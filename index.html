@@ -528,7 +528,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);b
   </section>
 </div>
 
-<p class="note" id="appVer" style="text-align:center;margin:8px 0 24px">เวอร์ชัน 07/11/2569 05:56</p>
+<p class="note" id="appVer" style="text-align:center;margin:8px 0 24px">เวอร์ชัน 07/11/2569 06:01</p>
 <div class="modal-bg" id="modal" style="z-index:25"><div class="modal"><p id="modalText"></p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost" id="modalNo">ยกเลิก</button><button class="btn" id="modalYes">ยืนยัน</button></div></div></div>
 <div class="modal-bg" id="doneModal"><div class="modal" style="max-width:420px">
   <h2 style="margin:0 0 4px;font-size:17px">✅ ปิดงาน / สรุปรายรับ</h2>
@@ -1655,10 +1655,11 @@ function lgSet(mode){lgMode=mode;lgMsg("");
   $("#lgPassRow").classList.toggle("hidden",mode==="forgot");$("#lgPass").required=mode!=="forgot";
   $("#lgPass").autocomplete=mode==="in"?"current-password":"new-password";
   $("#lgForgot").classList.toggle("hidden",mode!=="in");
+  $("#lgToggle").classList.toggle("hidden",mode==="in"); // ปิดรับสมัครบัญชีใหม่
 }
 function showLogin(mode,msg,kind){$("#gate").classList.add("hidden");$("#login").classList.remove("hidden");lgSet(mode||"in");if(msg)lgMsg(msg,kind)}
 function hideLogin(){$("#login").classList.add("hidden")}
-const TH_AUTH=m=>/Invalid login/i.test(m)?"อีเมลหรือรหัสผ่านไม่ถูกต้อง":/not confirmed/i.test(m)?"ยังไม่ได้ยืนยันอีเมล — เปิดอีเมลแล้วกดลิงก์ยืนยันก่อน":/already registered|already been registered/i.test(m)?"อีเมลนี้สมัครไว้แล้ว ให้เข้าสู่ระบบ":/rate limit|too many/i.test(m)?"ลองบ่อยเกินไป รอสักครู่แล้วลองใหม่":/fetch|network/i.test(m)?"ไม่มีอินเทอร์เน็ต หรือติดต่อเซิร์ฟเวอร์ไม่ได้":/at least|weak|short/i.test(m)?"รหัสผ่านสั้นหรือง่ายเกินไป":m;
+const TH_AUTH=m=>/Database error saving new user|signups? (are )?(not allowed|disabled)/i.test(m)?"ระบบปิดรับสมัครบัญชีใหม่แล้ว":/Invalid login/i.test(m)?"อีเมลหรือรหัสผ่านไม่ถูกต้อง":/not confirmed/i.test(m)?"ยังไม่ได้ยืนยันอีเมล — เปิดอีเมลแล้วกดลิงก์ยืนยันก่อน":/already registered|already been registered/i.test(m)?"อีเมลนี้สมัครไว้แล้ว ให้เข้าสู่ระบบ":/rate limit|too many/i.test(m)?"ลองบ่อยเกินไป รอสักครู่แล้วลองใหม่":/fetch|network/i.test(m)?"ไม่มีอินเทอร์เน็ต หรือติดต่อเซิร์ฟเวอร์ไม่ได้":/at least|weak|short/i.test(m)?"รหัสผ่านสั้นหรือง่ายเกินไป":m;
 const backTo=()=>location.origin+location.pathname;
 $("#lgToggle").onclick=()=>lgSet(lgMode==="in"?"up":"in");
 $("#lgForgot").onclick=()=>lgSet("forgot");
