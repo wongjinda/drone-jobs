@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="app-build" content="web-supabase-login">
+<meta http-equiv="Cache-Control" content="no-cache">
 <title>รับงานโดรนเกษตร</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -524,6 +525,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);b
   </section>
 </div>
 
+<p class="note" id="appVer" style="text-align:center;margin:8px 0 24px">เวอร์ชัน 07/11/2569 00:16</p>
 <div class="modal-bg" id="modal" style="z-index:25"><div class="modal"><p id="modalText"></p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost" id="modalNo">ยกเลิก</button><button class="btn" id="modalYes">ยืนยัน</button></div></div></div>
 <div class="modal-bg" id="doneModal"><div class="modal" style="max-width:420px">
   <h2 style="margin:0 0 4px;font-size:17px">✅ ปิดงาน / สรุปรายรับ</h2>
@@ -919,7 +921,7 @@ let ceSave=null;
 function openCE(title,note,fields,onSave){
   $("#ceTitle").textContent=title;$("#ceNote").textContent=note;
   $("#ceFields").innerHTML=fields.map(f=>f.sep?`<div class="ce-sep">${f.sep}</div>`:f.opts?`<div><label>${f.label}</label><select name="${f.k}">${f.opts.map(o=>`<option${o===f.v?" selected":""}>${esc(o)}</option>`).join("")}</select></div>`:`<div><label>${f.label}</label><input name="${f.k}" value="${esc(f.v??"")}" placeholder="${esc(f.ph||"")}"${f.type?` type="${f.type}" min="0" step="0.5"`:""}${f.req?" required":""}></div>`).join("");
-  ceSave=onSave;$("#ceForm [type=submit]").textContent=title.startsWith("แก้ไข")?"บันทึกการแก้ไข":"บันทึก";showInline("ceModal");setTimeout(()=>$("#ceFields input").focus(),30);
+  ceSave=onSave;$("#ceForm [type=submit]").textContent=title.startsWith("แก้ไข")?"บันทึกการแก้ไข":"บันทึก";showInline("ceModal");if(!(window.matchMedia&&matchMedia("(pointer:coarse)").matches))setTimeout(()=>$("#ceFields input").focus({preventScroll:true}),400);
 }
 $("#ceCancel").onclick=()=>hideInline("ceModal");
 $("#ceForm").addEventListener("submit",e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target));for(const k in v)v[k]=v[k].trim();
