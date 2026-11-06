@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#1E4A2A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="app-build" content="web-supabase-login">
 <title>รับงานโดรนเกษตร</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -1696,8 +1697,8 @@ async function offerMigration(){
 }
 (async()=>{
   await null; // let the rest of the script finish first
-  if(await startSupabase())return;
-  if(sbFailNote)setTimeout(()=>toast(sbFailNote),1500);
+  try{await startSupabase()}catch(e){$("#gate").classList.add("hidden");showLogin("in","เริ่มระบบไม่สำเร็จ: "+(e&&e.message||e))}
+  return;
   try{dbApi=window.claude&&claude.use?await claude.use("db"):null}catch(e){dbApi=null}
   if(!dbApi){connecting=false;renderDbBar();openGate();return}
   online=true;connecting=false;closeGate();
