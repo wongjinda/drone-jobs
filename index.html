@@ -188,6 +188,11 @@ textarea{resize:vertical;min-height:60px}
 #tab-dash .vbar{border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#5DB46A,#2E7D3A)}
 #tab-dash .htrack{height:10px;border-radius:99px}#tab-dash .hfill{border-radius:99px}
 
+/* pop-ups taller than the screen scroll instead of being cut off */
+.modal-bg{overflow-y:auto;overscroll-behavior:contain;z-index:30}
+#modal{z-index:40!important}
+.modal-bg>.modal,.modal-bg>form.modal{margin:auto;flex:none}
+@media(min-width:700px){#ceModal .modal{max-width:620px!important}#ceFields{grid-template-columns:1fr 1fr!important;column-gap:12px}#ceFields .ce-sep{grid-column:1/-1}}
 .paybtns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 @media(max-width:380px){#doneModal .grid{grid-template-columns:1fr!important}.paybtns button{white-space:normal!important;font-size:12.5px;padding:9px 2px}}
 .toast{pointer-events:none}
@@ -905,7 +910,7 @@ let ceSave=null;
 function openCE(title,note,fields,onSave){
   $("#ceTitle").textContent=title;$("#ceNote").textContent=note;
   $("#ceFields").innerHTML=fields.map(f=>f.sep?`<div class="ce-sep">${f.sep}</div>`:f.opts?`<div><label>${f.label}</label><select name="${f.k}">${f.opts.map(o=>`<option${o===f.v?" selected":""}>${esc(o)}</option>`).join("")}</select></div>`:`<div><label>${f.label}</label><input name="${f.k}" value="${esc(f.v??"")}" placeholder="${esc(f.ph||"")}"${f.type?` type="${f.type}" min="0" step="0.5"`:""}${f.req?" required":""}></div>`).join("");
-  ceSave=onSave;$("#ceModal").classList.add("show");setTimeout(()=>$("#ceFields input").focus(),30);
+  ceSave=onSave;$("#ceForm [type=submit]").textContent=title.startsWith("แก้ไข")?"บันทึกการแก้ไข":"บันทึก";$("#ceModal").classList.add("show");$("#ceModal").scrollTop=0;setTimeout(()=>$("#ceFields input").focus(),30);
 }
 $("#ceCancel").onclick=()=>$("#ceModal").classList.remove("show");
 $("#ceForm").addEventListener("submit",e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target));for(const k in v)v[k]=v[k].trim();
