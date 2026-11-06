@@ -136,6 +136,8 @@ textarea{resize:vertical;min-height:60px}
 .note{font-size:12px;color:var(--muted);margin-top:8px}
 @media(max-width:640px){#doneModal.inline,#dSave,.job-actions{scroll-margin-bottom:96px;scroll-margin-top:84px}}
 .modal-bg.inline{position:static;display:block;background:none;padding:0;margin-top:10px;z-index:auto}
+.modal-bg.inline{margin:0 0 14px;scroll-margin-top:90px;overflow:visible}
+#unpaidModal.inline .unpaid-modal{max-height:none}
 .modal-bg.inline .modal{max-width:none!important;width:100%;border:1.5px solid var(--green);border-radius:12px;box-shadow:none;padding:16px}
 /* ===== Thai date picker (dd/mm/yyyy พ.ศ.) ===== */
 .dp{position:relative}
@@ -778,7 +780,14 @@ function renderReminder(){
   $("#remindX").onclick=()=>{remindClosed=true;box.classList.add("hidden")};
   $("#remindQ").onclick=()=>{remindClosed=true;box.classList.add("hidden");showTab("schedule");window.scrollTo({top:0,behavior:"smooth"})};
 }
+// หน้าต่างกรอกข้อมูล / รายชื่อค้างจ่าย แสดงเป็นการ์ดในหน้า (ไม่ลอยทับ) เพื่อไม่ให้ถูกบีบหรือบังในบางเบราว์เซอร์
+function showInline(id){const m=$("#"+id);
+  const sec=[...document.querySelectorAll(".wrap>section")].find(x=>!x.classList.contains("hidden"));
+  if(sec){sec.prepend(m);m.classList.add("inline")}
+  m.classList.add("show");setTimeout(()=>{try{m.scrollIntoView({block:"start",behavior:"smooth"})}catch(e){}},30)}
+function hideInline(id){const m=$("#"+id);if(!m)return;m.classList.remove("show","inline");document.body.appendChild(m)}
 function showTab(t){
+  ["ceModal","unpaidModal"].forEach(id=>{const m=$("#"+id);if(m&&m.classList.contains("show"))hideInline(id)});
   renderReminder();
   document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
   ["dash","new","jobs","schedule","cust","tax","settings"].forEach(x=>$("#tab-"+x).classList.toggle("hidden",x!==t));
@@ -910,11 +919,11 @@ let ceSave=null;
 function openCE(title,note,fields,onSave){
   $("#ceTitle").textContent=title;$("#ceNote").textContent=note;
   $("#ceFields").innerHTML=fields.map(f=>f.sep?`<div class="ce-sep">${f.sep}</div>`:f.opts?`<div><label>${f.label}</label><select name="${f.k}">${f.opts.map(o=>`<option${o===f.v?" selected":""}>${esc(o)}</option>`).join("")}</select></div>`:`<div><label>${f.label}</label><input name="${f.k}" value="${esc(f.v??"")}" placeholder="${esc(f.ph||"")}"${f.type?` type="${f.type}" min="0" step="0.5"`:""}${f.req?" required":""}></div>`).join("");
-  ceSave=onSave;$("#ceForm [type=submit]").textContent=title.startsWith("แก้ไข")?"บันทึกการแก้ไข":"บันทึก";$("#ceModal").classList.add("show");$("#ceModal").scrollTop=0;setTimeout(()=>$("#ceFields input").focus(),30);
+  ceSave=onSave;$("#ceForm [type=submit]").textContent=title.startsWith("แก้ไข")?"บันทึกการแก้ไข":"บันทึก";showInline("ceModal");setTimeout(()=>$("#ceFields input").focus(),30);
 }
-$("#ceCancel").onclick=()=>$("#ceModal").classList.remove("show");
+$("#ceCancel").onclick=()=>hideInline("ceModal");
 $("#ceForm").addEventListener("submit",e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target));for(const k in v)v[k]=v[k].trim();
-  $("#ceModal").classList.remove("show");if(ceSave)ceSave(v)});
+  hideInline("ceModal");if(ceSave)ceSave(v)});
 function custJobs(c){return jobs.filter(j=>custKeyOf(j)===c.ck)}
 function plotJobs(c,p){return custJobs(c).filter(j=>plotKeyOf(j)===p.pk)}
 $("#custList").addEventListener("click",async e=>{
@@ -1172,10 +1181,10 @@ function renderUnpaid(){
     ${g.jobs.sort((a,b)=>(a.doneDate||a.date).localeCompare(b.doneDate||b.date)).map(j=>`<div class="up-job"><div>${thDate(j.doneDate||j.date)} · ${esc(j.serviceName)} ${j.area} ไร่<div class="meta" style="margin:0">ยอด ${fmt(j.amount)}${j.deposit?` · รับแล้ว ${fmt(j.deposit)}`:""} · <b style="color:var(--red)">ค้าง ${fmt(j.amount-j.deposit)}</b></div></div><button class="btn sm" type="button" data-act="paid" data-id="${j.id}">รับเงินครบแล้ว</button></div>`).join("")}
   </div>`).join(""):`<div class="empty" style="padding:28px 10px">✅ ไม่มีลูกค้าค้างจ่าย</div>`;
 }
-document.addEventListener("click",e=>{if(e.target.closest("[data-open-unpaid]")){renderUnpaid();$("#unpaidModal").classList.add("show")}});
-$("#upClose").onclick=()=>$("#unpaidModal").classList.remove("show");
-$("#unpaidModal").addEventListener("click",e=>{if(e.target.id==="unpaidModal")$("#unpaidModal").classList.remove("show")});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")$("#unpaidModal").classList.remove("show")});
+document.addEventListener("click",e=>{if(e.target.closest("[data-open-unpaid]")){renderUnpaid();showInline("unpaidModal")}});
+$("#upClose").onclick=()=>hideInline("unpaidModal");
+$("#unpaidModal").addEventListener("click",e=>{if(e.target.id==="unpaidModal")hideInline("unpaidModal")});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")hideInline("unpaidModal")});
 
 // ---- schedule ----
 function renderSchedule(){
