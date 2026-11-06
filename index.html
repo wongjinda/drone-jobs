@@ -196,6 +196,9 @@ textarea{resize:vertical;min-height:60px}
 #modal{z-index:40!important}
 .modal-bg>.modal,.modal-bg>form.modal{margin:auto;flex:none}
 @media(min-width:700px){#ceModal .modal{max-width:620px!important}#ceFields{grid-template-columns:1fr 1fr!important;column-gap:12px}#ceFields .ce-sep{grid-column:1/-1}}
+/* งานของวันนี้ */
+.job.is-today{background:#FFF8E1!important;border-color:#E8C35A!important;border-left:6px solid #D8A32A!important;box-shadow:0 0 0 3px rgba(216,163,42,.18)}
+.badge.b-today{background:#D8A32A;color:#fff}
 .paybtns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 @media(max-width:380px){#doneModal .grid{grid-template-columns:1fr!important}.paybtns button{white-space:normal!important;font-size:12.5px;padding:9px 2px}}
 .toast{pointer-events:none}
@@ -525,7 +528,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);b
   </section>
 </div>
 
-<p class="note" id="appVer" style="text-align:center;margin:8px 0 24px">เวอร์ชัน 07/11/2569 00:16</p>
+<p class="note" id="appVer" style="text-align:center;margin:8px 0 24px">เวอร์ชัน 07/11/2569 00:23</p>
 <div class="modal-bg" id="modal" style="z-index:25"><div class="modal"><p id="modalText"></p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost" id="modalNo">ยกเลิก</button><button class="btn" id="modalYes">ยืนยัน</button></div></div></div>
 <div class="modal-bg" id="doneModal"><div class="modal" style="max-width:420px">
   <h2 style="margin:0 0 4px;font-size:17px">✅ ปิดงาน / สรุปรายรับ</h2>
@@ -1096,10 +1099,11 @@ function renderChips(){
 function jobCard(j){
   const next={new:["accepted","รับงาน"],accepted:["working","เริ่มบิน"]}[j.status];
   const remain=j.amount-j.deposit;
-  return `<div class="job s-${j.status}">
+  const isToday=j.date===today()&&["new","accepted","working"].includes(j.status);
+  return `<div class="job s-${j.status}${isToday?" is-today":""}">
     <div class="job-top">
       <div style="flex:1;min-width:200px">
-        <h3>${esc(j.name)} <span class="badge ${STATUS[j.status].c}">${STATUS[j.status].t}</span></h3>
+        <h3>${esc(j.name)} <span class="badge ${STATUS[j.status].c}">${STATUS[j.status].t}</span>${isToday?`<span class="badge b-today">⭐ งานวันนี้</span>`:""}</h3>
         <div class="meta">
           ${[j.phone?`📞 ${esc(j.phone)}`:"",j.plotName?`🗺️ ${esc(j.plotName)}`:"",j.location?`📍 ${esc(j.location)}`:""].filter(Boolean).join(" · ")}${j.map?` · <a href="${esc(j.map)}" target="_blank" rel="noopener">แผนที่</a>`:""}<br>
           🌾 ${esc(j.serviceName)} · ${esc(j.crop)} · <b>${j.area} ไร่</b>${j.supply==="ours"?" · ทีมจัดหาสาร":""}<br>
