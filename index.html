@@ -230,7 +230,16 @@ a.btn{text-decoration:none;display:inline-block}
 .rm-hd b{font-size:15.5px}
 .rm-x{margin-left:auto;flex:none;width:36px;height:36px;border:0;border-radius:8px;background:none;font-size:18px;color:var(--muted)}
 .rm-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px dashed #E6CF8E;font-size:14px}
-.rm-item:first-of-type{margin-top:8px}
+.rm-sec{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff;border:1px solid #EFDCA8}
+.rm-sec.now{border:1.5px solid var(--gold);background:#FFF8E1}
+.rm-sec.late{border-color:#E8BDBD;background:#FDF3F3}
+.rm-sec.late .rm-t b{color:var(--red)}
+.rm-t{display:flex;gap:8px;align-items:flex-start;margin-bottom:4px}
+.rm-t>span{font-size:18px;line-height:1.3}
+summary .rm-t{margin:0}
+details.rm-sec>summary{list-style:none;cursor:pointer}
+details.rm-sec>summary::-webkit-details-marker{display:none}
+details.rm-sec[open]>summary{margin-bottom:4px}
 
 /* settings */
 .rate-row{display:grid;grid-template-columns:1fr 110px auto;gap:8px;align-items:center;margin-bottom:8px}
@@ -424,7 +433,7 @@ a.btn{text-decoration:none;display:inline-block}
 
 <script>
 "use strict";
-const APP_VERSION="2.0 · 07/11/2569";
+const APP_VERSION="2.1 · 10/11/2569";
 const SB_URL="https://nvuzbwullioricaonpck.supabase.co";
 // คีย์สาธารณะ (anon) — ข้อมูลป้องกันด้วย Row Level Security: แต่ละบัญชีเห็นเฉพาะข้อมูลของตัวเอง
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52dXpid3VsbGlvcmljYW9ucGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzI1NTIsImV4cCI6MjEwOTU0ODU1Mn0.a_2-yqi0ovmj1DjjY8_4ujONYiP0OfxZZdUs1Cs7kZE";
@@ -692,14 +701,22 @@ function renderCurrent(){({dash:renderDash,new:()=>{},jobs:renderJobs,queue:rend
 function renderAll(){fillServices();updatePrice();renderReminder();renderSync();renderCurrent()}
 function closePanels(){$$(".panel").forEach(p=>p.remove());doneId=null}
 
-/* ================= reminder: tomorrow's jobs ================= */
+/* ================= reminder: today's unfinished jobs, overdue, tomorrow ================= */
 let remindClosed=false;
 function renderReminder(){
-  const box=$("#remind"),t=addDays(1);
-  const list=jobs.filter(j=>j.date===t&&OPEN.includes(j.status)).sort((a,b)=>String(a.slot).localeCompare(String(b.slot)));
-  if(remindClosed||!list.length){box.classList.add("hidden");return}
-  box.innerHTML=`<div class="rm-hd"><span style="font-size:24px" aria-hidden="true">🔔</span><div><b>พรุ่งนี้มีงาน ${list.length} งาน · ${fmtArea(list.reduce((s,j)=>s+j.area,0))} ไร่</b><div class="meta" style="margin:0">${thDate(t)}</div></div><button type="button" class="rm-x" data-rm="x" aria-label="ปิดการแจ้งเตือน">✕</button></div>
-    ${list.map(j=>`<div class="rm-item"><div><b>${esc(j.name)}</b> · ${esc(j.serviceName)} · ${fmtArea(j.area)} ไร่<div class="meta" style="margin:0">⏰ ${esc(j.slot||"-")}${j.plotName?` · 🗺️ ${esc(j.plotName)}`:""}${j.location?` · 📍 ${esc(j.location)}`:""}</div></div>${j.phone?`<a class="btn sm ghost" href="${esc(telHref(j.phone))}">📞 ${esc(j.phone)}</a>`:""}</div>`).join("")}
+  const box=$("#remind"),td=today(),tm=addDays(1);
+  const bySlot=(a,b)=>String(a.date).localeCompare(String(b.date))||String(a.slot).localeCompare(String(b.slot));
+  const open=jobs.filter(j=>OPEN.includes(j.status));
+  const now=open.filter(j=>j.date===td).sort(bySlot),late=open.filter(j=>j.date<td).sort(bySlot),next=open.filter(j=>j.date===tm).sort(bySlot);
+  if(remindClosed||!(now.length||late.length||next.length)){box.classList.add("hidden");return}
+  const rai=l=>fmtArea(l.reduce((s,j)=>s+j.area,0));
+  const item=(j,showDate)=>`<div class="rm-item"><div><b>${esc(j.name)}</b> · ${esc(j.serviceName)} · ${fmtArea(j.area)} ไร่ <span class="badge ${STATUS[j.status].c}">${STATUS[j.status].t}</span><div class="meta" style="margin:0">${showDate?`📅 ${thDate(j.date)} · `:""}⏰ ${esc(j.slot||"-")}${j.plotName?` · 🗺️ ${esc(j.plotName)}`:""}${j.location?` · 📍 ${esc(j.location)}`:""}</div></div>${j.phone?`<a class="btn sm ghost" href="${esc(telHref(j.phone))}">📞 ${esc(j.phone)}</a>`:""}</div>`;
+  const sec=(cls,icon,title,sub,list,showDate)=>{if(!list.length)return"";const head=`<div class="rm-t"><span aria-hidden="true">${icon}</span><div><b>${title}</b><div class="meta" style="margin:0">${sub}</div></div></div>`,body=list.map(j=>item(j,showDate)).join("");
+    return cls==="late"?`<details class="rm-sec late"><summary>${head}</summary>${body}</details>`:`<div class="rm-sec ${cls}">${head}${body}</div>`};
+  box.innerHTML=`<div class="rm-hd"><span style="font-size:24px" aria-hidden="true">🔔</span><b>แจ้งเตือนงาน</b><button type="button" class="rm-x" data-rm="x" aria-label="ปิดการแจ้งเตือน">✕</button></div>
+    ${sec("now","⭐",`วันนี้ยังไม่เสร็จ ${now.length} งาน · ${rai(now)} ไร่`,thDate(td),now,false)}
+    ${sec("late","⚠️",`เลยกำหนด ยังไม่ได้ทำ ${late.length} งาน · ${rai(late)} ไร่`,"แตะเพื่อดูรายชื่อ · ทำแล้วกด ✅ งานเสร็จ หรือแก้วันนัดใหม่",late,true)}
+    ${sec("","📅",`พรุ่งนี้มีงาน ${next.length} งาน · ${rai(next)} ไร่`,thDate(tm),next,false)}
     <div class="row end" style="margin-top:8px"><button type="button" class="btn sm" data-rm="q">ดูคิวงาน</button></div>`;
   box.classList.remove("hidden");
 }
