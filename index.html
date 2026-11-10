@@ -351,7 +351,6 @@ details.rm-sec[open]>summary{margin-bottom:4px}
     <div><b id="syncWho">กำลังโหลด…</b><div class="meta" id="syncStatus"></div></div>
     <button class="btn sm ghost" type="button" id="logoutBtn">ออกจากระบบ</button>
   </div>
-  <div class="remind hidden" id="remind" role="status"></div>
 
   <nav class="tabs" aria-label="เมนูหลัก">
     <button type="button" data-tab="dash" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4zM14 20h6V11h-6zM4 20h6v-4H4zM14 4v4h6V4z"/></svg><span>ภาพรวม</span></button>
@@ -364,6 +363,7 @@ details.rm-sec[open]>summary{margin-bottom:4px}
 
   <!-- DASHBOARD -->
   <section id="tab-dash">
+    <div class="remind hidden" id="remind" role="status"></div>
     <div class="toolbar" style="align-items:center;justify-content:space-between">
       <b style="font-size:18px">ภาพรวม</b>
       <select id="dashRange" aria-label="ช่วงเวลา" style="border-radius:999px;padding:7px 14px"><option value="month">เดือนนี้</option><option value="3m">3 เดือนล่าสุด</option><option value="year">ปีนี้</option><option value="all">ทั้งหมด</option></select>
@@ -472,7 +472,7 @@ details.rm-sec[open]>summary{margin-bottom:4px}
 
 <script>
 "use strict";
-const APP_VERSION="2.4 · 10/11/2569";
+const APP_VERSION="2.5 · 10/11/2569";
 const SB_URL="https://nvuzbwullioricaonpck.supabase.co";
 // คีย์สาธารณะ (anon) — ข้อมูลป้องกันด้วย Row Level Security: แต่ละบัญชีเห็นเฉพาะข้อมูลของตัวเอง
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52dXpid3VsbGlvcmljYW9ucGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzI1NTIsImV4cCI6MjEwOTU0ODU1Mn0.a_2-yqi0ovmj1DjjY8_4ujONYiP0OfxZZdUs1Cs7kZE";
