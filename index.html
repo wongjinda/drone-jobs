@@ -168,8 +168,6 @@ tr.confirm-row td{padding:0 0 8px!important;border:0!important}
 .sumline{margin-top:10px;padding:10px 14px;border-radius:12px;background:var(--gold-l);border:1px solid #EFDCA8;font-size:13.5px}
 
 /* form extras */
-.price-box{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;padding:14px 16px;border-radius:12px;background:var(--gold-l);border:1px solid #EFDCA8}
-.price-box b{font:600 28px/1.2 var(--display)}
 .edit-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:12px 16px;border-radius:12px;background:var(--blue-l);color:var(--blue)}
 .edit-banner .btn{margin-left:auto}
 .ac-wrap{position:relative}
@@ -264,6 +262,32 @@ details.rm-sec[open]>summary{margin-bottom:4px}
 .fab:hover{background:var(--green-d);transform:scale(1.06)}
 .fab:active{transform:scale(.94)}
 .fab svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:round}
+/* compact job form */
+.jobform{padding:14px 16px}
+.jf-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.jf-head h2{margin:0}
+.fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 12px}
+.fgrid>.w,.fgrid>.d2{grid-column:span 2}
+.fgrid>.all{grid-column:1/-1}
+.jobform label{margin-bottom:2px;font-size:12.5px}
+.jobform label .opt{font-size:11.5px}
+.jobform input,.jobform select,.jobform textarea{padding:9px 11px}
+.jobform textarea{min-height:0}
+.jf-more{border-top:1px dashed var(--line);padding-top:8px}
+.jf-more>summary{cursor:pointer;color:var(--green-d);font-size:13.5px;font-weight:600;list-style:none}
+.jf-more>summary::-webkit-details-marker{display:none}
+.jf-more[open]>summary{color:var(--muted)}
+.jf-foot{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:12px;margin:12px -16px -14px;padding:10px 16px;background:var(--gold-l);border-top:1px solid #EFDCA8;border-radius:0 0 16px 16px}
+.jf-price{flex:1;min-width:0;display:grid;grid-template-columns:auto 1fr;align-items:baseline;column-gap:8px}
+.jf-price b{font:600 24px/1.2 var(--display);text-align:right}
+.jf-price #priceDetail{grid-column:1/-1;font-size:12px;color:var(--muted);text-align:right}
+.jf-foot .btn{flex:none;padding:12px 20px}
+.jobform .plots{grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px}
+.jobform .dp input{padding-left:9px;padding-right:32px}
+.jobform .dp-btn{right:1px;width:32px}
+.jobform select{padding-left:9px;padding-right:4px}
+.jobform .plot{padding:7px 10px;border-radius:10px;font-size:13.5px;line-height:1.35}
+.jobform .plot span,.jobform .plot small{font-size:11.5px}
 /* toast */
 .toast{position:fixed;left:50%;bottom:24px;z-index:60;transform:translate(-50%,120px);opacity:0;pointer-events:none;max-width:calc(100vw - 32px);padding:11px 18px;border-radius:12px;background:var(--paddy);color:#fff;transition:transform .25s,opacity .25s}
 .toast.show{transform:translate(-50%,0);opacity:1}
@@ -282,6 +306,11 @@ details.rm-sec[open]>summary{margin-bottom:4px}
   .card{padding:16px}
   .stat b{font-size:21px}
   .toast{bottom:86px}
+  .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fgrid>.w{grid-column:1/-1}.fgrid>.d2{grid-column:auto}
+  .jobform{padding:12px 14px}
+  .jobform .dp input,.jobform select{font-size:14px}
+  .jf-foot{bottom:calc(64px + env(safe-area-inset-bottom));margin:12px -14px -12px;padding:10px 14px}
   .fab{right:16px;bottom:calc(84px + env(safe-area-inset-bottom));width:58px;height:58px}
   .panel,.job-actions,.confirm{scroll-margin-bottom:100px}
 }
@@ -356,34 +385,30 @@ details.rm-sec[open]>summary{margin-bottom:4px}
   <!-- NEW / EDIT JOB -->
   <section id="tab-new" class="hidden">
     <div class="edit-banner hidden" id="editBanner">✏️ กำลังแก้ไขงานของ <b id="editName"></b><button class="btn sm ghost" type="button" id="cancelEdit">ยกเลิกการแก้ไข</button></div>
-    <form id="jobForm" novalidate>
-      <div class="card">
-        <h2>ข้อมูลเกษตรกร</h2>
-        <div class="grid">
-          <div class="ac-wrap"><label for="fName">ชื่อ-นามสกุล * <span class="opt">(พิมพ์เพื่อค้นหาลูกค้าเก่า)</span></label><input id="fName" name="name" autocomplete="off" placeholder="เช่น สมชาย ใจดี"><div class="ac-list hidden" id="acList"></div><div class="ac-hint hidden" id="acHint"></div></div>
-          <div><label for="fPhone">เบอร์โทร <span class="opt">(ไม่บังคับ)</span></label><input id="fPhone" name="phone" inputmode="tel" placeholder="08x-xxx-xxxx"></div>
-          <div class="full hidden" id="plotPick"></div>
-          <div class="full"><label for="fPlot">ชื่อแปลง <span class="opt">(ไม่บังคับ · ใช้แยกนาแต่ละแปลง)</span></label><input id="fPlot" name="plotName" autocomplete="off" placeholder="เช่น นาหลังบ้าน, นาโคกใหญ่"></div>
-          <div class="full"><label for="fLoc">ที่ตั้งแปลง <span class="opt">(ไม่บังคับ)</span></label><input id="fLoc" name="location" placeholder="เช่น ม.5 ต.หนองบัว"></div>
-          <div class="full"><label for="fMap">ลิงก์แผนที่ <span class="opt">(ไม่บังคับ)</span></label><input id="fMap" name="map" inputmode="url" placeholder="วางลิงก์ Google Maps"></div>
-        </div>
+    <form id="jobForm" class="card jobform" novalidate>
+      <div class="jf-head"><h2>รับงานใหม่</h2><button class="btn sm ghost" type="button" id="resetBtn">ล้างฟอร์ม</button></div>
+      <div class="fgrid">
+        <div class="ac-wrap w"><label for="fName">ชื่อลูกค้า * <span class="opt">พิมพ์เพื่อค้นหาลูกค้าเก่า</span></label><input id="fName" name="name" autocomplete="off" placeholder="เช่น สมชาย ใจดี"><div class="ac-list hidden" id="acList"></div><div class="ac-hint hidden" id="acHint"></div></div>
+        <div><label for="fPhone">เบอร์โทร</label><input id="fPhone" name="phone" inputmode="tel" placeholder="08x-xxx-xxxx"></div>
+        <div><label for="fArea">พื้นที่ (ไร่) *</label><input id="fArea" name="area" type="number" min="0" step="0.5" inputmode="decimal" placeholder="0"></div>
+        <div class="all hidden" id="plotPick"></div>
+        <div class="d2"><label for="fPlot">ชื่อแปลง</label><input id="fPlot" name="plotName" autocomplete="off" placeholder="เช่น นาหลังบ้าน"></div>
+        <div class="d2"><label for="fLoc">ที่ตั้งแปลง</label><input id="fLoc" name="location" placeholder="เช่น ม.5 ต.หนองบัว"></div>
+        <div class="w"><label for="fService">บริการ *</label><select id="fService" name="service"></select></div>
+        <div><label for="fCrop">พืช</label><select id="fCrop" name="crop"></select></div>
+        <div><label for="fDate">วันที่นัด *</label><input id="fDate" name="date" data-date></div>
+        <div><label for="fSlot">ช่วงเวลา</label><select id="fSlot" name="slot"><option value="เช้า (06:00–10:00)">เช้า 6–10 น.</option><option value="บ่าย (14:00–18:00)">บ่าย 14–18น.</option><option value="ตามสะดวก">ตามสะดวก</option></select></div>
+        <div><label for="fDiscount">ส่วนลด (฿)</label><input id="fDiscount" name="discount" type="number" min="0" inputmode="numeric" value="0"></div>
+        <details class="all jf-more" id="jfMore"><summary>＋ ลิงก์แผนที่ / หมายเหตุ</summary>
+          <div class="fgrid" style="margin-top:8px">
+            <div class="all"><label for="fMap">ลิงก์แผนที่</label><input id="fMap" name="map" inputmode="url" placeholder="วางลิงก์ Google Maps"></div>
+            <div class="all"><label for="fNote">หมายเหตุ</label><textarea id="fNote" name="note" rows="2" placeholder="เช่น มีสายไฟผ่านแปลง, ทางเข้ารถเล็ก"></textarea></div>
+          </div>
+        </details>
       </div>
-      <div class="card">
-        <h2>รายละเอียดงาน</h2>
-        <div class="grid">
-          <div><label for="fService">บริการ *</label><select id="fService" name="service"></select></div>
-          <div><label for="fCrop">พืช</label><select id="fCrop" name="crop"></select></div>
-          <div><label for="fArea">พื้นที่ (ไร่) *</label><input id="fArea" name="area" type="number" min="0" step="0.5" inputmode="decimal" placeholder="0"></div>
-          <div><label for="fDate">วันที่นัด *</label><input id="fDate" name="date" data-date></div>
-          <div><label for="fSlot">ช่วงเวลา</label><select id="fSlot" name="slot"><option>เช้า (06:00–10:00)</option><option>บ่าย (14:00–18:00)</option><option>ตามสะดวก</option></select></div>
-          <div><label for="fDiscount">ส่วนลด (บาท)</label><input id="fDiscount" name="discount" type="number" min="0" inputmode="numeric" value="0"></div>
-          <div class="full"><label for="fNote">หมายเหตุ</label><textarea id="fNote" name="note" placeholder="เช่น มีสายไฟผ่านแปลง, ทางเข้ารถเล็ก"></textarea></div>
-        </div>
-        <div class="price-box"><div><div class="meta" style="margin:0">ราคาประเมิน</div><div id="priceDetail" style="font-size:13px"></div></div><b id="priceTotal">0 ฿</b></div>
-        <div class="row end" style="margin-top:14px">
-          <button class="btn ghost" type="button" id="resetBtn">ล้างฟอร์ม</button>
-          <button class="btn" type="submit" id="submitBtn">บันทึกงาน</button>
-        </div>
+      <div class="jf-foot">
+        <div class="jf-price"><span class="meta">ราคาประเมิน</span><b id="priceTotal">0 ฿</b><div id="priceDetail"></div></div>
+        <button class="btn" type="submit" id="submitBtn">บันทึกงาน</button>
       </div>
     </form>
   </section>
@@ -447,7 +472,7 @@ details.rm-sec[open]>summary{margin-bottom:4px}
 
 <script>
 "use strict";
-const APP_VERSION="2.3 · 10/11/2569";
+const APP_VERSION="2.4 · 10/11/2569";
 const SB_URL="https://nvuzbwullioricaonpck.supabase.co";
 // คีย์สาธารณะ (anon) — ข้อมูลป้องกันด้วย Row Level Security: แต่ละบัญชีเห็นเฉพาะข้อมูลของตัวเอง
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52dXpid3VsbGlvcmljYW9ucGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzI1NTIsImV4cCI6MjEwOTU0ODU1Mn0.a_2-yqi0ovmj1DjjY8_4ujONYiP0OfxZZdUs1Cs7kZE";
@@ -543,10 +568,12 @@ function makeDateInput(inp){
 function dpOpen(inp,wrap){
   const iso=dateGet(inp)||today();
   dpState={inp,wrap,y:+iso.slice(0,4),m:+iso.slice(5,7)-1};
-  wrap.append(dpPop);dpRender();dpPop.classList.remove("hidden");
-  // keep inside the screen horizontally
-  dpPop.style.left="0px";const r=dpPop.getBoundingClientRect();
-  if(r.right>innerWidth-8)dpPop.style.left=Math.min(0,innerWidth-8-r.right)+"px";
+  // keep inside the screen horizontally (measure the screen before the popup can widen the page)
+  const vw=Math.min(document.documentElement.clientWidth,window.visualViewport?visualViewport.width:1e9),wl=wrap.getBoundingClientRect().left;
+  wrap.append(dpPop);dpRender();
+  const pw=Math.min(300,vw-32);
+  dpPop.style.left=Math.max(8-wl,Math.min(0,vw-8-wl-pw))+"px";
+  dpPop.classList.remove("hidden");
 }
 function dpClose(){dpState=null;dpPop.classList.add("hidden")}
 function dpRender(){
@@ -771,7 +798,7 @@ function updatePrice(){
 ["#fService","#fArea","#fDiscount"].forEach(s=>$(s).addEventListener("input",updatePrice));
 function resetForm(){
   $("#jobForm").reset();dateSet($("#fDate"),today());$("#fDiscount").value=0;
-  $("#acHint").classList.add("hidden");renderPlotPicker(null);updatePrice();
+  $("#acHint").classList.add("hidden");$("#jfMore").open=false;renderPlotPicker(null);updatePrice();
 }
 $("#resetBtn").onclick=resetForm;
 $("#jobForm").addEventListener("submit",e=>{
@@ -792,14 +819,15 @@ function startEdit(j){
   const F={fName:j.name,fPhone:j.phone,fPlot:j.plotName,fLoc:j.location,fMap:j.map,fCrop:j.crop,fArea:j.area,fSlot:j.slot,fDiscount:j.discount||0,fNote:j.note};
   Object.entries(F).forEach(([id,v])=>{$("#"+id).value=v??""});
   if(cfg.rates.some(r=>r.id===j.service))$("#fService").value=j.service;
-  dateSet($("#fDate"),j.date);
+  dateSet($("#fDate"),j.date);$("#jfMore").open=!!(j.map||j.note);
+  if(j.slot&&![...$("#fSlot").options].some(o=>o.value===j.slot)){$("#fSlot").add(new Option(j.slot,j.slot))}$("#fSlot").value=j.slot||$("#fSlot").options[0].value;
   $("#editName").textContent=j.name;$("#editBanner").classList.remove("hidden");
-  $("#submitBtn").textContent="บันทึกการแก้ไข";$("#resetBtn").classList.add("hidden");
+  $("#submitBtn").textContent="บันทึกการแก้ไข";$("#resetBtn").classList.add("hidden");$("#jobForm h2").textContent="แก้ไขงาน";
   renderPlotPicker(null);updatePrice();window.scrollTo({top:0});
 }
 function exitEdit(){
   editingId=null;resetForm();
-  $("#editBanner").classList.add("hidden");$("#submitBtn").textContent="บันทึกงาน";$("#resetBtn").classList.remove("hidden");
+  $("#editBanner").classList.add("hidden");$("#submitBtn").textContent="บันทึกงาน";$("#resetBtn").classList.remove("hidden");$("#jobForm h2").textContent="รับงานใหม่";
 }
 $("#cancelEdit").onclick=()=>{exitEdit();showTab("jobs")};
 
