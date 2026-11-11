@@ -288,6 +288,16 @@ details.rm-sec[open]>summary{margin-bottom:4px}
 .jobform select{padding-left:9px;padding-right:4px}
 .jobform .plot{padding:7px 10px;border-radius:10px;font-size:13.5px;line-height:1.35}
 .jobform .plot span,.jobform .plot small{font-size:11.5px}
+.pm{margin-top:8px;padding:8px 10px;border-radius:12px;background:var(--green-l);border:1px solid #BFD9B1}
+.pm-h{font-size:12.5px;font-weight:600;color:var(--green-d);margin-bottom:4px}
+.pm-row{display:grid;grid-template-columns:1fr 80px auto 30px;gap:6px;align-items:center;padding:3px 0;font-size:13.5px}
+.pm-row>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pm-row input{padding:6px 8px!important;text-align:right}
+.pm-x{width:30px;height:30px;border:0;border-radius:8px;background:none;color:var(--muted)}
+.pm-x:hover{background:#fff;color:var(--red)}
+.pm-sum{border-top:1px solid #BFD9B1;margin-top:2px;padding-top:6px}
+.pm-sum b{text-align:right;padding-right:8px}
+.jobform input.locked{background:var(--gray-l);color:var(--muted)}
 /* toast */
 .toast{position:fixed;left:50%;bottom:24px;z-index:60;transform:translate(-50%,120px);opacity:0;pointer-events:none;max-width:calc(100vw - 32px);padding:11px 18px;border-radius:12px;background:var(--paddy);color:#fff;transition:transform .25s,opacity .25s}
 .toast.show{transform:translate(-50%,0);opacity:1}
@@ -472,7 +482,7 @@ details.rm-sec[open]>summary{margin-bottom:4px}
 
 <script>
 "use strict";
-const APP_VERSION="2.5 · 10/11/2569";
+const APP_VERSION="2.6 · 11/11/2569";
 const SB_URL="https://nvuzbwullioricaonpck.supabase.co";
 // คีย์สาธารณะ (anon) — ข้อมูลป้องกันด้วย Row Level Security: แต่ละบัญชีเห็นเฉพาะข้อมูลของตัวเอง
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52dXpid3VsbGlvcmljYW9ucGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzI1NTIsImV4cCI6MjEwOTU0ODU1Mn0.a_2-yqi0ovmj1DjjY8_4ujONYiP0OfxZZdUs1Cs7kZE";
@@ -810,7 +820,9 @@ $("#jobForm").addEventListener("submit",e=>{
   if(!f.date){toast("กรุณาใส่วันที่นัดให้ถูกต้อง (วว/ดด/ปปปป)");$("#fDate").focus();return}
   const ej=editingJob(),p=calc(f.service,f.area,f.discount,ej&&ej.supply==="ours");
   const data={name:f.name,phone:f.phone.trim(),plotName:f.plotName.trim(),location:f.location.trim(),map:f.map.trim(),service:p.r.id,serviceName:p.r.name,crop:f.crop,area:num(f.area),date:f.date,slot:f.slot,discount:num(f.discount),note:f.note.trim(),amount:p.total};
-  if(ej){Object.assign(ej,data,{updated:new Date().toISOString()});toast("แก้ไขงานเรียบร้อย")}
+  const mp=multiPlots();
+  if(mp){data.plots=mp;Object.assign(data,joinPlots(mp),{map:f.map.trim()||joinPlots(mp).map})}
+  if(ej){Object.assign(ej,data,{updated:new Date().toISOString()});if(!mp)delete ej.plots;toast("แก้ไขงานเรียบร้อย")}
   else{jobs.push({id:newId(),created:new Date().toISOString(),status:"new",paid:false,deposit:0,supply:"own",...data});toast("บันทึกงานเรียบร้อย")}
   persist();exitEdit();showTab("jobs");
 });
@@ -823,7 +835,14 @@ function startEdit(j){
   if(j.slot&&![...$("#fSlot").options].some(o=>o.value===j.slot)){$("#fSlot").add(new Option(j.slot,j.slot))}$("#fSlot").value=j.slot||$("#fSlot").options[0].value;
   $("#editName").textContent=j.name;$("#editBanner").classList.remove("hidden");
   $("#submitBtn").textContent="บันทึกการแก้ไข";$("#resetBtn").classList.add("hidden");$("#jobForm h2").textContent="แก้ไขงาน";
-  renderPlotPicker(null);updatePrice();window.scrollTo({top:0});
+  renderPlotPicker(null);
+  if(Array.isArray(j.plots)&&j.plots.length>1){
+    const c=customers().find(x=>x.ck===custKeyOf(j));const choices=c?c.plots.slice():[];
+    plotSel=new Set();plotAreas={};
+    j.plots.forEach(pl=>{let k=choices.findIndex(x=>x.pk===plotKeyOf(pl));if(k<0){choices.push({...pl,pk:plotKeyOf(pl),count:0});k=choices.length-1}plotSel.add(k);plotAreas[k]=num(pl.area)});
+    renderPlotPicker({name:j.name,plots:choices});applyPlots(true);
+  }
+  updatePrice();window.scrollTo({top:0});
 }
 function exitEdit(){
   editingId=null;resetForm();
@@ -853,7 +872,8 @@ function customers(){
     if(!c.phone&&j.phone)c.phone=j.phone;
     if(j.status!=="cancel"){c.total+=j.amount;c.rai+=j.area}
     if(j.status==="done"&&!j.paid)c.owe+=owed(j);
-    addPlot(c,j,true);
+    if(Array.isArray(j.plots)&&j.plots.length)j.plots.forEach(pl=>addPlot(c,{...j,plotName:pl.plotName,location:pl.location,map:pl.map||"",area:pl.area},true));
+    else addPlot(c,j,true);
   });
   cfg.extraPlots.forEach(x=>{if(!String(x.name||"").trim())return;const c=getC(x);c.lastCreated=maxStr(c.lastCreated,x.created);addPlot(c,x,false)});
   const hidden=(list,k,lc)=>{const h=list.find(x=>x.k===k);return h&&String(lc||"")<=h.at};
@@ -875,26 +895,54 @@ function acRender(){
 function acClose(){$("#acList").classList.add("hidden");acIdx=-1}
 function acPick(c){
   $("#fName").value=c.name;$("#fPhone").value=c.phone||"";
-  renderPlotPicker(c,null);
+  renderPlotPicker(null);renderPlotPicker(c);
   if(c.plots.length===1)pickPlot(0);
   else if(!c.plots.length&&c.crop)$("#fCrop").value=c.crop;
   $("#acHint").textContent=`✓ ลูกค้าเก่า · ${c.plots.length>1?`มี ${c.plots.length} แปลง เลือกแปลงด้านล่าง`:"เติมข้อมูลให้แล้ว"} (ใช้บริการ ${c.count} ครั้ง ยอดรวม ${fmt(c.total)} ฿)`;
   $("#acHint").classList.remove("hidden");acClose();
 }
-function renderPlotPicker(c,sel){
+// Plot picker: tap plots to select one or more. Two or more selected → one job covering all of them.
+let plotSel=new Set(),plotNewOn=false,plotAreas={};
+const joinPlots=list=>({plotName:list.map(p=>p.plotName||p.location).filter(Boolean).join(" + "),location:[...new Set(list.map(p=>p.location).filter(Boolean))].join(", "),map:(list.find(p=>p.map)||{}).map||""});
+function multiPlots(){
+  if(plotSel.size<2)return null;
+  return [...plotSel].sort((a,b)=>a-b).map(i=>{const p=plotChoices[i];return {plotName:p.plotName||"",location:p.location||"",map:p.map||"",area:num(plotAreas[i])}});
+}
+function renderPlotPicker(c){
+  if(!c){plotSel=new Set();plotNewOn=false;plotAreas={};setMultiFields(false)}
   plotChoices=c?c.plots:[];const box=$("#plotPick");
   if(!plotChoices.length){box.classList.add("hidden");box.innerHTML="";return}
-  box.innerHTML=`<label>เลือกแปลงนาของ ${esc(c.name)} <span class="opt">(${plotChoices.length} แปลง)</span></label><div class="plots">${plotChoices.map((p,i)=>`<button type="button" class="plot${sel===i?" on":""}" data-plot="${i}"><b>${esc(plotLabel(p))}</b><span>${[p.plotName&&p.location?esc(p.location):"",p.area?fmtArea(p.area)+" ไร่":"",esc(p.crop)].filter(Boolean).join(" · ")}</span><small>${p.count?`ทำแล้ว ${p.count} ครั้ง${p.last?` · ล่าสุด ${thDate(p.last)}`:""}`:"ยังไม่เคยทำ"}</small></button>`).join("")}<button type="button" class="plot new${sel===-1?" on":""}" data-plot="new"><b>＋ แปลงใหม่</b><span>กรอกชื่อและที่ตั้งเอง</span></button></div>`;
+  const n=plotSel.size;
+  box.innerHTML=`<label>เลือกแปลงนาของ ${esc(c.name)} <span class="opt">(${plotChoices.length} แปลง · เลือกได้หลายแปลง)</span></label><div class="plots">${plotChoices.map((p,i)=>`<button type="button" class="plot${plotSel.has(i)?" on":""}" data-plot="${i}" aria-pressed="${plotSel.has(i)}"><b>${plotSel.has(i)?"✓ ":""}${esc(plotLabel(p))}</b><span>${[p.plotName&&p.location?esc(p.location):"",p.area?fmtArea(p.area)+" ไร่":"",esc(p.crop)].filter(Boolean).join(" · ")}</span><small>${p.count?`ทำแล้ว ${p.count} ครั้ง${p.last?` · ล่าสุด ${thDate(p.last)}`:""}`:"ยังไม่เคยทำ"}</small></button>`).join("")}<button type="button" class="plot new${plotNewOn?" on":""}" data-plot="new"><b>＋ แปลงใหม่</b><span>กรอกชื่อและที่ตั้งเอง</span></button></div>
+  ${n>1?`<div class="pm"><div class="pm-h">รวม ${n} แปลงในงานเดียว · ใส่พื้นที่ของแต่ละแปลง</div>${[...plotSel].sort((a,b)=>a-b).map(i=>`<div class="pm-row"><span>🗺️ ${esc(plotLabel(plotChoices[i]))}</span><input type="number" min="0" step="0.5" inputmode="decimal" data-parea="${i}" value="${plotAreas[i]||""}" placeholder="0" aria-label="พื้นที่ ${esc(plotLabel(plotChoices[i]))}"><span>ไร่</span><button type="button" class="pm-x" data-plot="${i}" aria-label="เอาแปลงนี้ออก">✕</button></div>`).join("")}<div class="pm-row pm-sum"><span>รวม</span><b id="pmSum">${fmtArea(Object.entries(plotAreas).filter(([k])=>plotSel.has(+k)).reduce((s,[,v])=>s+num(v),0))}</b><span>ไร่</span><span></span></div></div>`:""}`;
   box.dataset.name=c.name;box.classList.remove("hidden");
 }
-function pickPlot(i){
-  const name=$("#plotPick").dataset.name;
-  if(i==="new"){["#fPlot","#fLoc","#fMap","#fArea"].forEach(s=>$(s).value="");renderPlotPicker({name,plots:plotChoices},-1);updatePrice();$("#fPlot").focus();return}
-  const p=plotChoices[i];if(!p)return;
-  $("#fPlot").value=p.plotName;$("#fLoc").value=p.location;$("#fMap").value=p.map||"";
-  if(p.crop)$("#fCrop").value=p.crop;if(p.area)$("#fArea").value=p.area;
-  renderPlotPicker({name,plots:plotChoices},i);updatePrice();
+function setMultiFields(on){["#fPlot","#fLoc","#fArea"].forEach(q=>{$(q).readOnly=on;$(q).classList.toggle("locked",on)});["#fPlot","#fLoc"].forEach(q=>$(q).parentElement.classList.toggle("hidden",on))}
+// keepAreas: true when restoring an edited job (areas already in plotAreas)
+function applyPlots(keepAreas){
+  const list=[...plotSel].sort((a,b)=>a-b).map(i=>plotChoices[i]);
+  list.forEach((p,k)=>{const i=[...plotSel].sort((a,b)=>a-b)[k];if(!keepAreas&&plotAreas[i]===undefined)plotAreas[i]=num(p.area)});
+  Object.keys(plotAreas).forEach(k=>{if(!plotSel.has(+k))delete plotAreas[k]});
+  if(list.length>1){
+    const jp=joinPlots(list);$("#fPlot").value=jp.plotName;$("#fLoc").value=jp.location;if(!keepAreas)$("#fMap").value=jp.map;
+    $("#fArea").value=[...plotSel].reduce((s,i)=>s+num(plotAreas[i]),0)||"";setMultiFields(true);
+  }else if(list.length===1){
+    const p=list[0];setMultiFields(false);
+    $("#fPlot").value=p.plotName;$("#fLoc").value=p.location;$("#fMap").value=p.map||"";if(p.area)$("#fArea").value=p.area;
+  }else{setMultiFields(false);["#fPlot","#fLoc","#fMap","#fArea"].forEach(q=>$(q).value="")}
+  if(list[0]&&list[0].crop&&!keepAreas)$("#fCrop").value=list[0].crop;
+  renderPlotPicker({name:$("#plotPick").dataset.name,plots:plotChoices});updatePrice();
 }
+function pickPlot(i){
+  if(i==="new"){plotSel=new Set();plotAreas={};plotNewOn=true;setMultiFields(false);["#fPlot","#fLoc","#fMap","#fArea"].forEach(q=>$(q).value="");renderPlotPicker({name:$("#plotPick").dataset.name,plots:plotChoices});updatePrice();$("#fPlot").focus();return}
+  if(!plotChoices[i])return;
+  plotNewOn=false;plotSel.has(i)?plotSel.delete(i):plotSel.add(i);applyPlots(false);
+}
+$("#plotPick").addEventListener("input",e=>{
+  const inp=e.target.closest("[data-parea]");if(!inp)return;
+  plotAreas[+inp.dataset.parea]=num(inp.value);
+  const sum=[...plotSel].reduce((s,i)=>s+num(plotAreas[i]),0);$("#fArea").value=sum||"";$("#pmSum").textContent=fmtArea(sum);updatePrice();
+});
 $("#plotPick").addEventListener("click",e=>{const b=e.target.closest("[data-plot]");if(b)pickPlot(b.dataset.plot==="new"?"new":+b.dataset.plot)});
 $("#fName").addEventListener("input",()=>{acIdx=-1;$("#acHint").classList.add("hidden");renderPlotPicker(null);acRender()});
 $("#fName").addEventListener("focus",acRender);
@@ -919,7 +967,7 @@ function jobCard(j){
   return `<div class="job s-${j.status}${isToday?" today":""}" data-job="${esc(j.id)}">
     <div class="job-top"><div>
       <h3>${esc(j.name)} <span class="badge ${STATUS[j.status].c}">${STATUS[j.status].t}</span>${isToday?`<span class="badge b-today">⭐ งานวันนี้</span>`:""}</h3>
-      <div class="meta">${[j.phone?`📞 ${esc(j.phone)}`:"",j.plotName?`🗺️ ${esc(j.plotName)}`:"",j.location?`📍 ${esc(j.location)}`:"",mapUrl?`<a href="${esc(mapUrl)}" target="_blank" rel="noopener">แผนที่</a>`:""].filter(Boolean).join(" · ")}${j.phone||j.plotName||j.location||mapUrl?"<br>":""}
+      <div class="meta">${[j.phone?`📞 ${esc(j.phone)}`:"",Array.isArray(j.plots)&&j.plots.length>1?`🗺️ ${j.plots.map(x=>`${esc(x.plotName||x.location)} ${fmtArea(x.area)} ไร่`).join(" + ")}`:j.plotName?`🗺️ ${esc(j.plotName)}`:"",j.location?`📍 ${esc(j.location)}`:"",mapUrl?`<a href="${esc(mapUrl)}" target="_blank" rel="noopener">แผนที่</a>`:""].filter(Boolean).join(" · ")}${j.phone||j.plotName||j.location||mapUrl?"<br>":""}
         🌾 ${esc(j.serviceName)} · ${esc(j.crop)} · <b>${fmtArea(j.area)} ไร่</b>${j.supply==="ours"?" · ทีมจัดหาสาร":""}<br>
         📅 ${thDate(j.date)} · ${esc(j.slot)}${j.note?`<br>📝 ${esc(j.note)}`:""}</div>
     </div>
@@ -1112,9 +1160,12 @@ $("#custList").addEventListener("click",async e=>{
       custOpen.add(custKeyOf(v));toast("แก้ไขข้อมูลลูกค้าแล้ว")});break}
     case "cdel":if(!(await confirmBar(holder,`ลบ "${c.name}" ออกจากรายชื่อลูกค้า? ประวัติงานยังอยู่ครบ ถ้ารับงานลูกค้านี้ใหม่ ชื่อจะกลับมาเอง`,{choices:[{v:true,label:"ลบลูกค้า",cls:"red"}]})))return;
       cfg.extraPlots=cfg.extraPlots.filter(x=>!isExtraOf(x));hideKey("hiddenCust",c.ck);custOpen.delete(c.ck);persist();renderCustomers();toast(`ลบ ${c.name} ออกจากรายชื่อแล้ว`);break;
-    case "pedit":{const js=cJobs().filter(j=>plotKeyOf(j)===p.pk);openForm("แก้ไขแปลงนา",`${c.name} · จะเปลี่ยนในงานของแปลงนี้ทั้งหมด ${js.length} งาน`,plotFields(p),"บันทึกการแก้ไข",v=>{
+    case "pedit":{const js=cJobs().filter(j=>Array.isArray(j.plots)&&j.plots.length?j.plots.some(x=>plotKeyOf(x)===p.pk):plotKeyOf(j)===p.pk);openForm("แก้ไขแปลงนา",`${c.name} · จะเปลี่ยนในงานของแปลงนี้ทั้งหมด ${js.length} งาน`,plotFields(p),"บันทึกการแก้ไข",v=>{
       if(!v.plotName&&!v.location){toast("ต้องมีชื่อแปลงหรือที่ตั้งอย่างน้อยหนึ่งอย่าง");return false}
-      js.forEach(j=>{j.plotName=v.plotName;j.location=v.location;j.map=v.map;j.updated=new Date().toISOString()});
+      js.forEach(j=>{
+        if(Array.isArray(j.plots)&&j.plots.length){j.plots=j.plots.map(x=>plotKeyOf(x)===p.pk?{...x,plotName:v.plotName,location:v.location,map:v.map}:x);const jp=joinPlots(j.plots);j.plotName=jp.plotName;j.location=jp.location}
+        else{j.plotName=v.plotName;j.location=v.location;j.map=v.map}
+        j.updated=new Date().toISOString()});
       let found=false;cfg.extraPlots=cfg.extraPlots.map(x=>{if(isExtraOf(x,p.pk)){found=true;return {...x,plotName:v.plotName,location:v.location,map:v.map,area:num(v.area),crop:v.crop}}return x});
       if(!found&&(num(v.area)!==num(p.area)||v.crop!==p.crop))addExtra({...v,name:c.name,phone:c.phone}); // keep area/crop for plots that only exist in jobs
       toast("แก้ไขแปลงแล้ว")});break}
@@ -1124,7 +1175,7 @@ $("#custList").addEventListener("click",async e=>{
       hideKey("hiddenPlots",c.ck+"#"+p.pk);persist();renderCustomers();toast("ลบแปลงแล้ว");break;
     case "pjob":case "cjob":
       if(editingId)exitEdit();else resetForm();
-      showTab("new");acPick(c);if(b.dataset.c==="pjob")pickPlot(+holder.dataset.pi);else pickPlot("new");break;
+      showTab("new");acPick(c);if(b.dataset.c==="pjob"){plotSel=new Set();plotAreas={};pickPlot(+holder.dataset.pi)}else pickPlot("new");break;
     case "cjobs":filter="all";$("#q").value=c.name;showTab("jobs");break;
   }
 });
