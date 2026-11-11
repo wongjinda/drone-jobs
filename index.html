@@ -298,6 +298,26 @@ details.rm-sec[open]>summary{margin-bottom:4px}
 .pm-sum{border-top:1px solid #BFD9B1;margin-top:2px;padding-top:6px}
 .pm-sum b{text-align:right;padding-right:8px}
 .jobform input.locked{background:var(--gray-l);color:var(--muted)}
+/* wind */
+.wind-card h2{font-size:16px}
+.wnow{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:10px 12px;border-radius:12px;background:var(--green-l)}
+.wnow b{font:600 24px/1.2 var(--display)}
+.wnow span{font-size:13px;color:var(--muted)}
+.wnow .wbadge{margin-left:auto;font-weight:700;color:var(--green-d)}
+.wnow.warn{background:var(--amber-l)}.wnow.warn .wbadge{color:var(--amber)}
+.wnow.bad{background:var(--red-l)}.wnow.bad .wbadge{color:var(--red)}
+.wstrip{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.wh{flex:0 0 64px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:12px;background:var(--green-l);border:2px solid transparent;font-variant-numeric:tabular-nums}
+.wh.warn{background:var(--amber-l)}.wh.bad{background:var(--red-l)}
+.wh.mark{border-color:var(--ink)}
+.wh .wt{font-size:12px;font-weight:600}
+.wh .wa{font-size:16px;line-height:1.1;color:var(--muted)}
+.wh b{font:600 17px/1.2 var(--display)}
+.wh.ok b{color:var(--green-d)}.wh.warn b{color:var(--amber)}.wh.bad b{color:var(--red)}
+.wh .wu,.wh .wg,.wh .wr{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.wlegend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--muted)}
+.wlegend .ok{color:var(--green-d)}.wlegend .warn{color:var(--amber)}.wlegend .bad{color:var(--red)}
+.wtxt.ok{color:var(--green-d)}.wtxt.warn{color:var(--amber)}.wtxt.bad{color:var(--red)}
 /* toast */
 .toast{position:fixed;left:50%;bottom:24px;z-index:60;transform:translate(-50%,120px);opacity:0;pointer-events:none;max-width:calc(100vw - 32px);padding:11px 18px;border-radius:12px;background:var(--paddy);color:#fff;transition:transform .25s,opacity .25s}
 .toast.show{transform:translate(-50%,0);opacity:1}
@@ -378,6 +398,7 @@ details.rm-sec[open]>summary{margin-bottom:4px}
       <b style="font-size:18px">ภาพรวม</b>
       <select id="dashRange" aria-label="ช่วงเวลา" style="border-radius:999px;padding:7px 14px"><option value="month">เดือนนี้</option><option value="3m">3 เดือนล่าสุด</option><option value="year">ปีนี้</option><option value="all">ทั้งหมด</option></select>
     </div>
+    <div class="card wind-card" id="windCard"></div>
     <div id="dashKpi"></div>
     <div class="dash-grid">
       <div class="card wide"><h2>รายได้รายเดือน (งานที่เสร็จ, บาท)</h2><div class="vbars" id="chMonth"></div></div>
@@ -411,7 +432,7 @@ details.rm-sec[open]>summary{margin-bottom:4px}
         <div><label for="fDiscount">ส่วนลด (฿)</label><input id="fDiscount" name="discount" type="number" min="0" inputmode="numeric"></div>
         <details class="all jf-more" id="jfMore"><summary>＋ ลิงก์แผนที่ / หมายเหตุ</summary>
           <div class="fgrid" style="margin-top:8px">
-            <div class="all"><label for="fMap">ลิงก์แผนที่</label><input id="fMap" name="map" inputmode="url"></div>
+            <div class="all"><label for="fMap">ลิงก์แผนที่</label><input id="fMap" name="map" inputmode="url"><input type="hidden" id="fGeo" name="geo"></div>
             <div class="all"><label for="fNote">หมายเหตุ</label><textarea id="fNote" name="note" rows="2"></textarea></div>
           </div>
         </details>
@@ -482,7 +503,7 @@ details.rm-sec[open]>summary{margin-bottom:4px}
 
 <script>
 "use strict";
-const APP_VERSION="2.7 · 11/11/2569";
+const APP_VERSION="2.8 · 11/11/2569";
 const SB_URL="https://nvuzbwullioricaonpck.supabase.co";
 // คีย์สาธารณะ (anon) — ข้อมูลป้องกันด้วย Row Level Security: แต่ละบัญชีเห็นเฉพาะข้อมูลของตัวเอง
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52dXpid3VsbGlvcmljYW9ucGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzI1NTIsImV4cCI6MjEwOTU0ODU1Mn0.a_2-yqi0ovmj1DjjY8_4ujONYiP0OfxZZdUs1Cs7kZE";
@@ -807,7 +828,7 @@ function updatePrice(){
 }
 ["#fService","#fArea","#fDiscount"].forEach(s=>$(s).addEventListener("input",updatePrice));
 function resetForm(){
-  $("#jobForm").reset();dateSet($("#fDate"),today());
+  $("#jobForm").reset();$("#fGeo").value="";dateSet($("#fDate"),today());
   $("#acHint").classList.add("hidden");$("#jfMore").open=false;renderPlotPicker(null);updatePrice();
 }
 $("#resetBtn").onclick=resetForm;
@@ -819,16 +840,16 @@ $("#jobForm").addEventListener("submit",e=>{
   if(!(num(f.area)>0)){toast("กรุณาใส่พื้นที่ (ไร่)");$("#fArea").focus();return}
   if(!f.date){toast("กรุณาใส่วันที่นัดให้ถูกต้อง (วว/ดด/ปปปป)");$("#fDate").focus();return}
   const ej=editingJob(),p=calc(f.service,f.area,f.discount,ej&&ej.supply==="ours");
-  const data={name:f.name,phone:f.phone.trim(),plotName:f.plotName.trim(),location:f.location.trim(),map:f.map.trim(),service:p.r.id,serviceName:p.r.name,crop:f.crop,area:num(f.area),date:f.date,slot:f.slot,discount:num(f.discount),note:f.note.trim(),amount:p.total};
+  const data={geo:(f.geo||"").trim()||undefined,name:f.name,phone:f.phone.trim(),plotName:f.plotName.trim(),location:f.location.trim(),map:f.map.trim(),service:p.r.id,serviceName:p.r.name,crop:f.crop,area:num(f.area),date:f.date,slot:f.slot,discount:num(f.discount),note:f.note.trim(),amount:p.total};
   const mp=multiPlots();
   if(mp){data.plots=mp;Object.assign(data,joinPlots(mp),{map:f.map.trim()||joinPlots(mp).map})}
-  if(ej){Object.assign(ej,data,{updated:new Date().toISOString()});if(!mp)delete ej.plots;toast("แก้ไขงานเรียบร้อย")}
+  if(ej){Object.assign(ej,data,{updated:new Date().toISOString()});if(!mp)delete ej.plots;if(!data.geo)delete ej.geo;toast("แก้ไขงานเรียบร้อย")}
   else{jobs.push({id:newId(),created:new Date().toISOString(),status:"new",paid:false,deposit:0,supply:"own",...data});toast("บันทึกงานเรียบร้อย")}
   persist();exitEdit();showTab("jobs");
 });
 function startEdit(j){
   editingId=j.id;showTab("new");
-  const F={fName:j.name,fPhone:j.phone,fPlot:j.plotName,fLoc:j.location,fMap:j.map,fCrop:j.crop,fArea:j.area,fSlot:j.slot,fDiscount:j.discount||"",fNote:j.note};
+  const F={fGeo:j.geo,fName:j.name,fPhone:j.phone,fPlot:j.plotName,fLoc:j.location,fMap:j.map,fCrop:j.crop,fArea:j.area,fSlot:j.slot,fDiscount:j.discount||"",fNote:j.note};
   Object.entries(F).forEach(([id,v])=>{$("#"+id).value=v??""});
   if(cfg.rates.some(r=>r.id===j.service))$("#fService").value=j.service;
   dateSet($("#fDate"),j.date);$("#jfMore").open=!!(j.map||j.note);
@@ -862,7 +883,7 @@ function customers(){
     if(!String(x.plotName||"").trim()&&!String(x.location||"").trim())return;
     const pk=plotKeyOf(x);let p=c.plots.get(pk);
     if(!p){p={pk,plotName:String(x.plotName||"").trim(),location:String(x.location||"").trim(),map:"",crop:"",area:0,count:0,last:"",lastCreated:"",extra:false};c.plots.set(pk,p)}
-    p.lastCreated=maxStr(p.lastCreated,x.created);p.map=x.map||p.map;p.crop=x.crop||p.crop;
+    p.lastCreated=maxStr(p.lastCreated,x.created);p.map=x.map||p.map;p.geo=x.geo||p.geo||"";p.crop=x.crop||p.crop;
     if(fromJob){p.count++;if(String(x.date||"")>=String(p.last||"")){p.last=x.date;if(num(x.area))p.area=num(x.area)}}
     else{p.extra=true;if(!p.area)p.area=num(x.area)}
   };
@@ -872,7 +893,7 @@ function customers(){
     if(!c.phone&&j.phone)c.phone=j.phone;
     if(j.status!=="cancel"){c.total+=j.amount;c.rai+=j.area}
     if(j.status==="done"&&!j.paid)c.owe+=owed(j);
-    if(Array.isArray(j.plots)&&j.plots.length)j.plots.forEach(pl=>addPlot(c,{...j,plotName:pl.plotName,location:pl.location,map:pl.map||"",area:pl.area},true));
+    if(Array.isArray(j.plots)&&j.plots.length)j.plots.forEach(pl=>addPlot(c,{...j,plotName:pl.plotName,location:pl.location,map:pl.map||"",geo:pl.geo||"",area:pl.area},true));
     else addPlot(c,j,true);
   });
   cfg.extraPlots.forEach(x=>{if(!String(x.name||"").trim())return;const c=getC(x);c.lastCreated=maxStr(c.lastCreated,x.created);addPlot(c,x,false)});
@@ -906,7 +927,7 @@ let plotSel=new Set(),plotNewOn=false,plotAreas={};
 const joinPlots=list=>({plotName:list.map(p=>p.plotName||p.location).filter(Boolean).join(" + "),location:[...new Set(list.map(p=>p.location).filter(Boolean))].join(", "),map:(list.find(p=>p.map)||{}).map||""});
 function multiPlots(){
   if(plotSel.size<2)return null;
-  return [...plotSel].sort((a,b)=>a-b).map(i=>{const p=plotChoices[i];return {plotName:p.plotName||"",location:p.location||"",map:p.map||"",area:num(plotAreas[i])}});
+  return [...plotSel].sort((a,b)=>a-b).map(i=>{const p=plotChoices[i];const o={plotName:p.plotName||"",location:p.location||"",map:p.map||"",area:num(plotAreas[i])};if(p.geo)o.geo=p.geo;return o});
 }
 function renderPlotPicker(c){
   if(!c){plotSel=new Set();plotNewOn=false;plotAreas={};setMultiFields(false)}
@@ -924,17 +945,17 @@ function applyPlots(keepAreas){
   list.forEach((p,k)=>{const i=[...plotSel].sort((a,b)=>a-b)[k];if(!keepAreas&&plotAreas[i]===undefined)plotAreas[i]=num(p.area)});
   Object.keys(plotAreas).forEach(k=>{if(!plotSel.has(+k))delete plotAreas[k]});
   if(list.length>1){
-    const jp=joinPlots(list);$("#fPlot").value=jp.plotName;$("#fLoc").value=jp.location;if(!keepAreas)$("#fMap").value=jp.map;
+    const jp=joinPlots(list);$("#fPlot").value=jp.plotName;$("#fLoc").value=jp.location;if(!keepAreas){$("#fMap").value=jp.map;$("#fGeo").value=(list.find(x=>x.geo)||{}).geo||""}
     $("#fArea").value=[...plotSel].reduce((s,i)=>s+num(plotAreas[i]),0)||"";setMultiFields(true);
   }else if(list.length===1){
     const p=list[0];setMultiFields(false);
-    $("#fPlot").value=p.plotName;$("#fLoc").value=p.location;$("#fMap").value=p.map||"";if(p.area)$("#fArea").value=p.area;
-  }else{setMultiFields(false);["#fPlot","#fLoc","#fMap","#fArea"].forEach(q=>$(q).value="")}
+    $("#fPlot").value=p.plotName;$("#fLoc").value=p.location;$("#fMap").value=p.map||"";$("#fGeo").value=p.geo||"";if(p.area)$("#fArea").value=p.area;
+  }else{setMultiFields(false);["#fPlot","#fLoc","#fMap","#fArea","#fGeo"].forEach(q=>$(q).value="")}
   if(list[0]&&list[0].crop&&!keepAreas)$("#fCrop").value=list[0].crop;
   renderPlotPicker({name:$("#plotPick").dataset.name,plots:plotChoices});updatePrice();
 }
 function pickPlot(i){
-  if(i==="new"){plotSel=new Set();plotAreas={};plotNewOn=true;setMultiFields(false);["#fPlot","#fLoc","#fMap","#fArea"].forEach(q=>$(q).value="");renderPlotPicker({name:$("#plotPick").dataset.name,plots:plotChoices});updatePrice();$("#fPlot").focus();return}
+  if(i==="new"){plotSel=new Set();plotAreas={};plotNewOn=true;setMultiFields(false);["#fPlot","#fLoc","#fMap","#fArea","#fGeo"].forEach(q=>$(q).value="");renderPlotPicker({name:$("#plotPick").dataset.name,plots:plotChoices});updatePrice();$("#fPlot").focus();return}
   if(!plotChoices[i])return;
   plotNewOn=false;plotSel.has(i)?plotSel.delete(i):plotSel.add(i);applyPlots(false);
 }
@@ -962,7 +983,7 @@ const openMonths=new Set();let monthsInit=false;
 function jobCard(j){
   const next={new:["accepted","รับงาน"],accepted:["working","เริ่มบิน"]}[j.status];
   const isToday=j.date===today()&&OPEN.includes(j.status);
-  const mapUrl=safeUrl(j.map);
+  const mapUrl=safeUrl(j.map)||(j.geo?"https://www.google.com/maps?q="+encodeURIComponent(j.geo):"");
   const pay=j.paid?`✅ รับเงินครบ${j.payMethod&&!/^ค้าง/.test(j.payMethod)?` · ${esc(j.payMethod)}`:""}`:`${j.deposit?`รับแล้ว ${fmt(j.deposit)} · `:""}คงเหลือ ${fmt(owed(j))}${j.status==="done"?" · ค้างจ่าย":""}`;
   return `<div class="job s-${j.status}${isToday?" today":""}" data-job="${esc(j.id)}">
     <div class="job-top"><div>
@@ -975,6 +996,7 @@ function jobCard(j){
     <div class="job-actions">
       ${next?`<button type="button" class="btn sm ghost" data-act="status" data-v="${next[0]}">${next[1]}</button>`:""}
       ${OPEN.includes(j.status)?`<button type="button" class="btn sm" data-act="done">✅ งานเสร็จ</button>`:""}
+      ${OPEN.includes(j.status)?`<button type="button" class="btn sm ghost" data-act="wind">🌬️ ลม</button>`:""}
       ${j.status==="done"&&!j.paid?`<button type="button" class="btn sm" data-act="paid">💰 รับเงินครบแล้ว</button>`:""}
       <button type="button" class="btn sm ghost" data-act="edit">✏️ แก้ไข</button>
       ${OPEN.includes(j.status)?`<button type="button" class="btn sm danger" data-act="cancel">ยกเลิกงาน</button>`:""}
@@ -1033,6 +1055,7 @@ document.addEventListener("click",async e=>{
     case "status":j.status=b.dataset.v;j.updated=new Date().toISOString();toast("อัปเดตเป็น: "+STATUS[j.status].t);break;
     case "edit":startEdit(j);return;
     case "done":openDonePanel(j,card);return;
+    case "wind":openWindPanel(j,card);return;
     case "cancel":if(!(await confirmBar(acts,`ยกเลิกงานของ ${j.name}?`,{choices:[{v:true,label:"ยกเลิกงาน",cls:"red"}],cancel:"ไม่ใช่"})))return;
       j.status="cancel";j.updated=new Date().toISOString();toast("ยกเลิกงานแล้ว");break;
     case "del":if(!(await confirmBar(acts,`ลบงานของ ${j.name}? ลบแล้วกู้คืนไม่ได้`,{choices:[{v:true,label:"ลบเลย",cls:"red"}]})))return;
@@ -1180,6 +1203,120 @@ $("#custList").addEventListener("click",async e=>{
   }
 });
 
+
+/* ================= wind forecast (Open-Meteo, free, no key) ================= */
+// Spraying guide (drone): under 3 m/s good · 3–5 m/s careful · over 5 m/s don't spray.
+const WIND_OK=3,WIND_MAX=5;
+const windCache=new Map();
+const windLevel=v=>v<WIND_OK?"ok":v<=WIND_MAX?"warn":"bad";
+const WIND_TXT={ok:"เหมาะพ่น",warn:"ระวังละอองปลิว",bad:"ไม่ควรพ่น"};
+const DIRS=["เหนือ","ตอ.เฉียงเหนือ","ตะวันออก","ตอ.เฉียงใต้","ใต้","ตต.เฉียงใต้","ตะวันตก","ตต.เฉียงเหนือ"];
+const dirTxt=d=>"ลมจาก"+DIRS[Math.round(((d%360)+360)%360/45)%8];
+// Read "lat,lng" from a Google Maps link or from plain text. Short links (maps.app.goo.gl) carry no coordinates.
+function parseGeo(t){
+  t=String(t||"");let m=t.match(/@(-?\d{1,2}\.\d+),\s*(-?\d{1,3}\.\d+)/)||t.match(/!3d(-?\d{1,2}\.\d+)!4d(-?\d{1,3}\.\d+)/)||t.match(/[?&](?:q|query|ll|destination|center)=(-?\d{1,2}\.\d+)(?:,|%2C)\s*(-?\d{1,3}\.\d+)/i)||t.match(/^\s*(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})\s*$/);
+  if(!m)return null;const lat=+m[1],lng=+m[2];
+  return Math.abs(lat)<=90&&Math.abs(lng)<=180?{lat,lng}:null;
+}
+const geoStr=g=>`${g.lat.toFixed(5)},${g.lng.toFixed(5)}`;
+function jobGeo(j){return parseGeo(j.geo)||parseGeo(j.map)||parseGeo(j.location)||(Array.isArray(j.plots)?j.plots.map(p=>parseGeo(p.geo)||parseGeo(p.map)).find(Boolean):null)||null}
+async function fetchWind(g){
+  const key=geoStr({lat:+g.lat.toFixed(2),lng:+g.lng.toFixed(2)}),hit=windCache.get(key);
+  if(hit&&Date.now()-hit.at<30*60e3)return hit.data;
+  const u=`https://api.open-meteo.com/v1/forecast?latitude=${g.lat.toFixed(4)}&longitude=${g.lng.toFixed(4)}&hourly=wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation_probability&wind_speed_unit=ms&timezone=Asia%2FBangkok&forecast_days=16`;
+  const r=await fetch(u);if(!r.ok)throw new Error("HTTP "+r.status);
+  const d=await r.json(),h=d.hourly;if(!h||!h.time)throw new Error("ข้อมูลพยากรณ์ไม่ครบ");
+  const rows=h.time.map((t,i)=>({t,v:num(h.wind_speed_10m[i]),g:num(h.wind_gusts_10m[i]),d:num(h.wind_direction_10m[i]),rain:h.precipitation_probability?h.precipitation_probability[i]:null}));
+  windCache.set(key,{at:Date.now(),data:rows});return rows;
+}
+function getGPS(){
+  return new Promise((ok,no)=>{
+    if(!navigator.geolocation)return no(new Error("เครื่องนี้หาตำแหน่งไม่ได้"));
+    navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude}),
+      e=>no(new Error(e.code===1?"ไม่ได้อนุญาตให้ใช้ตำแหน่ง — เปิดสิทธิ์ตำแหน่งให้เว็บนี้ในตั้งค่าเบราว์เซอร์":"หาตำแหน่งไม่ได้ ลองใหม่อีกครั้ง")),{enableHighAccuracy:true,timeout:15000,maximumAge:120000});
+  });
+}
+const hourNow=()=>{const d=new Date();return `${ymd(d)}T${pad2(d.getHours())}:00`};
+// Horizontal strip of hourly chips. mark(row) → true to outline the hours of the job's time slot.
+function windStrip(rows,mark){
+  if(!rows.length)return `<div class="meta">ไม่มีข้อมูลในช่วงนี้</div>`;
+  return `<div class="wstrip">${rows.map(r=>{const lv=windLevel(r.v);return `<div class="wh ${lv}${mark&&mark(r)?" mark":""}" title="${WIND_TXT[lv]} · ${dirTxt(r.d)}"><span class="wt">${r.t.slice(11,16)}</span><span class="wa" style="transform:rotate(${(r.d+180)%360}deg)" aria-hidden="true">↑</span><b>${r.v.toFixed(1)}</b><span class="wu">ม./วิ</span><span class="wg">กระโชก ${r.g.toFixed(1)}</span>${r.rain!=null?`<span class="wr">💧${r.rain}%</span>`:""}</div>`}).join("")}</div>`;
+}
+// First run of 2+ consecutive good hours from the list.
+function goodWindow(rows){
+  rows=rows.filter(r=>+r.t.slice(11,13)>=5&&+r.t.slice(11,13)<=18); // daylight only
+  for(let i=0;i<rows.length;i++){if(windLevel(rows[i].v)!=="ok"||(rows[i].rain||0)>=50)continue;let k=i;while(k+1<rows.length&&windLevel(rows[k+1].v)==="ok"&&(rows[k+1].rain||0)<50&&new Date(rows[k+1].t)-new Date(rows[k].t)===3600e3)k++;if(k>i)return [rows[i],rows[k]];i=k}
+  return null;
+}
+const endHour=r=>pad2((+r.t.slice(11,13)+1)%24)+":00";
+const windLegend=`<div class="wlegend"><span class="ok">● ต่ำกว่า ${WIND_OK} ม./วิ เหมาะพ่น</span><span class="warn">● ${WIND_OK}–${WIND_MAX} ระวัง</span><span class="bad">● เกิน ${WIND_MAX} ไม่ควรพ่น</span></div>`;
+
+/* ---- dashboard card: next 12 hours at the phone's location ---- */
+let myGeo=null,windCardState={busy:false,err:"",rows:null,at:0};
+try{myGeo=parseGeo(localStorage.getItem("drone.myGeo"))}catch(e){}
+function renderWindCard(){
+  const box=$("#windCard");if(!box)return;const st=windCardState;
+  const head=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><h2 style="margin:0">🌬️ ลมรายชั่วโมง</h2><button type="button" class="btn sm ghost" data-wind="here"${st.busy?" disabled":""}>📍 ${myGeo?"อัปเดตตำแหน่ง":"ใช้ตำแหน่งปัจจุบัน"}</button></div>`;
+  if(!myGeo){box.innerHTML=head+`<p class="meta" style="margin:0">กด “ใช้ตำแหน่งปัจจุบัน” เพื่อดูความเร็วลม 12 ชั่วโมงข้างหน้า ณ จุดที่คุณอยู่ (เช่น ตอนอยู่ที่แปลง)${st.err?`<br><span style="color:var(--red)">${esc(st.err)}</span>`:""}</p>`;return}
+  if(!st.rows&&!st.busy&&!st.err){loadWindCard();}
+  if(!st.rows){box.innerHTML=head+`<p class="meta" style="margin:0">${st.busy?"กำลังโหลดพยากรณ์ลม…":`<span style="color:var(--red)">${esc(st.err)}</span> <button type="button" class="btn sm ghost" data-wind="retry">ลองใหม่</button>`}</p>`;return}
+  const now=hourNow(),rows=st.rows.filter(r=>r.t>=now).slice(0,12),cur=rows[0],gw=goodWindow(st.rows.filter(r=>r.t>=now).slice(0,36));
+  box.innerHTML=head+(cur?`<div class="wnow ${windLevel(cur.v)}"><b>${cur.v.toFixed(1)} ม./วิ</b><span>${(cur.v*3.6).toFixed(0)} กม./ชม. · กระโชก ${cur.g.toFixed(1)} · ${dirTxt(cur.d)}</span><span class="wbadge">${WIND_TXT[windLevel(cur.v)]}</span></div>`:"")+
+    `<div class="meta" style="margin:6px 0">${gw?`✅ ช่วงลมเหมาะพ่นถัดไป: <b>${gw[0].t.slice(11,16)}–${endHour(gw[1])}</b>${gw[0].t.slice(0,10)!==today()?" (พรุ่งนี้)":""}`:"⚠️ ช่วงกลางวันข้างหน้ายังไม่มีลมต่ำต่อเนื่อง"} · อัปเดต ${new Date(st.at).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})}</div>`+
+    windStrip(rows)+windLegend;
+}
+async function loadWindCard(){
+  const st=windCardState;st.busy=true;st.err="";
+  try{st.rows=await fetchWind(myGeo);st.at=Date.now()}catch(e){st.err="โหลดพยากรณ์ลมไม่สำเร็จ ("+(/fetch|network/i.test(e.message)?"ไม่มีอินเทอร์เน็ต":e.message)+")"}
+  st.busy=false;if(currentTab==="dash")renderWindCard();
+}
+$("#windCard").addEventListener("click",async e=>{
+  const b=e.target.closest("[data-wind]");if(!b)return;const st=windCardState;
+  if(b.dataset.wind==="retry"){st.err="";renderWindCard();return}
+  st.busy=true;st.err="";renderWindCard();
+  try{myGeo=await getGPS();try{localStorage.setItem("drone.myGeo",geoStr(myGeo))}catch(_){}st.rows=null;st.busy=false;await loadWindCard()}
+  catch(err){st.busy=false;st.err=err.message;renderWindCard()}
+});
+
+/* ---- per-job wind panel (inside the job card) ---- */
+const SLOT_HOURS=slot=>/^เช้า/.test(slot||"")?[6,10]:/^บ่าย/.test(slot||"")?[14,18]:null;
+function openWindPanel(j,card){
+  closePanels();closeConfirm();
+  const p=document.createElement("div");p.className="panel";p.id="windPanel";
+  card.querySelector(".job-actions").after(p);
+  let g=jobGeo(j),fromGPS=false;
+  const draw=async()=>{
+    const head=`<div class="row" style="justify-content:space-between;align-items:flex-start"><div><h2>🌬️ ลมวันนัด ${thDate(j.date)}</h2><div class="meta" style="margin:0">${g?(fromGPS?"📍 ตำแหน่งปัจจุบันของคุณ":"📍 พิกัดแปลง "+geoStr(g)):""}</div></div><button type="button" class="btn sm ghost" data-wp="close">ปิด</button></div>`;
+    if(!g){p.innerHTML=head+`<p class="meta">งานนี้ยังไม่มีพิกัดแปลง${j.map?" (ลิงก์แผนที่แบบย่ออ่านพิกัดไม่ได้)":""} — ถ้าอยู่ที่แปลงตอนนี้ กดใช้ตำแหน่งปัจจุบันได้เลย</p><div class="row"><button type="button" class="btn sm" data-wp="gps">📍 ใช้ตำแหน่งปัจจุบัน</button></div>`;return}
+    p.innerHTML=head+`<p class="meta">กำลังโหลด…</p>`;
+    let rows;try{rows=await fetchWind(g)}catch(e){p.innerHTML=head+`<p class="meta" style="color:var(--red)">โหลดพยากรณ์ลมไม่สำเร็จ (${esc(/fetch|network/i.test(e.message)?"ไม่มีอินเทอร์เน็ต":e.message)})</p><button type="button" class="btn sm ghost" data-wp="retry">ลองใหม่</button>`;return}
+    if(!p.isConnected)return;
+    const sh=SLOT_HOURS(j.slot),isT=j.date===today();
+    let day=rows.filter(r=>r.t.slice(0,10)===j.date&&+r.t.slice(11,13)>=5&&+r.t.slice(11,13)<=19);
+    if(isT)day=day.filter(r=>r.t>=hourNow());
+    const inSlot=r=>sh&&+r.t.slice(11,13)>=sh[0]&&+r.t.slice(11,13)<sh[1];
+    const slotRows=day.filter(inSlot),gw=goodWindow(day);
+    const save=fromGPS&&!j.geo?`<div class="row" style="margin-top:8px"><button type="button" class="btn sm" data-wp="save">💾 บันทึกพิกัดนี้ให้งาน/แปลงนี้</button><span class="meta" style="margin:0">ครั้งหน้าจะดูลมของแปลงนี้ได้ทันที</span></div>`:"";
+    if(!rows.some(r=>r.t.slice(0,10)===j.date)){p.innerHTML=head+`<p class="meta">${j.date<today()?"วันนัดผ่านไปแล้ว":"พยากรณ์ได้ล่วงหน้าไม่เกิน 16 วัน — ใกล้วันนัดแล้วกดดูใหม่"}</p>`+save;return}
+    const sMax=slotRows.length?Math.max(...slotRows.map(r=>r.v)):null;
+    p.innerHTML=head+
+      `<div class="meta" style="margin:8px 0">${sh&&slotRows.length?`ช่วงนัด (${esc(j.slot)}): ลมสูงสุด <b>${sMax.toFixed(1)} ม./วิ</b> — <b class="wtxt ${windLevel(sMax)}">${WIND_TXT[windLevel(sMax)]}</b><br>`:""}${gw?`✅ ช่วงลมเหมาะพ่น: <b>${gw[0].t.slice(11,16)}–${endHour(gw[1])}</b>`:"⚠️ วันนี้ไม่มีช่วงลมต่ำต่อเนื่อง"}</div>`+
+      windStrip(day,inSlot)+windLegend+(sh?`<div class="note">กรอบเข้ม = ช่วงเวลานัด</div>`:"")+save;
+  };
+  p.addEventListener("click",async e=>{
+    const b=e.target.closest("[data-wp]");if(!b)return;
+    if(b.dataset.wp==="close"){closePanels();return}
+    if(b.dataset.wp==="retry"){draw();return}
+    if(b.dataset.wp==="gps"){b.disabled=true;b.textContent="กำลังหาตำแหน่ง…";
+      try{g=await getGPS();fromGPS=true;myGeo=g;try{localStorage.setItem("drone.myGeo",geoStr(g))}catch(_){}draw()}catch(err){b.disabled=false;b.textContent="📍 ใช้ตำแหน่งปัจจุบัน";toast(err.message)}return}
+    if(b.dataset.wp==="save"){
+      j.geo=geoStr(g);if(Array.isArray(j.plots))j.plots.forEach(x=>{if(!x.geo)x.geo=j.geo});j.updated=new Date().toISOString();
+      fromGPS=false;persist();toast("บันทึกพิกัดแปลงแล้ว");draw();
+    }
+  });
+  draw();scrollIntoViewSoft(p);
+}
+
 /* ================= dashboard ================= */
 function rangeFrom(r){const d=new Date();if(r==="month")return ymd(new Date(d.getFullYear(),d.getMonth(),1));if(r==="3m")return ymd(new Date(d.getFullYear(),d.getMonth()-2,1));if(r==="year")return ymd(new Date(d.getFullYear(),0,1));return ""}
 function hbars(rows,unit){
@@ -1189,6 +1326,7 @@ function hbars(rows,unit){
 }
 let lastIncome=null;
 function renderDash(){
+  renderWindCard();
   const range=$("#dashRange").value,from=rangeFrom(range);
   const inR=jobs.filter(j=>!from||String(j.date)>=from),live=inR.filter(j=>j.status!=="cancel");
   const done=jobs.filter(j=>j.status==="done"&&(!from||String(j.doneDate||j.date)>=from));
