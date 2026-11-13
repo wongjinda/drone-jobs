@@ -1728,10 +1728,17 @@ async function importJson(file) {
   const s = data.settings || {};
   if (s.tax) S.settings.tax = Object.assign({}, s.tax, S.settings.tax);
   if (Array.isArray(s.rounds)) { const have = new Set(rounds().map(x => x.id)); S.settings.rounds = rounds().concat(s.rounds.filter(x => x && x.id && !have.has(x.id))); }
+  if (typeof s.farmExempt === "boolean") S.settings.farmExempt = s.farmExempt;
+  const skip = s.droneJobs && Array.isArray(s.droneJobs.skip) ? s.droneJobs.skip : [];
+  if (skip.length) { const dj = djCfg(); skip.forEach(id => { if (!dj.skip.includes(id)) dj.skip.push(id); }); }
   saveSettings();
   recs.forEach(r => S.records.set(r.id, r));
+  // drone jobs that were deleted in the backup must not come back from the automatic sync
+  const unwanted = allRecords().filter(r => r.src === "drone-jobs" && djCfg().skip.includes(r.srcId)).map(r => r.id);
+  for (const id of unwanted) await deleteRecord(id);
   renderAll();
-  if (!(await saveRecords(recs))) return; toast(`กู้คืน ${recs.length} รายการแล้ว ✓`);
+  if (!(await saveRecords(recs.filter(r => !unwanted.includes(r.id))))) return;
+  toast(`กู้คืน ${recs.length - unwanted.length} รายการแล้ว ✓`);
 }
 
 /* =====================================================================
