@@ -1726,7 +1726,9 @@ async function importJson(file) {
   if (!recs.length) { toast("ไม่พบรายการในไฟล์"); return; }
   if (!(await confirmBox("กู้คืนข้อมูล?", `จะเพิ่ม/อัปเดต ${recs.length} รายการจากไฟล์ (รายการเดิมที่ไม่อยู่ในไฟล์จะยังอยู่)`, "กู้คืน"))) return;
   const s = data.settings || {};
-  if (s.tax) S.settings.tax = Object.assign({}, s.tax, S.settings.tax);
+  // tax inputs: take the backup's values for any year that has nothing entered here yet
+  const blankTax = t => !t || Object.keys(t).every(k => k === "married" ? !t.married : k === "method" ? !Object.keys(t.method || {}).length : t[k] === "" || t[k] == null);
+  if (s.tax && typeof s.tax === "object") Object.keys(s.tax).forEach(y => { if (blankTax(S.settings.tax[y])) S.settings.tax[y] = s.tax[y]; });
   if (Array.isArray(s.rounds)) { const have = new Set(rounds().map(x => x.id)); S.settings.rounds = rounds().concat(s.rounds.filter(x => x && x.id && !have.has(x.id))); }
   if (typeof s.farmExempt === "boolean") S.settings.farmExempt = s.farmExempt;
   const skip = s.droneJobs && Array.isArray(s.droneJobs.skip) ? s.droneJobs.skip : [];
