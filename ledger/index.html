@@ -376,10 +376,11 @@ nav.bottom button.on{color:var(--brand);font-weight:600;box-shadow:inset 0 3px 0
     </div>
     <div class="card">
       <h2>ส่งออก / สำรองข้อมูล</h2>
-      <p class="small muted" style="margin:0 0 10px">ไฟล์ CSV เปิดด้วย Excel / Google Sheets ได้ · ไฟล์ JSON ใช้สำรองและกู้คืนข้อมูลทั้งหมด (รูปใบเสร็จไม่รวมอยู่ในไฟล์)</p>
+      <p class="small muted" style="margin:0 0 10px">ไฟล์ CSV เปิดด้วย Excel / Google Sheets ได้ · ไฟล์ JSON ใช้สำรองและกู้คืนข้อมูลทั้งหมด — แบบ “พร้อมรูป” รวมรูปหลักฐานทุกใบไว้ในไฟล์เดียว (ไฟล์ใหญ่ตามจำนวนรูป) กู้คืนซ้ำได้ รูปไม่ซ้ำ</p>
       <div class="btns">
         <button class="btn" data-act="export-csv">⬇ ส่งออก CSV (ปีที่เลือก)</button>
-        <button class="btn ghost" data-act="export-json">⬇ สำรองข้อมูลทั้งหมด (JSON)</button>
+        <button class="btn ghost" data-act="export-json">⬇ สำรองข้อมูลพร้อมรูป (JSON)</button>
+        <button class="btn ghost" data-act="export-json-lite">⬇ สำรองเฉพาะข้อมูล (ไม่รวมรูป)</button>
         <label class="btn ghost filebtn">⬆ กู้คืนจากไฟล์ JSON<input type="file" id="impJson" accept=".json,application/json"></label>
       </div>
     </div>
@@ -1717,8 +1718,29 @@ function exportCsv() {
       (r.receipts || []).length || "", r.docNo || ""]));
   offerFile(`farm-ledger-${be(S.year)}.csv`, "\uFEFF" + rows.map(r => r.map(q).join(",")).join("\r\n"), "text/csv;charset=utf-8");
 }
-function exportJson() {
-  offerFile(`farm-ledger-backup-${today()}.json`, JSON.stringify({ app:"farm-ledger", version:1, exported:new Date().toISOString(), records:allRecords(), settings:S.settings }, null, 1), "application/json");
+const blobToB64 = b => new Promise((ok, bad) => { const fr = new FileReader(); fr.onload = () => ok(String(fr.result).split(",")[1] || ""); fr.onerror = () => bad(fr.error); fr.readAsDataURL(b); });
+// withPhotos: every receipt stored in Storage is embedded as {id, t, ct, data}; importJson uploads
+// them back to the same path, so restoring a backup never duplicates photos.
+async function exportJson(withPhotos) {
+  const recs = JSON.parse(JSON.stringify(allRecords()));
+  let ok = 0, failed = 0;
+  if (withPhotos) {
+    const jobs = [];
+    recs.forEach(r => (r.receipts || []).forEach((x, i) => { if (x && x.path) jobs.push({ r, i, x }); }));
+    for (const { r, i, x } of jobs) {
+      toast(`กำลังรวมรูปหลักฐาน ${ok + failed + 1}/${jobs.length}…`);
+      try {
+        const { data, error } = await sb.storage.from(BUCKET).download(x.path);
+        if (error) throw error;
+        const name = x.path.split("/").pop().replace(/\.[^.]+$/, "");
+        const key = name.startsWith(r.id + "-") ? name.slice(r.id.length + 1) : name;
+        r.receipts[i] = { id:key, t:x.t, ct:data.type || (x.t === "pdf" ? "application/pdf" : "image/jpeg"), data:await blobToB64(data) };
+        ok++;
+      } catch (e) { console.error(e); failed++; }
+    }
+  }
+  offerFile(`farm-ledger-backup-${today()}${withPhotos ? "-photos" : ""}.json`, JSON.stringify({ app:"farm-ledger", version:1, exported:new Date().toISOString(), records:recs, settings:S.settings }), "application/json");
+  toast(!withPhotos ? "สำรองข้อมูลแล้ว (ไม่รวมรูป)" : failed ? `สำรองแล้ว — รวมรูปได้ ${ok} รูป, ดึงไม่ได้ ${failed} รูป (ลองใหม่อีกครั้ง)` : `สำรองข้อมูลพร้อมรูป ${ok} รูปแล้ว ✓`);
 }
 // A migration file may carry receipt photos inline ({data: base64, ct, id?}). Upload each one to
 // Storage and replace the entry with {path,t}. The path is derived from the old asset id, so
@@ -1811,7 +1833,8 @@ const ACTIONS = {
   "crop-cancel": () => Cropper.finish(false),
   "crop-ok": () => Cropper.finish(true),
   "export-csv": exportCsv,
-  "export-json": exportJson,
+  "export-json": () => exportJson(true),
+  "export-json-lite": () => exportJson(false),
   "dj-sync": () => syncDroneJobs(false),
   "logout": logout,
   "lg-forgot": () => showLogin("forgot"),
