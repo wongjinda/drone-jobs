@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>บัญชี นา · รถเกี่ยว · โดรน + ภาษี</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens ---------- */
+:root{
+  --bg:#f5f2ea; --card:#fffdf8; --ink:#1d2418; --ink2:#55594c; --muted:#8a8b7f;
+  --line:#e4dfd2; --brand:#2f6b2f; --brand2:#3f8a3a; --brand-soft:#e5efdc;
+  --gold-soft:#f7ecd1; --red:#c0392b; --red-soft:#f8e3df; --soft:#f4f1e6;
+  --in:#2a78d6; --out:#eb6834; --grid:#e1e0d9; --axis:#c3c2b7;
+  --r:14px; --shadow:0 1px 2px rgba(40,40,20,.06),0 4px 14px rgba(40,40,20,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+html.modal,html.modal body{overflow:hidden}
+body{font-family:"IBM Plex Sans Thai",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5;padding-bottom:84px}
+h1,h2,h3{font-family:"Mitr","IBM Plex Sans Thai",sans-serif;font-weight:500;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+[hidden]{display:none!important}
+.wrap{max-width:980px;margin:0 auto;padding:0 14px}
+.muted{color:var(--muted)} .small{font-size:13px} .pos{color:#1f6b25} .neg{color:var(--red)}
+.amt{font-family:"Mitr";font-variant-numeric:tabular-nums;white-space:nowrap}
+.amt.in{color:#1f5fa8} .amt.out{color:#b5481c}
+
+/* ---------- header ---------- */
+header.top{background:linear-gradient(135deg,#2f6b2f 0%,#4b8b3b 60%,#8aa64a 100%);color:#fff;padding:18px 0 54px;position:relative;overflow:hidden}
+header.top::after{content:"";position:absolute;inset:auto -10% -40px -10%;height:80px;background:var(--bg);border-radius:50% 50% 0 0/100% 100% 0 0}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.brandname{display:flex;align-items:center;gap:10px}
+.brandname h1{font-size:22px;line-height:1.2}
+.brandname small{display:block;opacity:.85;font-size:13px;font-family:"IBM Plex Sans Thai"}
+.yearsel{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:999px;padding:6px 12px;font-weight:600}
+.yearsel option{color:#000}
+main{margin-top:-38px;position:relative;z-index:1}
+.banner{border-radius:10px;padding:8px 12px;font-size:14px;margin:0 0 12px;background:var(--gold-soft);color:#6b4f12}
+
+/* ---------- cards & stats ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.card h2{font-size:18px;margin-bottom:10px}
+.card h3{font-size:16px;margin:14px 0 8px}
+.hrow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;box-shadow:var(--shadow)}
+.kpi .l{font-size:13px;color:var(--ink2)}
+.kpi .v{font-family:"Mitr";font-size:24px;line-height:1.25;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12px;color:var(--muted)}
+.bizgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.biz{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+.biz .hd{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:6px}
+.ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:19px;flex:none}
+.ic.farm{background:#e8f1dc}.ic.harvest{background:#f7ecd1}.ic.drone{background:#e1ecf7}
+.row{display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:2px 0}
+.row b{font-variant-numeric:tabular-nums;font-weight:600}
+.row.tot{border-top:1px solid var(--line);margin-top:4px;padding-top:5px}
+.strip{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13.5px;background:var(--soft);border-radius:8px;padding:6px 10px;margin:8px 0 4px}
+.strip .amt{font-size:13.5px;font-weight:600}
+.catrow{padding:5px 0}
+.catrow .cl{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.catrow .cl b{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+.cbar{height:8px;background:#f1eee4;border-radius:4px;margin-top:3px;overflow:hidden}
+.cbar i{display:block;height:100%;background:var(--out);border-radius:4px}
+.cbar.prog i{background:var(--brand2)}
+.empty{text-align:center;color:var(--muted);padding:22px 10px}
+.note{background:var(--soft);border-radius:10px;padding:10px 12px;font-size:13.5px;color:var(--ink2)}
+.note ul,.note ol{margin:4px 0 0;padding-left:18px}
+
+/* ---------- buttons & inputs ---------- */
+.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;background:var(--brand);color:#fff;display:inline-flex;align-items:center;gap:6px;justify-content:center;text-decoration:none}
+.btn:hover{background:var(--brand2)}
+.btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--brand)}
+.btn.ghost:hover{background:var(--brand-soft)}
+.btn.danger{background:var(--red)}
+.btn.sm{padding:6px 10px;font-size:14px;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:default}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.filebtn{position:relative;overflow:hidden;cursor:pointer}
+.filebtn input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:100px}
+.inp,label.f input,label.f select,.dwrap input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.inp:focus,label.f input:focus,label.f select:focus,.dwrap input:focus,.filters input:focus,.filters select:focus,.tin:focus{outline:2px solid var(--brand2);outline-offset:0;border-color:transparent}
+.f{display:block;margin-bottom:10px}
+.f>span,.flbl{display:block;font-size:13px;color:var(--ink2);margin-bottom:3px;font-weight:500}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1.2fr .9fr 1.2fr;gap:8px}
+.g2>*,.g3>*{min-width:0}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:6px 0 12px;cursor:pointer}
+.chk input{margin-top:4px;width:18px;height:18px;accent-color:var(--brand);flex:none}
+.hint{font-size:12.5px;color:var(--muted);margin-top:3px}
+.bigamt input{font-size:22px;font-family:"Mitr"}
+.bad{outline:2px solid var(--red)!important;background:var(--red-soft)!important}
+.ferr{color:var(--red);font-size:13px;font-weight:600;margin-top:3px}
+.seg{display:flex;background:#efebe0;border-radius:12px;padding:3px;gap:3px;margin-bottom:12px}
+.seg button{flex:1;border:0;background:none;padding:8px 4px;border-radius:9px;cursor:pointer;font-size:14px}
+.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
+.seg.kind button.on[data-k=in]{color:#1f5fa8}.seg.kind button.on[data-k=out]{color:#b5481c}
+.seg.small{margin:0;padding:3px;border-radius:10px}.seg.small button{padding:6px 12px;border-radius:8px}.seg.small button.on{color:var(--brand)}
+.navbtn{background:var(--brand-soft);border:0;border-radius:9px;width:38px;height:38px;font-size:20px;cursor:pointer;color:var(--brand);flex:none}
+.navbtn:disabled{opacity:.35;cursor:default}
+
+/* ---------- lists ---------- */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.filters select,.filters input{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;min-width:0}
+.filters input{flex:1 1 160px}
+.item{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.item:last-child{border-bottom:0}
+.item:hover{background:#faf8f1}
+.item .mid{flex:1;min-width:0}
+.item .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .d{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{display:inline-block;font-size:11px;border-radius:999px;padding:1px 8px;font-weight:600;vertical-align:1px}
+.tag.due{background:var(--gold-soft);color:#8a5d00}.tag.ex{background:#eee;color:#555}.tag.cap{background:#e9e4f7;color:#4b3a8f}
+.tag.rc{background:#e6eef8;color:#1c4f8a}.tag.doc{background:var(--brand-soft);color:#24502a}
+.grpm{font-family:"Mitr";font-size:16px;display:flex;justify-content:space-between;padding:16px 4px 4px;border-bottom:2px solid var(--line)}
+.grpm.plain{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);padding:10px 4px 2px;border:0}
+.daynav{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.daynav .lbl{flex:1;text-align:center;font-size:15px}
+
+/* ---------- chart ---------- */
+.legend{display:flex;gap:16px;font-size:13px;color:var(--ink2);margin-bottom:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.chartbox{position:relative}
+.chartbox svg{display:block;width:100%;height:auto}
+.tip{position:absolute;pointer-events:none;background:#1d2418;color:#fff;font-size:13px;border-radius:8px;padding:6px 9px;white-space:nowrap;transform:translate(-50%,0);z-index:3}
+
+/* ---------- overlays ---------- */
+.overlay{position:fixed;inset:0;background:rgba(20,25,15,.45);display:none;z-index:40;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.overlay.on{display:flex}
+.sheet{background:var(--card);width:100%;max-width:620px;margin-top:auto;border-radius:18px 18px 0 0;padding:18px 16px calc(28px + env(safe-area-inset-bottom))}
+.sheet.narrow{max-width:420px}
+.sheet h2{font-size:20px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.x{background:none;border:0;font-size:26px;cursor:pointer;color:var(--muted);line-height:1}
+.actions{display:flex;gap:10px;margin-top:8px}
+.actions .btn{flex:1}
+.actions .btn.danger{flex:0 0 auto}
+@media(min-width:700px){.overlay{padding:24px 0}.sheet{border-radius:18px;margin:auto}}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#1d2418;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:90;max-width:90vw}
+
+/* ---------- date picker ---------- */
+.dwrap{position:relative}
+.dwrap input{padding-right:44px;cursor:pointer}
+.calbtn{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:0;font-size:20px;cursor:pointer;padding:4px 6px}
+.dp{position:absolute;left:0;top:calc(100% + 6px);z-index:50;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(30,40,20,.22);padding:10px;width:330px;max-width:calc(100vw - 32px)}
+.dp.right{left:auto;right:0}
+.dph{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.dph select{flex:1;padding:6px 4px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:600;min-width:0}
+.dph .m{flex:1.7}
+.dow,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.dow span{font-size:12px;color:var(--muted);padding:2px 0;font-weight:600}
+.dow span:first-child,.days button.sun{color:#c0392b}
+.days button{border:0;background:none;height:36px;border-radius:9px;cursor:pointer;font-size:15px;font-variant-numeric:tabular-nums}
+.days button:hover{background:var(--brand-soft)}
+.days button.td{outline:1.5px solid var(--brand);outline-offset:-2px}
+.days button.sel{background:var(--brand);color:#fff;font-weight:600}
+.dpf{display:flex;justify-content:space-between;margin-top:8px;gap:6px}
+.dpf button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:14px}
+
+/* ---------- receipts ---------- */
+.rc-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.rc-grid:empty{display:none}
+.rc-th{position:relative;width:78px;height:78px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--soft);cursor:pointer;flex:none}
+.rc-th img{width:100%;height:100%;object-fit:cover;display:block}
+.rc-th .pdf{width:100%;height:100%;display:grid;place-items:center;font-weight:700;color:#b5481c;font-size:14px;text-align:center;line-height:1.2}
+.rc-th .busy{position:absolute;inset:0;background:rgba(255,255,255,.78);display:grid;place-items:center;font-size:12px;color:var(--ink2)}
+.rc-no{position:absolute;left:4px;top:4px;background:rgba(31,77,36,.9);color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:0 6px}
+.rc-new{position:absolute;left:4px;bottom:4px;background:#c99a2e;color:#fff;font-size:10.5px;font-weight:700;border-radius:6px;padding:0 5px}
+.rc-x{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:15px;line-height:1;cursor:pointer;padding:0}
+.camb{flex:1 1 100%;padding:12px 14px;font-size:16px}
+.lb{align-items:center;background:rgba(10,12,8,.9)}
+.lbin{max-width:96vw;max-height:94vh;display:flex;flex-direction:column;align-items:center;gap:10px;margin:auto}
+.lbin img{max-width:96vw;max-height:80vh;border-radius:8px;background:#fff;object-fit:contain}
+.lbin .btn.ghost{background:#fff}
+
+/* ---------- cropper ---------- */
+.crop{position:fixed;inset:0;background:#111;z-index:70;display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:10px 10px calc(12px + env(safe-area-inset-bottom));color:#fff}
+.crop.on{display:flex}
+.crop .top{width:100%;max-width:700px;display:flex;justify-content:space-between;align-items:center;font-family:"Mitr";font-size:17px}
+.stage{position:relative;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden;margin:8px 0;flex:none}
+.stage canvas{display:block}
+.cbox{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.58);cursor:move;touch-action:none}
+.cbox::before,.cbox::after{content:"";position:absolute;pointer-events:none;border:0 dashed rgba(255,255,255,.45)}
+.cbox::before{left:33.33%;right:33.33%;top:0;bottom:0;border-left-width:1px;border-right-width:1px}
+.cbox::after{top:33.33%;bottom:33.33%;left:0;right:0;border-top-width:1px;border-bottom-width:1px}
+.ch{position:absolute;width:30px;height:30px;touch-action:none}
+.ch::after{content:"";position:absolute;width:18px;height:18px;border:4px solid #8fd16a}
+.ch.nw{left:-15px;top:-15px;cursor:nwse-resize}.ch.nw::after{left:11px;top:11px;border-right:0;border-bottom:0}
+.ch.ne{right:-15px;top:-15px;cursor:nesw-resize}.ch.ne::after{right:11px;top:11px;border-left:0;border-bottom:0}
+.ch.sw{left:-15px;bottom:-15px;cursor:nesw-resize}.ch.sw::after{left:11px;bottom:11px;border-right:0;border-top:0}
+.ch.se{right:-15px;bottom:-15px;cursor:nwse-resize}.ch.se::after{right:11px;bottom:11px;border-left:0;border-top:0}
+.ce{position:absolute;touch-action:none}
+.ce.n,.ce.s{left:20%;right:20%;height:24px}.ce.n{top:-12px;cursor:ns-resize}.ce.s{bottom:-12px;cursor:ns-resize}
+.ce.w,.ce.e{top:20%;bottom:20%;width:24px}.ce.w{left:-12px;cursor:ew-resize}.ce.e{right:-12px;cursor:ew-resize}
+.crop .bar{width:100%;max-width:700px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.crop .bar .btn{flex:1 1 auto;min-width:96px}
+.crop .bar .btn.ghost{background:#2a2a2a;color:#fff;border-color:#555}
+.crop .bar .ok{flex-basis:100%}
+
+/* ---------- tax ---------- */
+.trow{display:grid;grid-template-columns:1fr 150px;gap:10px;align-items:center;padding:5px 0}
+.trow .lbl{font-size:14.5px}
+.trow .lbl small{display:block;color:var(--muted);font-size:12px}
+.tin{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;text-align:right;font-variant-numeric:tabular-nums}
+.tin.cnt{text-align:center}
+table.sum{width:100%;border-collapse:collapse;font-size:14.5px}
+table.sum td{padding:6px 4px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+table.sum td:last-child{text-align:right;white-space:nowrap}
+table.sum tr.tot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0;font-size:16px}
+table.sum tr.sub td{color:var(--ink2);font-size:13.5px}
+table.sum tr.sub td:first-child{padding-left:16px}
+.mbiz{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:#fff}
+.mbiz.ex{background:#f3f7ee}
+.method{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+.method button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 8px;font-size:12.5px;cursor:pointer}
+.method button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+/* ---------- rounds ---------- */
+.rdc{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:#fff;cursor:pointer}
+.rdc.on{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-soft)}
+.rdn{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;margin-top:4px}
+.rst{font-size:12px;font-weight:600;border-radius:999px;padding:1px 9px;white-space:nowrap}
+.rst.now{background:var(--brand-soft);color:#24502a}.rst.done{background:#eee;color:#555}.rst.wait{background:var(--gold-soft);color:#8a5d00}
+
+/* ---------- settings ---------- */
+.status{font-size:14px;margin-top:10px;padding:8px 12px;border-radius:10px}
+.status.ok{background:var(--brand-soft);color:#24502a}.status.err{background:var(--red-soft);color:#8a2a1f}.status.work{background:#eef3fa;color:#1c4f8a}
+
+/* ---------- login & header actions ---------- */
+.topact{display:flex;align-items:center;gap:8px}
+.toplink{color:#fff;text-decoration:none;font-weight:600;font-size:14px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 12px}
+.login{max-width:420px;margin:-38px auto 0;padding:0 14px;position:relative;z-index:1}
+.login a{color:var(--brand);font-weight:600}
+.rc-th .old{width:100%;height:100%;display:grid;place-items:center;text-align:center;font-size:10.5px;color:var(--muted);padding:4px;line-height:1.25}
+.loading{text-align:center;color:var(--muted);padding:40px 0;margin-top:-38px;position:relative}
+/* ---------- nav ---------- */
+.view{display:none}.view.on{display:block}
+.fab{position:fixed;right:18px;bottom:92px;width:58px;height:58px;border-radius:50%;font-size:30px;box-shadow:0 6px 18px rgba(47,107,47,.4);z-index:20;padding:0}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;z-index:15;padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom .in{display:flex;max-width:640px;width:100%}
+nav.bottom button{flex:1;background:none;border:0;padding:8px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);cursor:pointer}
+nav.bottom button .e{font-size:21px;line-height:1}
+nav.bottom button.on{color:var(--brand);font-weight:600}
+
+@media(max-width:720px){
+  .kpis{grid-template-columns:1fr 1fr}
+  .kpis .kpi:last-child:nth-child(odd){grid-column:span 2}
+  .bizgrid{grid-template-columns:1fr}
+  .trow{grid-template-columns:1fr 128px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap toprow">
+    <div class="brandname">
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="20" fill="rgba(255,255,255,.18)"/><path d="M20 32V14M20 18c-3-1-5-4-5-7 3 1 5 3 5 7zm0 0c3-1 5-4 5-7-3 1-5 3-5 7zm0 6c-3-1-6-3-6-7 3 1 6 3 6 7zm0 0c3-1 6-3 6-7-3 1-6 3-6 7z" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+      <div><h1>สมุดบัญชีชาวนา</h1><small>ทำนา · รับจ้างเกี่ยวข้าว · รับจ้างโดรน · ภาษี</small></div>
+    </div>
+    <div class="topact">
+      <a class="toplink" href="../" title="แอปรับงานโดรน">🚁 งานโดรน</a>
+      <label><span hidden>ปี</span><select id="yearSel" class="yearsel" aria-label="ปี"></select></label>
+    </div>
+  </div>
+</header>
+
+<section class="login" id="login" hidden>
+  <div class="card">
+    <h2 id="lgTitle">เข้าสู่ระบบ</h2>
+    <p class="small muted" id="lgSub" style="margin:0 0 12px">ใช้อีเมลและรหัสผ่านเดียวกับแอปรับงานโดรน</p>
+    <form id="lgForm" novalidate>
+      <label class="f" id="lgEmailRow"><span>อีเมล</span><input id="lgEmail" type="email" autocomplete="username" inputmode="email"></label>
+      <label class="f" id="lgPassRow"><span id="lgPassLbl">รหัสผ่าน</span><input id="lgPass" type="password" autocomplete="current-password"></label>
+      <div class="status" id="lgMsg" hidden></div>
+      <div class="actions"><button type="submit" class="btn" id="lgBtn">เข้าสู่ระบบ</button></div>
+      <p class="small" style="margin:12px 0 0;text-align:center"><a href="#" data-act="lg-forgot" id="lgForgot">ลืมรหัสผ่าน?</a><a href="#" data-act="lg-back" id="lgBack" hidden>← กลับไปหน้าเข้าสู่ระบบ</a></p>
+    </form>
+  </div>
+</section>
+<div class="loading" id="booting">กำลังโหลด…</div>
+
+<main class="wrap" id="app" hidden>
+  <div id="banner"></div>
+
+  <!-- ===== HOME ===== -->
+  <section class="view on" id="v-home">
+    <div class="kpis" id="homeKpis"></div>
+    <div class="card"><h2>แยกตามกิจการ</h2><div class="bizgrid" id="homeBiz"></div></div>
+    <div class="card">
+      <h2>รายรับ–รายจ่ายรายเดือน</h2>
+      <div class="legend"><span><i style="background:var(--in)"></i>รายรับ (รับเงินแล้ว)</span><span><i style="background:var(--out)"></i>รายจ่าย</span></div>
+      <div class="chartbox" id="chart"></div>
+    </div>
+    <div class="card" id="dueCard" hidden><h2>ค่าจ้างค้างรับ</h2><div id="dueList"></div></div>
+    <div class="card">
+      <div class="hrow" style="margin-bottom:10px"><h2 style="margin:0">รายการประจำวัน</h2><button class="btn ghost sm" data-go="list">ดูทั้งหมด</button></div>
+      <div class="daynav"><button type="button" class="navbtn" data-act="day-prev" aria-label="วันก่อนหน้า">‹</button><div class="lbl" id="dayLbl"></div><button type="button" class="navbtn" id="dayNext" data-act="day-next" aria-label="วันถัดไป">›</button></div>
+      <div class="strip" id="daySum" hidden></div>
+      <div id="dayList"></div>
+    </div>
+  </section>
+
+  <!-- ===== LIST ===== -->
+  <section class="view" id="v-list">
+    <div class="card">
+      <div class="hrow" style="margin-bottom:10px"><h2 style="margin:0">รายการทั้งหมด</h2>
+        <div class="seg small" id="listMode" role="group" aria-label="จัดกลุ่ม"><button type="button" data-mode="day">รายวัน</button><button type="button" data-mode="month">รายเดือน</button></div></div>
+      <div class="filters">
+        <select id="fBiz" aria-label="กิจการ"></select>
+        <select id="fKind" aria-label="ประเภท">
+          <option value="">รับ+จ่าย</option><option value="in">รายรับ</option><option value="out">รายจ่าย</option>
+          <option value="due">ค้างรับ</option><option value="norc">รายจ่ายที่ยังไม่มีใบเสร็จ</option>
+        </select>
+        <select id="fMonth" aria-label="เดือน"></select>
+        <input id="fText" placeholder="ค้นหา ลูกค้า/หมวด/หมายเหตุ/เลขที่หลักฐาน" aria-label="ค้นหา">
+      </div>
+      <div class="row small muted" id="listSum"></div>
+      <div id="list"></div>
+    </div>
+  </section>
+
+  <!-- ===== TAX ===== -->
+  <section class="view" id="v-tax">
+    <div class="kpis" id="taxHero"></div>
+    <div class="card">
+      <h2>1. เงินได้จากกิจการ (ดึงจากบันทึกอัตโนมัติ)</h2>
+      <p class="small muted" style="margin:0 0 10px">นับเฉพาะรายรับที่ <b>ได้รับเงินแล้ว</b> ในปีนี้ และไม่ได้ติ๊ก "ไม่ต้องคิดภาษี" · รายจ่ายซื้อทรัพย์สินไม่นับเป็นค่าใช้จ่าย (ให้บันทึกค่าเสื่อมราคาแทน)</p>
+      <div id="taxBiz"></div>
+      <label class="chk" style="margin-top:10px"><input type="checkbox" id="tFarmEx"><span>รายได้จากการทำนา (ทำนาเอง) ได้รับยกเว้นภาษี — ไม่นำมาคำนวณ<br><span class="muted small">เอาเครื่องหมายออก ถ้าต้องการนับเป็นเงินได้ 40(8) เช่น ทำนาเชิงธุรกิจหรือฟาร์มขนาดใหญ่</span></span></label>
+      <label class="chk" style="margin:4px 0 0"><input type="checkbox" id="tMarried"><span>มีคู่สมรส (ใช้เกณฑ์ต้องยื่นแบบ 120,000 บาท)</span></label>
+    </div>
+    <div class="card"><h2>2. เงินได้อื่น ๆ (ถ้ามี)</h2><div id="taxOther"></div></div>
+    <div class="card"><h2>3. ค่าลดหย่อน</h2><div id="taxAllow"></div></div>
+    <div class="card">
+      <h2>สรุปการคำนวณภาษี ปี <span id="taxYear"></span></h2>
+      <div id="taxSummary"></div>
+      <div class="actions"><button class="btn ghost" data-act="tax-copy">คัดลอกสรุปภาษี</button></div>
+    </div>
+    <div class="card"><h2>ภาษีครึ่งปี (ภ.ง.ด.94) — ประมาณการ</h2><div id="taxHalf"></div></div>
+    <div class="card"><div class="note"><b>ข้อควรรู้</b><ul>
+      <li>ยื่นภาษีประจำปี <b>ภ.ง.ด.90</b> ภายใน 31 มี.ค. ของปีถัดไป (ยื่นออนไลน์ได้ขยายเวลา 8 วัน) · ภาษีครึ่งปี <b>ภ.ง.ด.94</b> ภายใน 30 ก.ย.</li>
+      <li>ค่าเริ่มต้นของแอป: รายได้ทำนา (ชาวนาทำนาเอง) ไม่นำมาคิดภาษี ถ้าทำนาในรูปแบบธุรกิจ ให้เอาเครื่องหมายในข้อ 1 ออก แล้วแอปจะคิดเป็นเงินได้ 40(8)</li>
+      <li>รายได้รับจ้างเกี่ยวข้าว/โดรน การจัดประเภทเงินได้และสิทธิหักเหมา 60% ขึ้นกับลักษณะงาน — ควรสอบถามสรรพากรพื้นที่ และเก็บใบเสร็จค่าน้ำมัน/ค่าซ่อม/ค่าแรงไว้เสมอ</li>
+      <li>ถ้าเงินได้ที่ไม่ใช่เงินเดือนรวมตั้งแต่ 120,000 บาท ต้องเทียบภาษีขั้นต่ำ 0.5% ของเงินได้ (ยกเว้นคำนวณแล้วไม่เกิน 5,000 บาท) — แอปคำนวณให้แล้ว</li>
+      <li>ตั้งแต่ปีภาษี 2569 เงินบริจาคต้องผ่านระบบ e-Donation จึงจะลดหย่อนได้</li>
+      <li>ผลลัพธ์เป็นการประมาณ ไม่ใช่คำแนะนำทางภาษีอย่างเป็นทางการ ตรวจสอบกับกรมสรรพากร (โทร 1161) ก่อนยื่นจริง</li>
+    </ul></div></div>
+  </section>
+
+  <!-- ===== ROUNDS ===== -->
+  <section class="view" id="v-round">
+    <div class="card">
+      <div class="hrow" style="margin-bottom:8px"><h2 style="margin:0">รอบการปลูก (ทำนา)</h2><button class="btn sm" data-act="round-new">＋ เพิ่มรอบ</button></div>
+      <p class="small muted" style="margin:0">กำหนดวันเริ่ม–วันสิ้นสุดของแต่ละรอบ รายการ <b>ทำนา</b> ที่วันที่อยู่ในช่วงจะนับเข้ารอบนั้นอัตโนมัติ · ขายข้าวหลังจบรอบ ให้เลือก “รอบการปลูก” ในฟอร์มเอง</p>
+    </div>
+    <div id="roundDetail"></div>
+    <div id="roundList"></div>
+  </section>
+
+  <!-- ===== SETTINGS ===== -->
+  <section class="view" id="v-set">
+    <div class="card">
+      <h2>บัญชีและการเก็บข้อมูล</h2>
+      <p id="storeInfo" class="small" style="margin:0 0 10px"></p>
+      <button type="button" class="btn ghost sm" data-act="logout">ออกจากระบบ</button>
+    </div>
+    <div class="card">
+      <h2>🚁 งานจากแอปรับงานโดรน</h2>
+      <p class="small" style="margin:0 0 8px">งานที่ <b>ปิดงานแล้ว</b> ในแอปรับงานโดรนจะลงเป็นรายรับกิจการโดรนให้อัตโนมัติทุกครั้งที่เปิดแอปนี้ — ไม่ต้องพิมพ์ซ้ำ งานที่ลูกค้าจ่ายเงินภายหลังจะอัปเดตเป็น “รับเงินแล้ว” ให้เอง</p>
+      <div id="djInfo" class="small muted" style="margin-bottom:8px"></div>
+      <div class="btns"><button type="button" class="btn" id="djBtn" data-act="dj-sync">🔄 ดึงงานตอนนี้</button><a class="btn ghost" href="../">เปิดแอปรับงานโดรน</a></div>
+      <div class="status" id="djStatus" role="status" hidden></div>
+    </div>
+    <div class="card">
+      <h2>ส่งออก / สำรองข้อมูล</h2>
+      <p class="small muted" style="margin:0 0 10px">ไฟล์ CSV เปิดด้วย Excel / Google Sheets ได้ · ไฟล์ JSON ใช้สำรองและกู้คืนข้อมูลทั้งหมด (รูปใบเสร็จไม่รวมอยู่ในไฟล์)</p>
+      <div class="btns">
+        <button class="btn" data-act="export-csv">⬇ ส่งออก CSV (ปีที่เลือก)</button>
+        <button class="btn ghost" data-act="export-json">⬇ สำรองข้อมูลทั้งหมด (JSON)</button>
+        <label class="btn ghost filebtn">⬆ กู้คืนจากไฟล์ JSON<input type="file" id="impJson" accept=".json,application/json"></label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>วิธีใช้แบบเร็ว</h2>
+      <div class="note"><ul>
+        <li>กดปุ่ม <b>+</b> เพื่อบันทึกรายรับหรือรายจ่าย เลือกกิจการ (นา / รถเกี่ยว / โดรน) ก่อน</li>
+        <li>ใส่ปริมาณ (ไร่ / ตัน / กก.) กับราคาต่อหน่วย แอปคูณยอดเงินให้</li>
+        <li>งานที่ลูกค้ายังไม่จ่าย ให้เลือก <b>ค้างรับ</b> แล้วกด "รับเงินแล้ว" ในหน้าแรกเมื่อได้เงิน</li>
+        <li>ถ้าผู้จ้างหักภาษี ณ ที่จ่าย ให้ใส่ยอดที่ถูกหัก จะนำไปเครดิตภาษีให้อัตโนมัติ</li>
+        <li>ซื้อรถเกี่ยว/โดรน ให้บันทึกหมวด "ซื้อเครื่องจักร" (ไม่นับเป็นค่าใช้จ่ายภาษี) แล้วบันทึก "ค่าเสื่อมราคา" ปีละครั้ง (เครื่องจักรหักได้ไม่เกิน 20% ของราคาทุนต่อปี)</li>
+      </ul></div>
+    </div>
+  </section>
+</main>
+
+<button class="btn fab" data-act="record-new" aria-label="เพิ่มรายการ" hidden>+</button>
+<nav class="bottom" id="nav" hidden><div class="in">
+  <button data-go="home" class="on"><span class="e">🏠</span>ภาพรวม</button>
+  <button data-go="list"><span class="e">📒</span>รายการ</button>
+  <button data-go="tax"><span class="e">🧾</span>ภาษี</button>
+  <button data-go="round"><span class="e">🌱</span>รอบปลูก</button>
+  <button data-go="set"><span class="e">⚙️</span>ข้อมูล</button>
+</div></nav>
+
+<!-- ===== record form ===== -->
+<div class="overlay" id="recOv">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="recTitle">
+    <h2><span id="recTitle">บันทึกรายการ</span><button type="button" class="x" data-act="record-close" aria-label="ปิด">×</button></h2>
+    <div class="seg" id="segBiz"></div>
+    <div class="seg kind" id="segKind"><button type="button" data-k="in">💰 รายรับ</button><button type="button" data-k="out">💸 รายจ่าย</button></div>
+    <form id="recForm" autocomplete="off" novalidate>
+      <div class="g2">
+        <div class="f"><span class="flbl">วันที่ (วว/ดด/ปปปป)</span><div class="dwrap"><input type="text" id="rDate" inputmode="none" maxlength="10" placeholder="แตะเพื่อเลือกวันที่" aria-label="วันที่"><button type="button" class="calbtn" aria-label="เปิดปฏิทิน">📅</button><div class="dp" hidden></div></div></div>
+        <label class="f"><span>หมวด</span><select id="rCat"></select></label>
+      </div>
+      <div class="g3">
+        <label class="f"><span>ปริมาณ</span><input type="number" step="any" min="0" id="rQty" inputmode="decimal" placeholder="เช่น 25"></label>
+        <label class="f"><span>หน่วย</span><select id="rUnit"></select></label>
+        <label class="f"><span>ราคา/หน่วย</span><input type="number" step="any" min="0" id="rPrice" inputmode="decimal" placeholder="บาท"></label>
+      </div>
+      <label class="f bigamt"><span>จำนวนเงิน (บาท)</span><input type="number" step="any" min="0" id="rAmt" inputmode="decimal" placeholder="0"></label>
+      <label class="f"><span id="partyLbl">ลูกค้า / ผู้จ้าง</span><input id="rParty" placeholder="ชื่อ หรือ หมู่บ้าน"></label>
+      <div id="inOnly">
+        <div class="g2">
+          <label class="f"><span>สถานะเงิน</span><select id="rStatus"><option value="paid">รับเงินแล้ว</option><option value="due">ค้างรับ</option></select></label>
+          <label class="f"><span>ภาษีหัก ณ ที่จ่าย (บาท)</span><input type="number" step="any" min="0" id="rWht" inputmode="decimal" placeholder="0"></label>
+        </div>
+        <label class="chk"><input type="checkbox" id="rExempt"><span>ไม่ต้องนำไปคิดภาษี <span class="muted small">(เช่น เงินช่วยเหลือที่ได้รับยกเว้น เงินยืม เงินคืน)</span></span></label>
+      </div>
+      <label class="f" id="farmOnly"><span>รอบการปลูก</span><select id="rRound"></select></label>
+      <div class="f">
+        <span class="flbl" id="rcLbl">📎 รูปใบเสร็จ / ใบกำกับภาษี</span>
+        <div class="small" id="rcDoc" style="margin-bottom:6px"></div>
+        <div class="rc-grid" id="rcGrid"></div>
+        <div class="btns" id="rcBtns">
+          <label class="btn filebtn camb"><span id="camTxt">📷 ถ่ายรูปใบเสร็จ</span><input type="file" accept="image/*" capture="environment" data-pick aria-label="เปิดกล้องถ่ายรูปใบเสร็จ"></label>
+          <label class="btn ghost sm filebtn">🖼️ เลือกจากคลังภาพ / PDF<input type="file" accept="image/*,application/pdf,.pdf" multiple data-pick aria-label="เลือกรูปจากคลังภาพหรือไฟล์ PDF"></label>
+        </div>
+        <div class="hint" id="rcHint"></div>
+      </div>
+      <label class="f"><span>หมายเหตุ</span><input id="rNote" placeholder="รายละเอียดเพิ่มเติม เช่น เลขที่ใบเสร็จ"></label>
+      <div class="note" id="djNote" hidden style="margin-bottom:10px">🚁 รายการนี้ดึงมาจากแอปรับงานโดรน — ยอดเงิน จำนวนไร่ และสถานะการจ่ายเงิน ให้แก้ในแอปรับงานโดรน แล้วกดดึงงานใหม่ (ถ้าแก้ที่นี่ จะถูกทับตอนดึงครั้งถัดไป)</div>
+      <div class="actions">
+        <button type="button" class="btn danger" id="recDel" data-act="record-delete">ลบ</button>
+        <button type="submit" class="btn" id="recSave">บันทึก</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== round form ===== -->
+<div class="overlay" id="roundOv">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="roundTitle">
+    <h2><span id="roundTitle">เพิ่มรอบการปลูก</span><button type="button" class="x" data-act="round-close" aria-label="ปิด">×</button></h2>
+    <form id="roundForm" autocomplete="off" novalidate>
+      <label class="f"><span>ชื่อรอบ</span><input id="rdName" placeholder="เช่น รอบที่ 1 ปี 2569 / นาปรัง แปลงหลังบ้าน"></label>
+      <div class="g2">
+        <div class="f"><span class="flbl">วันเริ่มปลูก</span><div class="dwrap"><input type="text" id="rdStart" inputmode="none" maxlength="10" placeholder="วว/ดด/ปปปป" aria-label="วันเริ่มปลูก"><button type="button" class="calbtn" aria-label="เปิดปฏิทิน">📅</button><div class="dp" hidden></div></div></div>
+        <div class="f"><span class="flbl">วันสิ้นสุดรอบ</span><div class="dwrap"><input type="text" id="rdEnd" inputmode="none" maxlength="10" placeholder="วว/ดด/ปปปป" aria-label="วันสิ้นสุดรอบ"><button type="button" class="calbtn" aria-label="เปิดปฏิทิน">📅</button><div class="dp right" hidden></div></div></div>
+      </div>
+      <div class="small muted" id="rdDays" style="margin:-4px 0 10px"></div>
+      <div class="g2">
+        <label class="f"><span>พื้นที่ปลูก (ไร่) <span class="muted">ไม่บังคับ</span></span><input type="number" step="any" min="0" id="rdArea" inputmode="decimal" placeholder="เช่น 25"></label>
+        <label class="f"><span>พันธุ์ข้าว <span class="muted">ไม่บังคับ</span></span><input id="rdVar" placeholder="เช่น กข 85"></label>
+      </div>
+      <label class="f"><span>แปลง / หมายเหตุ</span><input id="rdNote" placeholder="เช่น แปลงหลังบ้าน"></label>
+      <div class="actions">
+        <button type="button" class="btn danger" id="rdDel" data-act="round-delete">ลบรอบ</button>
+        <button type="submit" class="btn">บันทึกรอบ</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== confirm / lightbox / cropper / toast ===== -->
+<div class="overlay" id="cfOv">
+  <div class="sheet narrow" role="alertdialog" aria-modal="true" aria-labelledby="cfTitle">
+    <h2 id="cfTitle">ยืนยัน</h2>
+    <p id="cfMsg" style="margin:0 0 14px"></p>
+    <div class="actions"><button type="button" class="btn ghost" id="cfNo">ยกเลิก</button><button type="button" class="btn danger" id="cfYes">ยืนยัน</button></div>
+  </div>
+</div>
+<div class="overlay lb" id="lbOv" role="dialog" aria-modal="true" aria-label="ดูรูปใบเสร็จ">
+  <div class="lbin"><img id="lbImg" alt="รูปใบเสร็จ">
+    <div class="btns"><button type="button" class="btn ghost" data-act="lb-prev" id="lbPrev">‹ ก่อนหน้า</button><button type="button" class="btn" data-act="lb-close">ปิด</button><button type="button" class="btn ghost" data-act="lb-next" id="lbNext">ถัดไป ›</button></div>
+  </div>
+</div>
+<div class="crop" id="cropOv" role="dialog" aria-modal="true" aria-label="ตัดกรอบรูปใบเสร็จ">
+  <div class="top"><span>✂️ ตัดกรอบใบเสร็จ</span><span id="cropCount" class="small" style="opacity:.75;font-family:inherit"></span></div>
+  <div class="small" style="opacity:.75;text-align:center">ลากมุมสีเขียวให้พอดีกับใบเสร็จ · ลากกลางกรอบเพื่อย้าย</div>
+  <div class="stage" id="cropStage"><canvas id="cropCv"></canvas>
+    <div class="cbox" id="cropBox" data-cm="move">
+      <div class="ce n" data-cm="n"></div><div class="ce s" data-cm="s"></div><div class="ce w" data-cm="w"></div><div class="ce e" data-cm="e"></div>
+      <div class="ch nw" data-cm="nw"></div><div class="ch ne" data-cm="ne"></div><div class="ch sw" data-cm="sw"></div><div class="ch se" data-cm="se"></div>
+    </div>
+  </div>
+  <div class="bar">
+    <button type="button" class="btn ghost" data-act="crop-rotate">⟳ หมุน</button>
+    <button type="button" class="btn ghost" data-act="crop-full">ทั้งภาพ</button>
+    <button type="button" class="btn ghost" data-act="crop-cancel">ยกเลิก</button>
+    <button type="button" class="btn ok" data-act="crop-ok">✓ ใช้รูปนี้</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+"use strict";
+/* =====================================================================
+   1. CONSTANTS
+   ===================================================================== */
+// Supabase project shared with the drone-jobs app (public anon key — data is protected by row level security)
+const SB_URL = "https://nvuzbwullioricaonpck.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52dXpid3VsbGlvcmljYW9ucGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzI1NTIsImV4cCI6MjEwOTU0ODU1Mn0.a_2-yqi0ovmj1DjjY8_4ujONYiP0OfxZZdUs1Cs7kZE";
+const T_RECORDS = "ledger_records", T_SETTINGS = "ledger_settings", BUCKET = "receipts";
+const LS_LISTMODE = "farm-list-mode";
+const BIZ = {
+  farm:   { name:"ทำนา",            short:"นา",       icon:"🌾" },
+  harvest:{ name:"รับจ้างเกี่ยวข้าว", short:"รถเกี่ยว", icon:"🚜" },
+  drone:  { name:"รับจ้างโดรนฉีดยา", short:"โดรน",     icon:"🚁" },
+};
+const BIZ_KEYS = Object.keys(BIZ);
+const CAT_ASSET = "ซื้อเครื่องจักร/อุปกรณ์ (ทรัพย์สิน)";
+const CAT_DEPR  = "ค่าเสื่อมราคาเครื่องจักร";
+const CATS = {
+  farm:{
+    in:[["ขายข้าวเปลือก","ตัน"],["ขายข้าวสาร/ข้าวแปรรูป","กก."],["ขายฟาง","ก้อน"],["เงินช่วยเหลือ/ชดเชยจากรัฐ","ไร่"],["รายรับอื่น ๆ",""]],
+    out:[["ค่าเมล็ดพันธุ์","กก."],["ค่าปุ๋ย","ถุง"],["ค่ายา/สารเคมี","ขวด"],["ค่าเตรียมดิน/ไถ/ตีดิน","ไร่"],["ค่าหว่าน/ปักดำ","ไร่"],["ค่าจ้างแรงงาน","วัน"],["ค่าจ้างรถเกี่ยว","ไร่"],["ค่าจ้างโดรนฉีดพ่น","ไร่"],["ค่าน้ำมันเชื้อเพลิง","ลิตร"],["ค่าสูบน้ำ/ค่าไฟ",""],["ค่าเช่าที่นา","ไร่"],["ค่าขนส่งข้าว","เที่ยว"],["ดอกเบี้ยเงินกู้ (ธ.ก.ส. ฯลฯ)",""],["ค่าซ่อมเครื่องมือ",""],[CAT_DEPR,""],[CAT_ASSET,""],["รายจ่ายอื่น ๆ",""]],
+  },
+  harvest:{
+    in:[["ค่าจ้างเกี่ยวข้าว","ไร่"],["ค่าจ้างขนข้าว","เที่ยว"],["รายรับอื่น ๆ",""]],
+    out:[["ค่าน้ำมันดีเซล","ลิตร"],["ค่าซ่อม/อะไหล่",""],["ค่าน้ำมันเครื่อง/จารบี",""],["ค่าจ้างคนขับ/ลูกมือ","วัน"],["ค่าขนย้ายรถ (หัวลาก)","เที่ยว"],["ค่านายหน้าหางาน","ไร่"],["ค่าอาหาร/ที่พักระหว่างทาง",""],["ค่างวดดอกเบี้ยรถ",""],["ค่าประกัน/ภาษีรถ",""],[CAT_DEPR,""],[CAT_ASSET,""],["รายจ่ายอื่น ๆ",""]],
+  },
+  drone:{
+    in:[["ค่าจ้างฉีดพ่น","ไร่"],["ค่าจ้างหว่านปุ๋ย/เมล็ด","ไร่"],["ขายยา/ปุ๋ยให้ลูกค้า",""],["รายรับอื่น ๆ",""]],
+    out:[["ค่าไฟชาร์จแบต/น้ำมันปั่นไฟ",""],["ค่าแบตเตอรี่",""],["ค่าซ่อม/อะไหล่ (ใบพัด หัวฉีด)",""],["ค่าจ้างผู้ช่วย","วัน"],["ค่าน้ำมันรถเดินทาง","ลิตร"],["ค่ายา/ปุ๋ยที่ซื้อมาฉีดให้ลูกค้า",""],["ค่าประกัน/ขึ้นทะเบียน/ใบอนุญาต",""],["ค่างวดดอกเบี้ย",""],["ค่าโฆษณาหางาน",""],[CAT_DEPR,""],[CAT_ASSET,""],["รายจ่ายอื่น ๆ",""]],
+  },
+};
+const UNITS = ["","ไร่","ตัน","กก.","ถุง","ลิตร","วัน","ชม.","เที่ยว","ก้อน","ขวด","ครั้ง"];
+const MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const MONTHS_FULL = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+const DAYS = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+
+/* =====================================================================
+   2. UTILITIES
+   ===================================================================== */
+const $  = (s, root=document) => root.querySelector(s);
+const $$ = (s, root=document) => Array.from(root.querySelectorAll(s));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
+const r2 = n => Math.round(n * 100) / 100;
+const fmt = (n, d=0) => (n || 0).toLocaleString("th-TH", { minimumFractionDigits:d, maximumFractionDigits:d });
+const baht = n => fmt(Math.round(n || 0));
+const baht2 = n => fmt(n, 2);
+const signed = n => (n < 0 ? "−" : "") + baht(Math.abs(n));
+const be = y => y + 543;
+const pad2 = n => String(n).padStart(2, "0");
+const isoOf = d => d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate());
+const today = () => isoOf(new Date());
+const addDays = (iso, n) => { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() + n); return isoOf(d); };
+const daysBetween = (a, b) => Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 86400000);
+const weekday = iso => DAYS[new Date(iso + "T00:00:00").getDay()];
+/** ISO (ค.ศ.) -> dd/mm/yyyy (พ.ศ.) */
+const thDate = iso => { if (!iso) return ""; const [y,m,d] = iso.split("-"); return `${d}/${m}/${+y + 543}`; };
+/** dd/mm/yyyy (พ.ศ. หรือ ค.ศ., ปี 2 หลัก = พ.ศ.) -> ISO หรือ null */
+function parseDMY(str) {
+  const m = String(str || "").trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if (!m) return null;
+  let d = +m[1], mo = +m[2], y = +m[3];
+  if (y < 100) y += 2500;
+  if (y > 2400) y -= 543;
+  const dt = new Date(y, mo - 1, d);
+  return (dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === d) ? isoOf(dt) : null;
+}
+const newId = prefix => prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const fmtStamp = iso => { if (!iso) return ""; const d = new Date(iso); return `${thDate(isoOf(d))} ${pad2(d.getHours())}:${pad2(d.getMinutes())} น.`; };
+
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.timer); toast.timer = setTimeout(() => { t.hidden = true; }, 2800);
+}
+
+/* =====================================================================
+   3. STATE & STORAGE (Supabase: ledger_records / ledger_settings, one row per item, data in jsonb)
+   ===================================================================== */
+const sb = window.supabase ? window.supabase.createClient(SB_URL, SB_KEY, { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } }) : null;
+const S = {
+  records: new Map(),
+  settings: normalizeSettings(null),
+  user: null,
+  loaded: false,
+  year: new Date().getFullYear(),
+  view: "home",
+};
+function normalizeSettings(s) {
+  const o = (s && typeof s === "object") ? JSON.parse(JSON.stringify(s)) : {};
+  if (!o.tax || typeof o.tax !== "object") o.tax = {};
+  if (!Array.isArray(o.rounds)) o.rounds = [];
+  return o;
+}
+function writeErr(e) {
+  const m = String(e && (e.message || e.error_description) || "");
+  toast(/JWT|auth|session/i.test(m) ? "หมดเวลาการเข้าสู่ระบบ — เข้าสู่ระบบใหม่"
+      : /fetch|network|Failed/i.test(m) ? "บันทึกไม่สำเร็จ — ตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง"
+      : "บันทึกไม่สำเร็จ ลองอีกครั้ง");
+}
+const recordRow = r => ({ user_id:S.user.id, id:r.id, data:r });
+async function saveRecords(list) {                         // upsert in chunks; returns true on success
+  for (let i = 0; i < list.length; i += 200) {
+    const { error } = await sb.from(T_RECORDS).upsert(list.slice(i, i + 200).map(recordRow), { onConflict:"user_id,id" });
+    if (error) { writeErr(error); return false; }
+  }
+  return true;
+}
+async function putRecord(r) { S.records.set(r.id, r); renderAll(); await saveRecords([r]); }
+async function deleteRecord(id) {
+  S.records.delete(id); renderAll();
+  const { error } = await sb.from(T_RECORDS).delete().eq("user_id", S.user.id).eq("id", id);
+  if (error) writeErr(error);
+}
+
+/* settings: debounced, one write in flight at a time */
+const settingsSync = { timer:null, busy:false, again:false, pending:false };
+function saveSettings() {
+  settingsSync.pending = true;
+  clearTimeout(settingsSync.timer);
+  settingsSync.timer = setTimeout(flushSettings, 600);
+}
+async function flushSettings() {
+  if (settingsSync.busy) { settingsSync.again = true; return; }
+  settingsSync.busy = true;
+  const { error } = await sb.from(T_SETTINGS).upsert({ user_id:S.user.id, id:"main", data:S.settings }, { onConflict:"user_id,id" });
+  if (error) writeErr(error);
+  settingsSync.busy = false;
+  if (settingsSync.again) { settingsSync.again = false; flushSettings(); }
+  else settingsSync.pending = false;
+}
+function setBanner(msg) { $("#banner").innerHTML = msg ? `<div class="banner">${esc(msg)}</div>` : ""; }
+
+async function loadAll() {
+  const recs = new Map();
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await sb.from(T_RECORDS).select("data").range(from, from + 999);
+    if (error) throw error;
+    data.forEach(row => { const r = row.data; if (r && r.id) recs.set(r.id, r); });
+    if (data.length < 1000) break;
+  }
+  const { data:st, error } = await sb.from(T_SETTINGS).select("data").eq("id", "main").maybeSingle();
+  if (error) throw error;
+  S.records = recs;
+  if (!settingsSync.pending) S.settings = normalizeSettings(st && st.data);
+  S.loaded = true;
+}
+async function refresh(showErrors) {
+  try { await loadAll(); setBanner(""); renderAll(); }
+  catch (e) { setBanner("⚠️ โหลดข้อมูลไม่สำเร็จ — ตรวจอินเทอร์เน็ตแล้วเปิดหน้านี้ใหม่"); if (showErrors) writeErr(e); }
+}
+
+/* ---------- sign-in (same accounts as the drone-jobs app) ---------- */
+let loginMode = "in";                                     // in | forgot | reset
+function showLogin(mode) {
+  loginMode = mode || "in";
+  $("#booting").hidden = true; $("#app").hidden = true; $("#nav").hidden = true; $(".fab").hidden = true; $("#login").hidden = false; $(".topact").hidden = true;
+  const reset = loginMode === "reset", forgot = loginMode === "forgot";
+  $("#lgTitle").textContent = reset ? "ตั้งรหัสผ่านใหม่" : forgot ? "ลืมรหัสผ่าน" : "เข้าสู่ระบบ";
+  $("#lgSub").textContent = reset ? "ใส่รหัสผ่านใหม่อย่างน้อย 6 ตัวอักษร" : forgot ? "ใส่อีเมล ระบบจะส่งลิงก์ตั้งรหัสผ่านใหม่ให้" : "ใช้อีเมลและรหัสผ่านเดียวกับแอปรับงานโดรน";
+  $("#lgEmailRow").hidden = reset; $("#lgPassRow").hidden = forgot;
+  $("#lgPassLbl").textContent = reset ? "รหัสผ่านใหม่" : "รหัสผ่าน";
+  $("#lgPass").autocomplete = reset ? "new-password" : "current-password";
+  $("#lgBtn").textContent = reset ? "บันทึกรหัสผ่านใหม่" : forgot ? "ส่งลิงก์" : "เข้าสู่ระบบ";
+  $("#lgForgot").hidden = loginMode !== "in"; $("#lgBack").hidden = loginMode === "in";
+  loginMsg();
+}
+function loginMsg(kind, text) { const el = $("#lgMsg"); el.hidden = !text; el.className = "status " + (kind || ""); el.textContent = text || ""; }
+async function submitLogin() {
+  const email = $("#lgEmail").value.trim(), pass = $("#lgPass").value, btn = $("#lgBtn");
+  if (loginMode !== "reset" && !/^\S+@\S+\.\S+$/.test(email)) { loginMsg("err", "ใส่อีเมลให้ถูกต้อง"); return; }
+  if (loginMode !== "forgot" && pass.length < 6) { loginMsg("err", "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"); return; }
+  btn.disabled = true; loginMsg("work", "⏳ กำลังดำเนินการ…");
+  try {
+    if (loginMode === "in") {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password:pass }); if (error) throw error;
+      await enterApp(data.user);
+    } else if (loginMode === "forgot") {
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo:location.origin + location.pathname }); if (error) throw error;
+      showLogin("in"); loginMsg("ok", "ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว — เปิดลิงก์จากอีเมลบนเครื่องนี้");
+    } else {
+      const { data, error } = await sb.auth.updateUser({ password:pass }); if (error) throw error;
+      history.replaceState(null, "", location.pathname); await enterApp(data.user); toast("ตั้งรหัสผ่านใหม่แล้ว ✓");
+    }
+  } catch (e) {
+    const m = String(e && e.message || "");
+    loginMsg("err", /Invalid login/i.test(m) ? "อีเมลหรือรหัสผ่านไม่ถูกต้อง" : /Email not confirmed/i.test(m) ? "ยังไม่ได้ยืนยันอีเมล — เปิดลิงก์ยืนยันในอีเมลก่อน"
+      : /rate limit/i.test(m) ? "ลองบ่อยเกินไป รอสักครู่แล้วลองใหม่" : /fetch|network/i.test(m) ? "เชื่อมต่อไม่ได้ — ตรวจอินเทอร์เน็ต" : "ทำรายการไม่สำเร็จ: " + m);
+  } finally { btn.disabled = false; }
+}
+async function enterApp(user) {
+  S.user = user;
+  $("#login").hidden = true; $("#booting").hidden = false;
+  try { await loadAll(); }
+  catch (e) { $("#booting").textContent = "โหลดข้อมูลไม่สำเร็จ — ตรวจอินเทอร์เน็ตแล้วเปิดหน้านี้ใหม่"; return; }
+  $("#booting").hidden = true; $("#app").hidden = false; $("#nav").hidden = false; $(".topact").hidden = false;
+  goView(S.view);
+  renderAll();
+  syncDroneJobs(true);
+}
+async function logout() {
+  if (!(await confirmBox("ออกจากระบบ?", "จะออกจากระบบทั้งแอปบัญชีและแอปรับงานโดรนบนเครื่องนี้", "ออกจากระบบ"))) return;
+  await sb.auth.signOut();
+  S.records = new Map(); S.settings = normalizeSettings(null); S.user = null; S.loaded = false;
+  showLogin("in");
+}
+
+/* =====================================================================
+   4. DOMAIN HELPERS
+   ===================================================================== */
+const isDue = r => r.kind === "in" && r.status === "due";
+const isAsset = r => r.kind === "out" && r.cat === CAT_ASSET;
+/** income counts on the day the money arrived (cash basis) */
+const effDate = r => (r.kind === "in" && r.status === "paid") ? (r.paidDate || r.date) : r.date;
+const yearOf = r => +effDate(r).slice(0, 4);
+const monthOf = r => +effDate(r).slice(5, 7);
+const allRecords = () => [...S.records.values()];
+const byNewest = (a, b) => (effDate(b) + (b.created || "")).localeCompare(effDate(a) + (a.created || ""));
+
+/** per-business totals for a year (optionally limited to some months); due income is reported separately */
+function bizStats(year, months) {
+  const o = {};
+  BIZ_KEYS.forEach(k => o[k] = { inc:0, incTax:0, exp:0, expTax:0, asset:0, wht:0, rai:0, due:0 });
+  for (const r of S.records.values()) {
+    const b = o[r.biz]; if (!b) continue;
+    if (isDue(r)) { if (+r.date.slice(0, 4) === year) b.due += num(r.amount); continue; }
+    if (yearOf(r) !== year || (months && !months.includes(monthOf(r)))) continue;
+    const a = num(r.amount);
+    if (r.kind === "in") {
+      b.inc += a; if (!r.exempt) b.incTax += a; b.wht += num(r.wht);
+      if (r.unit === "ไร่") b.rai += num(r.qty);
+    } else {
+      b.exp += a; if (isAsset(r)) b.asset += a; else b.expTax += a;
+    }
+  }
+  return o;
+}
+const sumStats = st => BIZ_KEYS.reduce((t, k) => { t.inc += st[k].inc; t.exp += st[k].exp; t.due += st[k].due; t.asset += st[k].asset; return t; }, { inc:0, exp:0, due:0, asset:0 });
+
+/* ---- planting rounds (farm only) ---- */
+const rounds = () => S.settings.rounds || [];
+const roundsNewest = () => rounds().slice().sort((a, b) => b.start.localeCompare(a.start));
+const roundOfDate = iso => roundsNewest().find(x => iso >= x.start && iso <= x.end) || null;
+function roundOf(r) {
+  if (!r || r.biz !== "farm" || r.round === "none") return null;
+  if (r.round) { const x = rounds().find(z => z.id === r.round); if (x) return x; }
+  return roundOfDate(r.date);
+}
+const roundName = r => { const x = roundOf(r); return x ? x.name : (r.season || ""); };
+const roundRange = x => `${thDate(x.start)} – ${thDate(x.end)}`;
+function roundStatus(x) {
+  const td = today();
+  if (td < x.start) return { text:"ยังไม่เริ่ม", cls:"wait" };
+  if (td > x.end) return { text:"จบรอบแล้ว", cls:"done" };
+  const d = daysBetween(x.start, td) + 1, n = daysBetween(x.start, x.end) + 1;
+  return { text:`กำลังปลูก · วันที่ ${d} จาก ${n}`, cls:"now", progress:d / n };
+}
+function roundStats(x) {
+  const o = { inc:0, exp:0, due:0, asset:0, ton:0, tonAmt:0, cats:{}, recs:[] };
+  for (const r of S.records.values()) {
+    const rr = roundOf(r); if (!rr || rr.id !== x.id) continue;
+    o.recs.push(r); const a = num(r.amount);
+    if (r.kind === "in") {
+      if (isDue(r)) { o.due += a; continue; }
+      o.inc += a;
+      if (r.unit === "ตัน") { o.ton += num(r.qty); o.tonAmt += a; }
+      else if (r.unit === "กก.") { o.ton += num(r.qty) / 1000; o.tonAmt += a; }
+    } else {
+      o.exp += a; if (isAsset(r)) o.asset += a; o.cats[r.cat] = (o.cats[r.cat] || 0) + a;
+    }
+  }
+  o.recs.sort((a, b) => a.date.localeCompare(b.date));
+  return o;
+}
+
+/* ---- evidence numbers: <พ.ศ.>/<running 4 digits> ---- */
+function nextDocNo(beYear, exceptId) {
+  const pre = beYear + "/"; let max = 0;
+  for (const r of S.records.values()) {
+    if (r.id !== exceptId && typeof r.docNo === "string" && r.docNo.startsWith(pre)) max = Math.max(max, parseInt(r.docNo.slice(pre.length), 10) || 0);
+  }
+  return pre + String(max + 1).padStart(4, "0");
+}
+
+/* =====================================================================
+   5. GENERIC UI: overlays, confirm, date picker
+   ===================================================================== */
+function syncModalClass() { document.documentElement.classList.toggle("modal", $$(".overlay.on, .crop.on").length > 0); }
+function showOverlay(id) { const el = $("#" + id); el.classList.add("on"); el.scrollTop = 0; syncModalClass(); }
+function hideOverlay(id) { $("#" + id).classList.remove("on"); syncModalClass(); }
+
+function confirmBox(title, msg, yesText = "ยืนยัน") {
+  return new Promise(resolve => {
+    $("#cfTitle").textContent = title; $("#cfMsg").textContent = msg; $("#cfYes").textContent = yesText;
+    showOverlay("cfOv");
+    const done = v => { hideOverlay("cfOv"); $("#cfYes").onclick = $("#cfNo").onclick = null; confirmBox.cancel = null; resolve(v); };
+    $("#cfYes").onclick = () => done(true);
+    $("#cfNo").onclick = () => done(false);
+    confirmBox.cancel = () => done(false);
+  });
+}
+
+/* one Thai calendar popup at a time; each .dwrap has its own popup element */
+const Picker = {
+  input:null, pop:null, after:null, y:0, m:0,
+  get open() { return !!this.pop && !this.pop.hidden; },
+  show(input, after) {
+    this.close();
+    this.input = input; this.pop = $(".dp", input.closest(".dwrap")); this.after = after;
+    const iso = parseDMY(input.value) || today();
+    this.y = +iso.slice(0, 4); this.m = +iso.slice(5, 7) - 1;
+    this.pop.hidden = false; this.draw();
+  },
+  close() { if (this.pop) this.pop.hidden = true; this.pop = null; },
+  draw() {
+    const sel = parseDMY(this.input.value), td = today();
+    const first = new Date(this.y, this.m, 1).getDay(), nd = new Date(this.y, this.m + 1, 0).getDate();
+    const cy = new Date().getFullYear(); let years = "";
+    for (let y = cy + 1; y >= cy - 10; y--) years += `<option value="${y}">${be(y)}</option>`;
+    if (this.y > cy + 1 || this.y < cy - 10) years = `<option value="${this.y}">${be(this.y)}</option>` + years;
+    let days = "<span></span>".repeat(first);
+    for (let d = 1; d <= nd; d++) {
+      const iso = `${this.y}-${pad2(this.m + 1)}-${pad2(d)}`;
+      days += `<button type="button" data-day="${iso}" class="${iso === sel ? "sel" : ""} ${iso === td ? "td" : ""} ${(first + d - 1) % 7 === 0 ? "sun" : ""}">${d}</button>`;
+    }
+    this.pop.innerHTML = `<div class="dph"><button type="button" class="navbtn" data-shift="-1" aria-label="เดือนก่อน">‹</button>
+      <select class="m" aria-label="เดือน">${MONTHS_FULL.map((n, i) => `<option value="${i}">${n}</option>`).join("")}</select>
+      <select class="y" aria-label="ปี พ.ศ.">${years}</select>
+      <button type="button" class="navbtn" data-shift="1" aria-label="เดือนถัดไป">›</button></div>
+      <div class="dow">${["อา","จ","อ","พ","พฤ","ศ","ส"].map(x => `<span>${x}</span>`).join("")}</div>
+      <div class="days">${days}</div>
+      <div class="dpf"><button type="button" data-day="${td}">วันนี้</button><button type="button" data-day="${addDays(td, -1)}">เมื่อวาน</button><button type="button" data-shut>ปิด</button></div>`;
+    $(".m", this.pop).value = this.m; $(".y", this.pop).value = this.y;
+  },
+  pick(iso) { this.input.value = thDate(iso); const f = this.after; this.close(); if (f) f(); },
+};
+function bindDateInput(input, after) {
+  const toggle = () => (Picker.open && Picker.input === input) ? Picker.close() : Picker.show(input, after);
+  input.addEventListener("click", toggle);
+  $(".calbtn", input.closest(".dwrap")).addEventListener("click", e => { e.preventDefault(); toggle(); });
+  input.addEventListener("blur", () => { const iso = parseDMY(input.value); if (iso) { input.value = thDate(iso); if (after) after(); } });
+}
+document.addEventListener("click", e => {
+  const pop = e.target.closest(".dp");
+  if (!pop || pop !== Picker.pop) return;
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.shift) { Picker.m += +b.dataset.shift; if (Picker.m < 0) { Picker.m = 11; Picker.y--; } if (Picker.m > 11) { Picker.m = 0; Picker.y++; } Picker.draw(); }
+  else if (b.dataset.day) Picker.pick(b.dataset.day);
+  else if (b.hasAttribute("data-shut")) Picker.close();
+});
+document.addEventListener("change", e => {
+  const pop = e.target.closest(".dp"); if (!pop || pop !== Picker.pop) return;
+  if (e.target.classList.contains("m")) Picker.m = +e.target.value;
+  if (e.target.classList.contains("y")) Picker.y = +e.target.value;
+  Picker.draw();
+});
+document.addEventListener("click", e => { if (Picker.open && !e.target.closest(".dwrap")) Picker.close(); }, true);
+
+/* =====================================================================
+   6. RENDERING
+   ===================================================================== */
+function renderAll() {
+  renderYearSelect();
+  renderHome();
+  renderList();
+  renderSettings();
+  if (S.view === "tax") renderTax(false);
+  if (S.view === "round") renderRounds();
+}
+function renderYearSelect() {
+  const ys = new Set([new Date().getFullYear(), S.year]);
+  for (const r of S.records.values()) ys.add(yearOf(r));
+  const html = [...ys].sort((a, b) => b - a).map(y => `<option value="${y}">ปี ${be(y)}</option>`).join("");
+  const sel = $("#yearSel");
+  if (sel.innerHTML !== html) sel.innerHTML = html;
+  sel.value = S.year;
+}
+
+function itemHtml(r) {
+  const tags = [
+    isDue(r) && `<span class="tag due">ค้างรับ</span>`,
+    r.exempt && `<span class="tag ex">ไม่คิดภาษี</span>`,
+    isAsset(r) && `<span class="tag cap">ทรัพย์สิน</span>`,
+    r.receipts && r.receipts.length && `<span class="tag rc">📎${r.receipts.length}</span>`,
+    r.docNo && r.receipts && r.receipts.length && `<span class="tag doc">${esc(r.docNo)}</span>`,
+    r.src === "drone-jobs" && `<span class="tag rc">🚁 งานโดรน</span>`,
+  ].filter(Boolean).join(" ");
+  const qty = r.qty ? ` · ${fmt(num(r.qty), num(r.qty) % 1 ? 2 : 0)} ${esc(r.unit || "")}` : "";
+  const b = BIZ[r.biz] || { short:"", icon:"•" };
+  return `<div class="item" data-rec="${esc(r.id)}"><span class="ic ${esc(r.biz)}">${b.icon}</span>
+    <div class="mid"><div class="t">${esc(r.cat)} ${tags}</div>
+    <div class="d">${thDate(effDate(r))} · ${b.short}${qty}${r.party ? " · " + esc(r.party) : ""}${r.note ? " · " + esc(r.note) : ""}</div></div>
+    <div class="amt ${r.kind}">${r.kind === "in" ? "+" : "−"}${baht2(num(r.amount))}</div></div>`;
+}
+function bizCardHtml(k, b, extra = "") {
+  const p = b.inc - b.exp;
+  return `<div class="biz"><div class="hd"><span class="ic ${k}">${BIZ[k].icon}</span>${BIZ[k].name}</div>
+    <div class="row"><span>รายรับ</span><b>${baht(b.inc)}</b></div>
+    <div class="row"><span>รายจ่าย</span><b>${baht(b.exp)}</b></div>
+    <div class="row tot"><span>กำไร</span><b class="${p >= 0 ? "pos" : "neg"}">${signed(p)}</b></div>
+    ${b.due ? `<div class="row small"><span class="tag due">ค้างรับ</span><span>${baht(b.due)}</span></div>` : ""}${extra}</div>`;
+}
+const kpiHtml = (label, value, sub, cls = "") => `<div class="kpi"><div class="l">${label}</div><div class="v ${cls}">${value}</div><div class="s">${sub}</div></div>`;
+function catBarsHtml(cats, total) {
+  const rows = Object.entries(cats).sort((a, b) => b[1] - a[1]); if (!rows.length) return "";
+  const max = rows[0][1];
+  return rows.map(([c, v]) => `<div class="catrow"><div class="cl"><span>${esc(c)}</span><b>${baht(v)} <span class="muted small">(${Math.round(v / total * 100)}%)</span></b></div><div class="cbar"><i style="width:${Math.max(2, v / max * 100)}%"></i></div></div>`).join("");
+}
+
+/* ---------- home ---------- */
+let homeDay = null;
+function renderHome() {
+  const st = bizStats(S.year), t = sumStats(st), p = t.inc - t.exp;
+  $("#homeKpis").innerHTML =
+    kpiHtml(`รายรับ ปี ${be(S.year)}`, baht(t.inc), t.due ? `+ ค้างรับ ${baht(t.due)} บาท` : "บาท") +
+    kpiHtml("รายจ่าย", baht(t.exp), t.asset ? `รวมซื้อเครื่องจักร ${baht(t.asset)} บาท` : "บาท") +
+    kpiHtml("กำไร (ขาดทุน) สุทธิ", signed(p), t.asset ? `ถ้าไม่นับซื้อเครื่องจักร: ${signed(p + t.asset)} บาท` : `บาท · ${t.inc ? Math.round(p / t.inc * 100) + "% ของรายรับ" : "—"}`, p >= 0 ? "pos" : "neg");
+  $("#homeBiz").innerHTML = BIZ_KEYS.map(k => {
+    const b = st[k];
+    const extra = b.rai ? `<div class="row small muted"><span>ทำไป ${fmt(b.rai, b.rai % 1 ? 1 : 0)} ไร่</span><span>เฉลี่ยรับ ${baht(b.inc / b.rai)} ฿/ไร่</span></div>` : "";
+    return bizCardHtml(k, b, extra);
+  }).join("");
+  if (S.view === "home") renderChart();
+  const dues = allRecords().filter(isDue).sort((a, b) => a.date.localeCompare(b.date));
+  $("#dueCard").hidden = !dues.length;
+  $("#dueList").innerHTML = dues.map(r => `<div class="item" data-rec="${esc(r.id)}"><span class="ic ${esc(r.biz)}">${BIZ[r.biz].icon}</span>
+    <div class="mid"><div class="t">${esc(r.party || r.cat)}</div><div class="d">${thDate(r.date)} · ${esc(r.cat)}${r.qty ? ` · ${fmt(num(r.qty), 1)} ${esc(r.unit)}` : ""}</div></div>
+    <div class="amt in">${baht(r.amount)}</div><button type="button" class="btn sm" data-paid="${esc(r.id)}">รับเงินแล้ว</button></div>`).join("");
+  renderDay();
+}
+function renderDay() {
+  const td = today(); if (!homeDay) homeDay = td;
+  const d = homeDay, rel = d === td ? "วันนี้" : d === addDays(td, -1) ? "เมื่อวาน" : "";
+  $("#dayLbl").innerHTML = `${rel ? `<b>${rel}</b> · ` : ""}${weekday(d)} ${thDate(d)}${d !== td ? ` <button type="button" class="btn ghost sm" data-act="day-today" style="margin-left:6px;padding:2px 10px">วันนี้</button>` : ""}`;
+  $("#dayNext").disabled = d >= td;
+  const recs = allRecords().filter(r => effDate(r) === d || (isDue(r) && r.date === d)).sort(byNewest);
+  let i = 0, o = 0;
+  recs.forEach(r => { if (isDue(r)) return; if (r.kind === "in") i += num(r.amount); else o += num(r.amount); });
+  $("#daySum").hidden = !recs.length;
+  $("#daySum").innerHTML = `<span>${recs.length} รายการ</span><span><span class="amt in">รับ ${baht(i)}</span> · <span class="amt out">จ่าย ${baht(o)}</span> · คงเหลือ <b>${signed(i - o)}</b></span>`;
+  $("#dayList").innerHTML = recs.length ? recs.map(itemHtml).join("")
+    : `<div class="empty">ไม่มีรายการ${rel || "ในวันนี้"}<br>${d === td ? "กดปุ่ม <b>+</b> ด้านล่างเพื่อบันทึก" : "กด ‹ › เพื่อดูวันอื่น"}</div>`;
+}
+
+/* ---------- monthly chart ---------- */
+function renderChart() {
+  const box = $("#chart");
+  const inc = Array(12).fill(0), exp = Array(12).fill(0);
+  for (const r of S.records.values()) {
+    if (isDue(r) || yearOf(r) !== S.year) continue;
+    (r.kind === "in" ? inc : exp)[monthOf(r) - 1] += num(r.amount);
+  }
+  const max = Math.max(1, ...inc, ...exp);
+  const p10 = Math.pow(10, Math.floor(Math.log10(max / 4))), f = (max / 4) / p10;
+  const step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p10, top = Math.ceil(max / step) * step;
+  const W = Math.max(320, box.clientWidth || 720), H = 230, L = 44, R = 8, T = 12, B = 28;
+  const pw = W - L - R, ph = H - T - B, gw = pw / 12, bw = Math.min(18, (gw - 10) / 2);
+  const y = v => T + ph - (v / top) * ph;
+  const short = v => v >= 1e6 ? fmt(v / 1e6, 1) + " ล." : v >= 1e3 ? fmt(v / 1e3, 1) + "k" : String(v);
+  const bar = (x, v, c) => {
+    if (v <= 0) return "";
+    const h = Math.max(1.5, (v / top) * ph), yy = T + ph - h, rr = Math.min(4, h, bw / 2);
+    return `<path d="M${x},${T + ph} V${yy + rr} Q${x},${yy} ${x + rr},${yy} H${x + bw - rr} Q${x + bw},${yy} ${x + bw},${yy + rr} V${T + ph} Z" fill="${c}"/>`;
+  };
+  let grid = "", bars = "", hits = "";
+  for (let v = 0; v <= top + 1e-9; v += step)
+    grid += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 0 ? "var(--axis)" : "var(--grid)"}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="#898781">${short(v)}</text>`;
+  for (let i = 0; i < 12; i++) {
+    const cx = L + gw * i + gw / 2;
+    bars += bar(cx - bw - 1, inc[i], "var(--in)") + bar(cx + 1, exp[i], "var(--out)");
+    grid += `<text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#898781">${MONTHS[i]}</text>`;
+    hits += `<rect x="${L + gw * i}" y="${T}" width="${gw}" height="${ph}" fill="transparent" data-m="${i}"/>`;
+  }
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="กราฟรายรับรายจ่ายรายเดือน">${grid}${bars}<g class="hl"></g>${hits}</svg><div class="tip" hidden></div>`;
+  const svg = $("svg", box), tip = $(".tip", box), hl = $(".hl", box);
+  const show = i => {
+    hl.innerHTML = `<rect x="${L + gw * i}" y="${T}" width="${gw}" height="${ph}" fill="rgba(0,0,0,.04)"/>`;
+    const sx = svg.getBoundingClientRect().width / W;
+    tip.innerHTML = `<b>${MONTHS[i]} ${be(S.year)}</b><br>รายรับ ${baht(inc[i])} ฿<br>รายจ่าย ${baht(exp[i])} ฿<br>คงเหลือ ${signed(inc[i] - exp[i])} ฿`;
+    tip.style.left = Math.min(Math.max((L + gw * i + gw / 2) * sx, 70), W * sx - 70) + "px"; tip.style.top = "4px"; tip.hidden = false;
+  };
+  $$("rect[data-m]", svg).forEach(rc => {
+    rc.addEventListener("mouseenter", () => show(+rc.dataset.m));
+    rc.addEventListener("click", () => show(+rc.dataset.m));
+    rc.addEventListener("mouseleave", () => { tip.hidden = true; hl.innerHTML = ""; });
+  });
+}
+
+/* ---------- list ---------- */
+let listMode = "day";
+try { listMode = localStorage.getItem(LS_LISTMODE) === "month" ? "month" : "day"; } catch (e) {}
+function renderList() {
+  const fb = $("#fBiz"), fm = $("#fMonth");
+  if (!fb.options.length) { fb.innerHTML = `<option value="">ทุกกิจการ</option>` + BIZ_KEYS.map(k => `<option value="${k}">${BIZ[k].name}</option>`).join(""); }
+  if (!fm.options.length) { fm.innerHTML = `<option value="">ทั้งปี</option>` + MONTHS.map((m, i) => `<option value="${i + 1}">${m}</option>`).join(""); }
+  $$("#listMode button").forEach(b => b.classList.toggle("on", b.dataset.mode === listMode));
+  const biz = fb.value, kind = $("#fKind").value, month = +fm.value, q = $("#fText").value.trim().toLowerCase();
+  const list = allRecords().filter(r => {
+    if (biz && r.biz !== biz) return false;
+    if (kind === "due") return isDue(r);
+    if (yearOf(r) !== S.year || (month && monthOf(r) !== month)) return false;
+    if (kind === "norc" && (r.kind !== "out" || (r.receipts && r.receipts.length))) return false;
+    if ((kind === "in" || kind === "out") && r.kind !== kind) return false;
+    if (q && !`${r.cat} ${r.party || ""} ${r.note || ""} ${r.docNo || ""}`.toLowerCase().includes(q)) return false;
+    return true;
+  }).sort(byNewest);
+
+  let si = 0, so = 0; list.forEach(r => { if (r.kind === "in") si += num(r.amount); else so += num(r.amount); });
+  $("#listSum").innerHTML = `<span>${list.length} รายการ</span><span>รับ ${baht(si)} · จ่าย ${baht(so)} · คงเหลือ ${signed(si - so)}</span>`;
+  if (!list.length) { $("#list").innerHTML = `<div class="empty">ไม่มีรายการตามที่เลือก</div>`; return; }
+
+  const monthNet = {}, dayTot = {};
+  list.forEach(r => {
+    const d = effDate(r), a = num(r.amount);
+    monthNet[d.slice(0, 7)] = (monthNet[d.slice(0, 7)] || 0) + (r.kind === "in" ? a : -a);
+    const t = dayTot[d] || (dayTot[d] = { i:0, o:0, n:0 }); t.n++; if (r.kind === "in") t.i += a; else t.o += a;
+  });
+  const byDay = listMode === "day";
+  let html = "", curM = "", curD = "";
+  for (const r of list) {
+    const d = effDate(r), m = d.slice(0, 7);
+    if (m !== curM) {
+      curM = m; curD = "";
+      html += `<div class="grpm ${byDay ? "" : "plain"}"><span>${MONTHS_FULL[+m.slice(5) - 1]} ${be(+m.slice(0, 4))}</span><span>${monthNet[m] >= 0 ? "+" : ""}${signed(monthNet[m])}</span></div>`;
+    }
+    if (byDay && d !== curD) {
+      curD = d; const t = dayTot[d];
+      html += `<div class="strip"><span><b>${weekday(d)}</b> ${thDate(d)} <span class="muted">· ${t.n} รายการ</span></span><span>${t.i ? `<span class="amt in">+${baht(t.i)}</span>` : ""} ${t.o ? `<span class="amt out">−${baht(t.o)}</span>` : ""}</span></div>`;
+    }
+    html += itemHtml(r);
+  }
+  $("#list").innerHTML = html;
+}
+
+/* =====================================================================
+   7. RECORD FORM (+ receipts)
+   ===================================================================== */
+const F = { id:null, biz:"farm", kind:"in", round:"", rc:[], removed:[], fresh:[], saving:false };
+// rc item: {id?, t:"img"|"pdf", blob?, preview?, pending?, busy?}
+
+function openRecord(rec) {
+  Object.assign(F, { id:rec ? rec.id : null, biz:rec ? rec.biz : (F.biz || "farm"), kind:rec ? rec.kind : "in",
+    round:rec && rec.round || "", removed:[], fresh:[], saving:false,
+    rc:rec && Array.isArray(rec.receipts) ? rec.receipts.map(x => Object.assign({}, x)) : [] });
+  $("#recTitle").textContent = rec ? "แก้ไขรายการ" : "บันทึกรายการใหม่";
+  $("#recDel").hidden = !rec;
+  $("#rDate").value = thDate(rec ? rec.date : today());
+  $("#rQty").value = rec && rec.qty != null ? rec.qty : "";
+  $("#rPrice").value = rec && rec.price != null ? rec.price : "";
+  $("#rAmt").value = rec ? rec.amount : "";
+  $("#rParty").value = rec && rec.party || "";
+  $("#rStatus").value = rec && rec.status || "paid";
+  $("#rWht").value = rec && rec.wht || "";
+  $("#rExempt").checked = !!(rec && rec.exempt);
+  $("#rNote").value = rec && rec.note || "";
+  $("#recSave").disabled = false; $("#recSave").textContent = "บันทึก";
+  $("#djNote").hidden = !(rec && rec.src === "drone-jobs");
+  $$("#recForm .bad").forEach(clearFieldError);
+  drawRecordParts(rec ? rec.cat : null, rec ? rec.unit : null);
+  showOverlay("recOv");
+}
+function closeRecord() {
+  if (!$("#recOv").classList.contains("on")) return;
+  if (F.saving) { toast("กำลังบันทึกรูป รอสักครู่"); return; }
+  Picker.close();
+  F.rc.forEach(x => { if (x.preview) URL.revokeObjectURL(x.preview); });
+  F.fresh.forEach(deleteAsset);                            // uploaded during a save that never completed
+  F.rc = []; F.fresh = [];
+  hideOverlay("recOv");
+}
+function drawRecordParts(cat, unit) {
+  $("#segBiz").innerHTML = BIZ_KEYS.map(k => `<button type="button" data-b="${k}" class="${F.biz === k ? "on" : ""}">${BIZ[k].icon} ${BIZ[k].short}</button>`).join("");
+  $$("#segKind button").forEach(b => b.classList.toggle("on", b.dataset.k === F.kind));
+  const list = CATS[F.biz][F.kind], sel = $("#rCat");
+  sel.innerHTML = list.map(([c]) => `<option>${esc(c)}</option>`).join("");
+  if (cat && !list.some(([c]) => c === cat)) sel.add(new Option(cat, cat));
+  if (cat) sel.value = cat;
+  fillUnits(unit);
+  $("#inOnly").hidden = F.kind !== "in";
+  $("#farmOnly").hidden = F.biz !== "farm";
+  $("#partyLbl").textContent = F.kind === "in" ? "ลูกค้า / ผู้ซื้อ / ผู้จ้าง" : "ร้านค้า / ผู้รับเงิน";
+  $("#rcLbl").textContent = F.kind === "in" ? "📎 รูปหลักฐาน (เช่น ใบรับซื้อจากโรงสี, 50 ทวิ)" : "📎 รูปใบเสร็จ / ใบกำกับภาษี";
+  fillRoundSelect();
+  renderReceipts();
+}
+function fillUnits(unit) {
+  const def = (CATS[F.biz][F.kind].find(([c]) => c === $("#rCat").value) || [])[1] || "";
+  const u = unit != null ? unit : def;
+  $("#rUnit").innerHTML = UNITS.map(x => `<option value="${x}">${x || "—"}</option>`).join("");
+  $("#rUnit").value = UNITS.includes(u) ? u : "";
+}
+function fillRoundSelect() {
+  const iso = parseDMY($("#rDate").value) || today(), auto = roundOfDate(iso), rs = roundsNewest();
+  $("#rRound").innerHTML = `<option value="">อัตโนมัติตามวันที่ → ${auto ? esc(auto.name) : "ไม่อยู่ในรอบใด"}</option>`
+    + rs.map(x => `<option value="${esc(x.id)}">${esc(x.name)} (${roundRange(x)})</option>`).join("")
+    + `<option value="none">ไม่นับเข้ารอบใด</option>`;
+  $("#rRound").value = (F.round === "none" || rs.some(x => x.id === F.round)) ? F.round : "";
+}
+function onRecordDateChanged() { clearFieldError($("#rDate")); fillRoundSelect(); renderReceipts(); }
+function autoAmount() { const q = num($("#rQty").value), p = num($("#rPrice").value); if (q && p) { $("#rAmt").value = r2(q * p); clearFieldError($("#rAmt")); } }
+
+function fieldError(el, msg) {
+  el.classList.add("bad");
+  const box = el.closest(".f") || el.parentElement;
+  let m = $(".ferr", box); if (!m) { m = document.createElement("div"); m.className = "ferr"; box.appendChild(m); }
+  m.textContent = "⚠️ " + msg; toast(msg);
+  try { el.scrollIntoView({ block:"center", behavior:"smooth" }); } catch (e) {}
+}
+function clearFieldError(el) { el.classList.remove("bad"); const m = $(".ferr", el.closest(".f") || el.parentElement); if (m) m.remove(); }
+
+async function submitRecord() {
+  if (F.saving) return;
+  const iso = parseDMY($("#rDate").value);
+  if (!iso) { fieldError($("#rDate"), "วันที่ไม่ถูกต้อง — ใส่แบบ วว/ดด/ปปปป เช่น 01/11/2569 หรือแตะ 📅"); return; }
+  const amount = num($("#rAmt").value);
+  if (amount <= 0) { fieldError($("#rAmt"), "กรุณาใส่จำนวนเงิน (ต้องมากกว่า 0)"); return; }
+  if (F.rc.some(x => x.busy)) { toast("รอให้รูปบันทึกเสร็จก่อน"); return; }
+
+  const old = F.id ? S.records.get(F.id) : null;
+  const r = {
+    id: F.id || newId("r_"), biz:F.biz, kind:F.kind, date:iso, cat:$("#rCat").value,
+    qty: $("#rQty").value === "" ? null : num($("#rQty").value), unit:$("#rUnit").value,
+    price: $("#rPrice").value === "" ? null : num($("#rPrice").value),
+    amount:r2(amount), party:$("#rParty").value.trim(), note:$("#rNote").value.trim(),
+    created: old && old.created || new Date().toISOString(),
+  };
+  if (F.kind === "in") {
+    r.status = $("#rStatus").value; r.wht = r2(num($("#rWht").value)); r.exempt = $("#rExempt").checked;
+    if (r.status === "paid" && old && old.kind === "in") {
+      if (old.status === "paid" && old.paidDate) r.paidDate = old.paidDate;
+      if (old.status === "due") r.paidDate = today();
+    }
+  }
+  if (F.biz === "farm") {
+    if (old && old.season) r.season = old.season;           // legacy field, kept for old records
+    if ($("#rRound").value) r.round = $("#rRound").value;
+  }
+  if (old && old.docNo) r.docNo = old.docNo;
+  if (old && old.src) Object.assign(r, { src:old.src, srcId:old.srcId, srcUpdated:old.srcUpdated || null });
+
+  if (F.rc.length) {
+    if (!r.docNo) r.docNo = nextDocNo(be(+iso.slice(0, 4)), r.id);
+    const ok = await uploadPendingReceipts(r);
+    if (!ok) return;
+    r.receipts = F.rc.map(x => x.path ? { path:x.path, t:x.t } : { id:x.id, t:x.t });
+  }
+  const removed = F.removed.slice();
+  F.rc = []; F.fresh = []; hideOverlay("recOv"); Picker.close();
+  putRecord(r);
+  removed.forEach(deleteAsset);
+  toast(r.receipts ? `บันทึกแล้ว ✓ เลขที่หลักฐาน ${r.docNo}` : "บันทึกแล้ว ✓");
+}
+async function deleteCurrentRecord() {
+  const old = F.id && S.records.get(F.id); if (!old) return;
+  const n = (old.receipts || []).length, fromDj = old.src === "drone-jobs";
+  const msg = (n ? `รูปใบเสร็จ ${n} รูปของรายการนี้จะถูกลบด้วย ลบแล้วกู้คืนไม่ได้` : "ลบแล้วกู้คืนไม่ได้") + (fromDj ? " · งานโดรนนี้จะไม่ถูกดึงเข้ามาอีก" : "");
+  if (!(await confirmBox("ลบรายการนี้?", msg, "ลบ"))) return;
+  if (fromDj) { const dj = djCfg(); if (!dj.skip.includes(old.srcId)) dj.skip.push(old.srcId); saveSettings(); }
+  const assets = (old.receipts || []).map(x => x.path).filter(Boolean).concat(F.fresh);
+  F.rc = []; F.fresh = []; hideOverlay("recOv");
+  deleteRecord(old.id); assets.forEach(deleteAsset);
+  toast("ลบแล้ว");
+}
+function markPaid(id) {
+  const r = S.records.get(id); if (!r) return;
+  putRecord(Object.assign({}, r, { status:"paid", paidDate:today() }));
+  toast("ย้ายเป็นรับเงินแล้ว ✓ (นับเป็นรายได้วันนี้)");
+}
+
+/* ---------- receipts ---------- */
+/* receipt entry: {path, t} in Supabase Storage; {id, t} = photo kept in the old Claude app */
+const urlCache = new Map();                                  // path -> {url, until}
+const isLegacy = x => !x.path && x.id;
+async function signPaths(paths) {
+  const need = [...new Set(paths)].filter(p => p && !(urlCache.has(p) && urlCache.get(p).until > Date.now()));
+  if (!need.length) return;
+  const { data, error } = await sb.storage.from(BUCKET).createSignedUrls(need, 3600);
+  if (error || !data) return;
+  data.forEach(d => { if (d.signedUrl) urlCache.set(d.path, { url:d.signedUrl, until:Date.now() + 50 * 60000 }); });
+}
+const signedUrl = p => (urlCache.get(p) || {}).url || "";
+async function deleteAsset(path) { if (!path) return; await sb.storage.from(BUCKET).remove([path]); }
+
+function renderReceipts() {
+  const list = F.rc;
+  const unsigned = list.filter(x => x.path && !x.preview && !signedUrl(x.path)).map(x => x.path);
+  if (unsigned.length) signPaths(unsigned).then(() => { if ($("#recOv").classList.contains("on")) renderReceipts(); });
+  $("#rcGrid").innerHTML = list.map((x, i) => `<div class="rc-th" data-rc="${i}"><span class="rc-no">${i + 1}</span>${
+    x.busy ? `<div class="pdf">…</div><div class="busy">กำลังบันทึก</div>`
+    : isLegacy(x) ? `<div class="old">รูปเดิม<br>อยู่ในแอป<br>Claude</div>`
+    : x.t === "pdf" ? `<div class="pdf">📄<br>PDF</div>`
+    : `<img src="${x.preview || signedUrl(x.path)}" alt="ใบเสร็จ ${i + 1}">`}${
+    x.pending && !x.busy ? `<span class="rc-new">ใหม่</span>` : ""}${
+    x.busy ? "" : `<button type="button" class="rc-x" data-rcdel="${i}" aria-label="ลบรูปนี้">×</button>`}</div>`).join("");
+  const old = F.id && S.records.get(F.id);
+  const iso = parseDMY($("#rDate").value) || today();
+  $("#rcDoc").innerHTML = !list.length ? "" : old && old.docNo ? `เลขที่หลักฐาน <b>${esc(old.docNo)}</b>`
+    : `เลขที่หลักฐาน <b>${esc(nextDocNo(be(+iso.slice(0, 4)), F.id))}</b> <span class="muted">(ออกเลขเมื่อกดบันทึก)</span>`;
+  $("#camTxt").textContent = list.length ? "📷 ถ่ายใบถัดไป" : "📷 ถ่ายรูปใบเสร็จ";
+  $("#rcHint").textContent = list.length ? "แตะรูปเพื่อดูขนาดใหญ่ · รูปใหม่จะประทับลายน้ำเลขที่หลักฐานตอนกดบันทึก"
+    : "กด “ถ่ายรูปใบเสร็จ” เพื่อเปิดกล้อง ถ่ายได้หลายใบ หรือกด “เลือกจากคลังภาพ”";
+}
+const isPdfFile = f => f.type === "application/pdf" || /\.pdf$/i.test(f.name || "");
+async function addReceiptFiles(files) {
+  const imgCount = files.filter(f => !isPdfFile(f)).length; let k = 0;
+  for (const file of files) {
+    if (isPdfFile(file)) {
+      if (file.size > 20 * 1024 * 1024) { toast("ไฟล์ใหญ่เกินไป (สูงสุด 20 MB)"); continue; }
+      F.rc.push({ t:"pdf", blob:file, pending:true }); renderReceipts(); continue;
+    }
+    k++;
+    let blob;
+    try { blob = await Cropper.run(file, imgCount > 1 ? `รูปที่ ${k} จาก ${imgCount}` : ""); }
+    catch (e) { toast("เปิดรูปนี้ไม่ได้ — ใช้รูป JPG/PNG"); continue; }
+    if (!blob) continue;                                   // cancelled
+    F.rc.push({ t:"img", blob, preview:URL.createObjectURL(blob), pending:true }); renderReceipts();
+  }
+}
+/** watermark + upload every pending receipt; returns false (form stays open) on failure */
+async function uploadPendingReceipts(r) {
+  const pending = F.rc.filter(x => x.pending); if (!pending.length) return true;
+  const btn = $("#recSave"); F.saving = true; btn.disabled = true;
+  const imgs = F.rc.filter(x => x.t === "img");
+  const line2 = `${thDate(r.date)} · ${BIZ[r.biz].short} · ${r.kind === "in" ? "รายรับ" : "รายจ่าย"}: ${r.cat} · ${baht2(r.amount)} บาท${r.party ? " · " + r.party : ""}`;
+  try {
+    let n = 0;
+    for (const it of pending) {
+      btn.textContent = `กำลังบันทึกรูป ${++n}/${pending.length}…`; it.busy = true; renderReceipts();
+      const blob = it.t === "img" ? await watermark(it.blob, { docNo:r.docNo, page:imgs.indexOf(it) + 1, total:imgs.length, line2 }) : it.blob;
+      const path = `${S.user.id}/${r.id}-${newId("")}.${it.t === "pdf" ? "pdf" : "jpg"}`;
+      const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType:it.t === "pdf" ? "application/pdf" : "image/jpeg", upsert:false });
+      if (error) throw error;
+      Object.assign(it, { path, pending:false, busy:false, blob:null });   // keep the local preview for this session
+      F.fresh.push(path);
+    }
+    return true;
+  } catch (e) {
+    F.rc.forEach(x => { x.busy = false; }); renderReceipts();
+    const m = String(e && e.message || "");
+    toast(/size|large/i.test(m) ? "ไฟล์ใหญ่เกินไป (สูงสุด 20 MB)" : /quota|limit/i.test(m) ? "พื้นที่เก็บรูปเต็ม — ลบรูปที่ไม่ใช้แล้วก่อน"
+      : "บันทึกรูปไม่สำเร็จ — กดบันทึกอีกครั้ง (รูปที่บันทึกแล้วไม่ซ้ำ)");
+    return false;
+  } finally {
+    F.saving = false; btn.disabled = false; btn.textContent = "บันทึก";
+  }
+}
+function removeReceipt(i) {
+  const it = F.rc[i]; if (!it) return;
+  F.rc.splice(i, 1);
+  if (it.preview) URL.revokeObjectURL(it.preview);
+  if (!it.pending && it.path) F.removed.push(it.path);    // deleted from storage only when the record is saved
+  renderReceipts();
+}
+function viewReceipt(i) {
+  const it = F.rc[i]; if (!it || it.busy) return;
+  if (isLegacy(it)) { toast("รูปนี้อยู่ในแอปบัญชีเดิมบน Claude — ถ้าต้องการ ให้ถ่ายแนบใหม่"); return; }
+  if (it.t === "pdf") {
+    if (it.pending) { toast("ไฟล์ PDF จะเปิดดูได้หลังบันทึก"); return; }
+    const w = window.open("", "_blank");
+    signPaths([it.path]).then(() => { if (w) w.location = signedUrl(it.path); });
+    return;
+  }
+  const imgs = F.rc.filter(x => x.t === "img" && !x.busy && !isLegacy(x));
+  Lightbox.open(imgs.map(x => x.preview || signedUrl(x.path)), imgs.indexOf(it));
+}
+/* ---------- watermark ---------- */
+async function decodeImage(blob) {
+  try { return await createImageBitmap(blob); }
+  catch (e) {
+    return await new Promise((res, rej) => {
+      const u = URL.createObjectURL(blob), im = new Image();
+      im.onload = () => { URL.revokeObjectURL(u); res(im); };
+      im.onerror = () => { URL.revokeObjectURL(u); rej(new Error("decode")); };
+      im.src = u;
+    });
+  }
+}
+const toJpeg = (canvas, q) => new Promise(res => canvas.toBlob(res, "image/jpeg", q));
+async function watermark(blob, info) {
+  try { await document.fonts.load('600 32px "IBM Plex Sans Thai"'); } catch (e) {}
+  const img = await decodeImage(blob);
+  const W = img.width, H = img.height, base = Math.max(W, H);
+  const fs2 = Math.max(16, Math.round(W * 0.032)), band = Math.round(fs2 * 3.4);
+  const c = document.createElement("canvas"); c.width = W; c.height = H + band;
+  const x = c.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0, 0, W, c.height); x.drawImage(img, 0, 0, W, H);
+  if (img.close) img.close();
+  // diagonal repeated mark over the photo
+  const fs = Math.max(18, Math.round(base * 0.038)), txt = `${info.docNo} · สำเนาเพื่อบัญชี`;
+  x.save(); x.beginPath(); x.rect(0, 0, W, H); x.clip();
+  x.translate(W / 2, H / 2); x.rotate(-Math.PI / 6);
+  x.font = `600 ${fs}px "IBM Plex Sans Thai", sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "rgba(200,40,30,0.16)";
+  const tw = x.measureText(txt).width + fs * 2.2, th = fs * 4.2;
+  for (let yy = -base, row = 0; yy <= base; yy += th, row++)
+    for (let xx = -base - tw; xx <= base + tw; xx += tw) x.fillText(txt, xx + (row % 2) * tw / 2, yy);
+  x.restore();
+  // information band below the photo (never covers the receipt)
+  x.fillStyle = "#1f4d24"; x.fillRect(0, H, W, band);
+  x.fillStyle = "#fff"; x.textAlign = "left"; x.textBaseline = "alphabetic";
+  x.font = `700 ${Math.round(fs2 * 1.1)}px "IBM Plex Sans Thai", sans-serif`;
+  x.fillText(`เลขที่หลักฐาน ${info.docNo}${info.total > 1 ? `  (รูป ${info.page}/${info.total})` : ""}`, fs2 * 0.7, H + fs2 * 1.45, W - fs2 * 1.4);
+  x.font = `400 ${fs2}px "IBM Plex Sans Thai", sans-serif`;
+  x.fillText(info.line2, fs2 * 0.7, H + fs2 * 2.85, W - fs2 * 1.4);
+  return toJpeg(c, 0.85);
+}
+
+/* ---------- cropper ---------- */
+const Cropper = {
+  src:null, box:{ x:0, y:0, w:0, h:0 }, dw:0, dh:0, resolve:null, drag:null,
+  async run(file, label) {
+    const img = await decodeImage(file);
+    const sc = Math.min(1, 2400 / Math.max(img.width, img.height));      // keep memory low for big camera photos
+    const c = document.createElement("canvas"); c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+    if (img.close) img.close();
+    this.src = c; $("#cropCount").textContent = label || "";
+    $("#cropOv").classList.add("on"); syncModalClass();
+    this.layout(); this.reset(false);
+    return new Promise(res => { this.resolve = res; });
+  },
+  layout() {
+    const maxW = Math.min(window.innerWidth - 24, 680), maxH = Math.max(200, window.innerHeight - 230);
+    const sc = Math.min(maxW / this.src.width, maxH / this.src.height);
+    this.dw = Math.round(this.src.width * sc); this.dh = Math.round(this.src.height * sc);
+    const st = $("#cropStage"), cv = $("#cropCv"), dpr = Math.min(2, window.devicePixelRatio || 1);
+    st.style.width = this.dw + "px"; st.style.height = this.dh + "px";
+    cv.width = this.dw * dpr; cv.height = this.dh * dpr; cv.style.width = this.dw + "px"; cv.style.height = this.dh + "px";
+    cv.getContext("2d").drawImage(this.src, 0, 0, cv.width, cv.height);
+  },
+  reset(full) { const m = full ? 0 : 0.06; this.box = { x:this.dw * m, y:this.dh * m, w:this.dw * (1 - 2 * m), h:this.dh * (1 - 2 * m) }; this.draw(); },
+  draw() { const b = this.box, el = $("#cropBox"); el.style.left = b.x + "px"; el.style.top = b.y + "px"; el.style.width = b.w + "px"; el.style.height = b.h + "px"; },
+  rotate() {
+    const s = this.src, c = document.createElement("canvas"); c.width = s.height; c.height = s.width;
+    const x = c.getContext("2d"); x.translate(c.width, 0); x.rotate(Math.PI / 2); x.drawImage(s, 0, 0);
+    this.src = c; this.layout(); this.reset(false);
+  },
+  async finish(ok) {
+    const res = this.resolve; this.resolve = null;
+    $("#cropOv").classList.remove("on"); syncModalClass();
+    if (!res) return;
+    if (!ok) { this.src = null; res(null); return; }
+    const k = this.src.width / this.dw, b = this.box;
+    const sx = Math.max(0, Math.round(b.x * k)), sy = Math.max(0, Math.round(b.y * k));
+    const sw = Math.min(this.src.width - sx, Math.round(b.w * k)), sh = Math.min(this.src.height - sy, Math.round(b.h * k));
+    const sc = Math.min(1, 1800 / Math.max(sw, sh));
+    const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(sw * sc)); c.height = Math.max(1, Math.round(sh * sc));
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(this.src, sx, sy, sw, sh, 0, 0, c.width, c.height);
+    this.src = null;
+    res(await toJpeg(c, 0.82));
+  },
+  get active() { return $("#cropOv").classList.contains("on"); },
+};
+$("#cropStage").addEventListener("pointerdown", e => {
+  const t = e.target.closest("[data-cm]"); if (!t) return; e.preventDefault();
+  Cropper.drag = { mode:t.dataset.cm, x0:e.clientX, y0:e.clientY, b0:Object.assign({}, Cropper.box), id:e.pointerId };
+  try { $("#cropStage").setPointerCapture(e.pointerId); } catch (err) {}
+});
+$("#cropStage").addEventListener("pointermove", e => {
+  const d = Cropper.drag; if (!d || e.pointerId !== d.id) return; e.preventDefault();
+  const dx = e.clientX - d.x0, dy = e.clientY - d.y0, W = Cropper.dw, H = Cropper.dh, MIN = 40;
+  let { x, y, w, h } = d.b0;
+  if (d.mode === "move") { x = Math.min(Math.max(0, x + dx), W - w); y = Math.min(Math.max(0, y + dy), H - h); }
+  else {
+    if (d.mode.includes("w")) { const nx = Math.min(Math.max(0, x + dx), x + w - MIN); w += x - nx; x = nx; }
+    if (d.mode.includes("e")) w = Math.min(Math.max(MIN, w + dx), W - x);
+    if (d.mode.includes("n")) { const ny = Math.min(Math.max(0, y + dy), y + h - MIN); h += y - ny; y = ny; }
+    if (d.mode.includes("s")) h = Math.min(Math.max(MIN, h + dy), H - y);
+  }
+  Cropper.box = { x, y, w, h }; Cropper.draw();
+});
+["pointerup", "pointercancel"].forEach(ev => $("#cropStage").addEventListener(ev, () => { Cropper.drag = null; }));
+
+/* ---------- lightbox ---------- */
+const Lightbox = {
+  urls:[], i:0,
+  open(urls, i) { this.urls = urls; this.i = Math.max(0, i); this.show(); showOverlay("lbOv"); },
+  show() { $("#lbImg").src = this.urls[this.i]; $("#lbPrev").style.visibility = this.i > 0 ? "" : "hidden"; $("#lbNext").style.visibility = this.i < this.urls.length - 1 ? "" : "hidden"; },
+  step(n) { this.i = Math.min(Math.max(0, this.i + n), this.urls.length - 1); this.show(); },
+};
+
+/* =====================================================================
+   8. TAX
+   ===================================================================== */
+const ALLOWANCES = [ // [key, label, hint, "cnt"|"amt"] ; [null, section title]
+  [null,"ส่วนตัวและครอบครัว"],
+  ["spouse","คู่สมรสไม่มีเงินได้","60,000 บาท (ใส่ 1 ถ้ามี)","cnt"],
+  ["kid1","บุตร (คนแรก / เกิดก่อนปี 2561)","คนละ 30,000 บาท · อายุไม่เกิน 20 หรือไม่เกิน 25 และกำลังเรียน","cnt"],
+  ["kid2","บุตรคนที่ 2 ขึ้นไป ที่เกิดตั้งแต่ปี 2561","คนละ 60,000 บาท","cnt"],
+  ["parent","บิดามารดา (ตนเอง+คู่สมรส) อายุ 60 ปีขึ้นไป รายได้ไม่เกิน 30,000","คนละ 30,000 บาท สูงสุด 4 คน","cnt"],
+  ["disabled","อุปการะคนพิการ/ทุพพลภาพ","คนละ 60,000 บาท","cnt"],
+  ["prenatal","ค่าฝากครรภ์และคลอดบุตร","ไม่เกิน 60,000 บาท","amt"],
+  [null,"ประกันและเงินออม"],
+  ["sso","เงินสมทบประกันสังคม (ม.33/39/40)","ไม่เกิน 9,000 บาท","amt"],
+  ["life","เบี้ยประกันชีวิต","ไม่เกิน 100,000 บาท","amt"],
+  ["health","เบี้ยประกันสุขภาพตนเอง","ไม่เกิน 25,000 บาท (รวมประกันชีวิตไม่เกิน 100,000)","amt"],
+  ["phealth","เบี้ยประกันสุขภาพบิดามารดา","ไม่เกิน 15,000 บาท","amt"],
+  ["nsf","เงินสะสม กอช.","ไม่เกิน 30,000 บาท","amt"],
+  ["pension","เบี้ยประกันชีวิตแบบบำนาญ","15% ของเงินได้ ไม่เกิน 200,000","amt"],
+  ["rmf","กองทุน RMF","30% ของเงินได้ ไม่เกิน 500,000","amt"],
+  ["esg","กองทุน Thai ESG / ESGX","30% ของเงินได้ ไม่เกิน 300,000","amt"],
+  [null,"อื่น ๆ"],
+  ["home","ดอกเบี้ยเงินกู้ซื้อ/สร้างที่อยู่อาศัย","ไม่เกิน 100,000 บาท","amt"],
+  ["extra","ลดหย่อนตามมาตรการรัฐอื่น ๆ","เช่น มาตรการกระตุ้นเศรษฐกิจของปีนั้น (ใส่ยอดที่มีสิทธิ์)","amt"],
+  ["don2","เงินบริจาคเพื่อการศึกษา/กีฬา/โรงพยาบาลรัฐ","หักได้ 2 เท่า แต่ไม่เกิน 10% ของเงินได้หลังหักลดหย่อน","amt"],
+  ["don","เงินบริจาคทั่วไป (วัด มูลนิธิ ฯลฯ)","ไม่เกิน 10% ของเงินได้หลังหักลดหย่อน","amt"],
+];
+const OTHER_INCOME = [
+  ["salary","เงินเดือน/ค่าจ้างประจำ 40(1)","หักค่าใช้จ่าย 50% ไม่เกิน 100,000"],
+  ["salaryWht","ภาษีหัก ณ ที่จ่ายจากเงินเดือน",""],
+  ["other8","เงินได้ค้าขาย/ธุรกิจอื่น 40(8)","คำนวณหักเหมา 60%"],
+  ["other8Wht","ภาษีหัก ณ ที่จ่ายของเงินได้อื่น",""],
+];
+const BRACKETS = [[150000,0],[300000,.05],[500000,.10],[750000,.15],[1000000,.20],[2000000,.25],[5000000,.30],[Infinity,.35]];
+function bracketTax(n) { let tax = 0, prev = 0; for (const [cap, rate] of BRACKETS) { if (n > prev) tax += (Math.min(n, cap) - prev) * rate; prev = cap; } return tax; }
+function taxInputs() {
+  const y = String(S.year);
+  if (!S.settings.tax[y]) S.settings.tax[y] = { married:false, method:{} };
+  if (!S.settings.tax[y].method) S.settings.tax[y].method = {};
+  return S.settings.tax[y];
+}
+const farmExempt = () => S.settings.farmExempt !== false;
+
+function computeTax(half = false) {
+  const t = taxInputs(), st = bizStats(S.year, half ? [1,2,3,4,5,6] : null);
+  const lines = []; let inc8 = 0, exp8 = 0, wht = 0;
+  for (const k of BIZ_KEYS) {
+    const b = st[k]; wht += b.wht;
+    if (k === "farm" && farmExempt()) { lines.push({ k, exempt:true, exInc:b.incTax, wht:b.wht }); continue; }
+    const inc = b.incTax, flat = inc * 0.6, actual = Math.min(b.expTax, inc), mode = t.method[k] || "auto";
+    const chosen = mode === "auto" ? (flat >= actual ? "flat" : "actual") : mode;
+    const used = chosen === "flat" ? flat : actual;
+    lines.push({ k, inc, flat, actual, rawExp:b.expTax, used, chosen, mode });
+    inc8 += inc; exp8 += used;
+  }
+  const o8 = half ? 0 : num(t.other8), o8e = o8 * 0.6;
+  const sal = half ? 0 : num(t.salary), salE = Math.min(sal * 0.5, 100000);
+  if (!half) wht += num(t.salaryWht) + num(t.other8Wht);
+  const totalInc = inc8 + o8 + sal, nonSal = inc8 + o8, totalExp = exp8 + o8e + salE;
+  const afterExp = Math.max(0, totalInc - totalExp);
+
+  const A = [], h = half ? 0.5 : 1, add = (l, v) => { if (v > 0) A.push([l, v]); };
+  add("ส่วนตัว", 60000 * h);
+  add("คู่สมรสไม่มีเงินได้", Math.min(1, num(t.spouse)) * 60000 * h);
+  add("บุตร", (num(t.kid1) * 30000 + num(t.kid2) * 60000) * h);
+  add("บิดามารดา", Math.min(4, num(t.parent)) * 30000 * h);
+  add("อุปการะคนพิการ", num(t.disabled) * 60000 * h);
+  if (!half) {
+    add("ค่าฝากครรภ์/คลอดบุตร", Math.min(num(t.prenatal), 60000));
+    add("ประกันสังคม", Math.min(num(t.sso), 9000));
+    add("ประกันชีวิต+สุขภาพ", Math.min(Math.min(num(t.life), 100000) + Math.min(num(t.health), 25000), 100000));
+    add("ประกันสุขภาพบิดามารดา", Math.min(num(t.phealth), 15000));
+    let pension = Math.min(num(t.pension), totalInc * 0.15, 200000);
+    let rmf = Math.min(num(t.rmf), totalInc * 0.30, 500000);
+    let nsf = Math.min(num(t.nsf), 30000);
+    const ret = pension + rmf + nsf;
+    if (ret > 500000) { const f = 500000 / ret; pension *= f; rmf *= f; nsf *= f; }      // retirement group cap
+    add("เบี้ยประกันบำนาญ", pension); add("RMF", rmf); add("กอช.", nsf);
+    add("Thai ESG/ESGX", Math.min(num(t.esg), totalInc * 0.30, 300000));
+    add("ดอกเบี้ยที่อยู่อาศัย", Math.min(num(t.home), 100000));
+    add("มาตรการรัฐอื่น ๆ", num(t.extra));
+  }
+  const base = Math.max(0, afterExp - A.reduce((s, a) => s + a[1], 0));
+  let d2 = 0, d1 = 0;
+  if (!half) {
+    d2 = Math.min(num(t.don2) * 2, base * 0.10); d1 = Math.min(num(t.don), (base - d2) * 0.10);
+    add("บริจาค (2 เท่า)", d2); add("บริจาคทั่วไป", d1);
+  }
+  const net = Math.max(0, base - d2 - d1), tax1 = bracketTax(net);
+  const tax2 = nonSal >= 120000 ? nonSal * 0.005 : 0;
+  const useMin = tax2 > 5000 && tax2 > tax1, tax = useMin ? tax2 : tax1;
+  const limit = t.married ? 120000 : 60000;
+  return { lines, inc8, exp8, o8, sal, totalInc, nonSal, totalExp, afterExp, A, allow:A.reduce((s, a) => s + a[1], 0),
+    net, tax1, tax2, useMin, tax, wht, payable:tax - wht, mustFile:(half ? nonSal : totalInc) > limit };
+}
+
+/** full=true rebuilds the input fields (on entering the tab or changing year); otherwise only results refresh */
+function renderTax(full) {
+  const t = taxInputs(), R = computeTax();
+  const editing = document.activeElement && document.activeElement.closest && document.activeElement.closest("#v-tax .tin");
+  $("#taxYear").textContent = be(S.year);
+  $("#tFarmEx").checked = farmExempt(); $("#tMarried").checked = !!t.married;
+  $("#taxHero").innerHTML =
+    kpiHtml(`ภาษีที่ต้องเสียทั้งปี ${be(S.year)} (ประมาณ)`, baht2(R.tax), `${R.useMin ? "ใช้ภาษีขั้นต่ำ 0.5% ของเงินได้" : "คำนวณจากอัตราก้าวหน้า"} · เงินได้สุทธิ ${baht(R.net)}`) +
+    kpiHtml(`${R.payable >= 0 ? "ต้องชำระเพิ่ม" : "ได้รับคืน"} (หลังหักภาษี ณ ที่จ่าย ${baht2(R.wht)})`, baht2(Math.abs(R.payable)),
+      R.mustFile ? "✅ มีหน้าที่ยื่น ภ.ง.ด.90" : "รายได้ยังไม่ถึงเกณฑ์ต้องยื่น (ยื่นได้ถ้าต้องการขอคืนภาษี)", R.payable > 0 ? "neg" : "pos");
+  $("#taxBiz").innerHTML = R.lines.map(l => l.exempt ? `<div class="mbiz ex">
+      <div class="hrow"><b>${BIZ[l.k].icon} ${BIZ[l.k].name}</b><span class="tag doc">ยกเว้นภาษี</span></div>
+      <div class="row small"><span>รายรับจากการทำนา (ไม่นำมาคำนวณภาษี)</span><b>${baht2(l.exInc)}</b></div>
+      <div class="small muted">ค่าใช้จ่ายทำนาจึงไม่นำมาหักด้วย${l.wht ? ` · ภาษีที่ถูกหัก ณ ที่จ่าย ${baht2(l.wht)} บาท ยังนำมาเครดิตขอคืนได้` : ""}</div></div>`
+    : `<div class="mbiz">
+      <div class="hrow"><b>${BIZ[l.k].icon} ${BIZ[l.k].name}</b><span class="small muted">เงินได้ ${baht2(l.inc)} บาท</span></div>
+      <div class="row small"><span>หักเหมา 60%</span><b>${baht2(l.flat)}</b></div>
+      <div class="row small"><span>หักตามจริง (จากบันทึก ${baht2(l.rawExp)})</span><b>${baht2(l.actual)}</b></div>
+      <div class="hrow"><div class="method" data-biz="${l.k}">${[["auto","เลือกให้อัตโนมัติ"],["flat","เหมา 60%"],["actual","ตามจริง"]].map(([m, n]) => `<button type="button" data-method="${m}" class="${l.mode === m ? "on" : ""}">${n}</button>`).join("")}</div>
+      <span class="small">ใช้: <b>${l.chosen === "flat" ? "เหมา 60%" : "ตามจริง"}</b> ${baht2(l.used)}</span></div></div>`).join("");
+  if (full || !editing) {
+    const field = (k, label, hint, kind) => `<div class="trow"><div class="lbl">${label}${hint ? `<small>${hint}</small>` : ""}</div><input class="tin ${kind === "cnt" ? "cnt" : ""}" data-tax="${k}" type="number" min="0" step="${kind === "cnt" ? 1 : "any"}" inputmode="${kind === "cnt" ? "numeric" : "decimal"}" value="${t[k] ?? ""}" placeholder="${kind === "cnt" ? "0 คน" : "0"}"></div>`;
+    $("#taxOther").innerHTML = OTHER_INCOME.map(([k, l, h]) => field(k, l, h, "amt")).join("");
+    $("#taxAllow").innerHTML = `<div class="trow"><div class="lbl">ค่าลดหย่อนส่วนตัว<small>ได้ทุกคน</small></div><div style="text-align:right;font-weight:600">60,000</div></div>`
+      + ALLOWANCES.map(([k, l, h, kind]) => k ? field(k, l, h, kind) : `<h3>${l}</h3>`).join("");
+  }
+  renderTaxSummary(R);
+}
+function renderTaxSummary(R) {
+  const tr = (l, v, c = "") => `<tr class="${c}"><td>${l}</td><td>${v}</td></tr>`;
+  let h = `<table class="sum">` + tr("เงินได้จากกิจการ (40(8))", baht2(R.inc8));
+  R.lines.forEach(l => { if (l.exempt) { if (l.exInc) h += tr(`${BIZ[l.k].name} (ยกเว้น ไม่นับรวม)`, baht2(l.exInc), "sub"); } else if (l.inc) h += tr(BIZ[l.k].name, baht2(l.inc), "sub"); });
+  if (R.o8) h += tr("เงินได้ 40(8) อื่น", baht2(R.o8));
+  if (R.sal) h += tr("เงินเดือน 40(1)", baht2(R.sal));
+  h += tr("<b>รวมเงินได้พึงประเมิน</b>", `<b>${baht2(R.totalInc)}</b>`) + tr("หัก ค่าใช้จ่าย", "−" + baht2(R.totalExp))
+    + tr("เงินได้หลังหักค่าใช้จ่าย", baht2(R.afterExp)) + tr("หัก ค่าลดหย่อนรวม", "−" + baht2(R.allow));
+  R.A.forEach(([l, v]) => { h += tr(l, baht2(v), "sub"); });
+  h += tr("<b>เงินได้สุทธิ</b>", `<b>${baht2(R.net)}</b>`) + tr("ภาษีตามอัตราก้าวหน้า", baht2(R.tax1));
+  if (R.nonSal >= 120000) h += tr(`ภาษีขั้นต่ำ 0.5% ของเงินได้ที่ไม่ใช่เงินเดือน${R.tax2 <= 5000 ? " (ไม่เกิน 5,000 จึงไม่ต้องใช้)" : ""}`, baht2(R.tax2));
+  h += tr("ภาษีที่ต้องเสีย", baht2(R.tax)) + tr("หัก ภาษีหัก ณ ที่จ่าย", "−" + baht2(R.wht))
+    + tr(R.payable >= 0 ? "ภาษีที่ต้องชำระเพิ่ม" : "ภาษีที่ได้รับคืน", baht2(Math.abs(R.payable)), "tot") + `</table>`;
+  const rate = (BRACKETS.find(([cap]) => R.net <= cap) || [0, 0])[1];
+  h += `<p class="small muted" style="margin:8px 0 0">ฐานภาษีสูงสุดของคุณ: ${Math.round(rate * 100)}% — ลดหย่อนเพิ่ม 10,000 บาท ช่วยประหยัดภาษีได้ราว ${baht(10000 * rate)} บาท</p>`;
+  $("#taxSummary").innerHTML = h;
+
+  const H = computeTax(true);
+  $("#taxHalf").innerHTML = `<table class="sum">${tr("เงินได้ 40(8) ม.ค.–มิ.ย. (รับเงินแล้ว)", baht2(H.inc8))}${tr("หัก ค่าใช้จ่าย (วิธีเดียวกับด้านบน)", "−" + baht2(H.exp8))}${tr("หัก ลดหย่อนครอบครัว (ครึ่งหนึ่ง)", "−" + baht2(H.allow))}${tr("เงินได้สุทธิครึ่งปี", baht2(H.net))}${tr("ภาษีครึ่งปี (ก่อนหัก ณ ที่จ่าย)", baht2(H.tax))}${tr(H.payable >= 0 ? "ต้องชำระ (หลังหักภาษี ณ ที่จ่าย)" : "เครดิตคงเหลือ", baht2(Math.abs(H.payable)), "tot")}</table>
+    <p class="small" style="margin:8px 0 0">${H.mustFile ? "✅ เงินได้ครึ่งปีแรกเกินเกณฑ์ ต้องยื่น ภ.ง.ด.94 ภายใน 30 ก.ย. — ภาษีที่จ่ายไปนำมาหักตอนยื่นสิ้นปีได้" : "เงินได้ครึ่งปีแรกยังไม่เกินเกณฑ์ (60,000 บาท / มีคู่สมรส 120,000 บาท) ไม่ต้องยื่น ภ.ง.ด.94"}</p>
+    <p class="small muted" style="margin:4px 0 0">ประมาณการนี้ใช้เฉพาะลดหย่อนส่วนตัว/ครอบครัวครึ่งหนึ่ง ถ้าจ่ายเบี้ยประกัน กองทุน ฯลฯ ในครึ่งปีแรกแล้ว ภาษีจริงจะต่ำกว่านี้</p>`;
+}
+async function copyTaxSummary() {
+  const R = computeTax(), L = [`สรุปภาษีเงินได้บุคคลธรรมดา ปีภาษี ${be(S.year)}`];
+  R.lines.forEach(l => L.push(l.exempt ? `${BIZ[l.k].name}: รายรับ ${baht2(l.exInc)} (ยกเว้นภาษี ไม่นับรวม)` : `${BIZ[l.k].name}: เงินได้ ${baht2(l.inc)} | หักค่าใช้จ่าย${l.chosen === "flat" ? "เหมา 60%" : "ตามจริง"} ${baht2(l.used)}`));
+  if (R.o8) L.push(`เงินได้ 40(8) อื่น: ${baht2(R.o8)}`);
+  if (R.sal) L.push(`เงินเดือน 40(1): ${baht2(R.sal)}`);
+  L.push(`รวมเงินได้ ${baht2(R.totalInc)} | ค่าใช้จ่าย ${baht2(R.totalExp)}`);
+  R.A.forEach(([l, v]) => L.push(`ลดหย่อน ${l}: ${baht2(v)}`));
+  L.push(`เงินได้สุทธิ ${baht2(R.net)}`, `ภาษี ${baht2(R.tax)}${R.useMin ? " (ขั้นต่ำ 0.5%)" : ""}`, `ภาษีหัก ณ ที่จ่าย ${baht2(R.wht)}`, `${R.payable >= 0 ? "ชำระเพิ่ม" : "ขอคืน"} ${baht2(Math.abs(R.payable))}`);
+  try { await navigator.clipboard.writeText(L.join("\n")); toast("คัดลอกแล้ว ✓"); }
+  catch (e) { toast("คัดลอกไม่ได้ในเบราว์เซอร์นี้"); }
+}
+
+/* =====================================================================
+   9. PLANTING ROUNDS
+   ===================================================================== */
+let roundSel = null, roundEditing = null;
+function renderRounds() {
+  const rs = roundsNewest();
+  if (roundSel && !rs.some(x => x.id === roundSel)) roundSel = null;
+  if (!roundSel && rs.length) roundSel = (rs.find(x => roundStatus(x).cls === "now") || rs[0]).id;
+
+  $("#roundList").innerHTML = !rs.length
+    ? `<div class="card"><div class="empty">ยังไม่มีรอบการปลูก<br>กด <b>＋ เพิ่มรอบ</b> แล้วใส่วันเริ่มและวันสิ้นสุดของรอบ</div></div>`
+    : `<div class="card"><h2>ทุกรอบ (${rs.length})</h2>${rs.map(x => {
+        const t = roundStats(x), p = t.inc - t.exp, st = roundStatus(x);
+        return `<div class="rdc ${x.id === roundSel ? "on" : ""}" data-round="${esc(x.id)}"><div class="hrow"><b>${esc(x.name)}</b><span class="rst ${st.cls}">${st.text}</span></div>
+          <div class="small muted">${roundRange(x)} · ${daysBetween(x.start, x.end) + 1} วัน${x.area ? ` · ${fmt(num(x.area), num(x.area) % 1 ? 1 : 0)} ไร่` : ""}${x.variety ? ` · ${esc(x.variety)}` : ""}</div>
+          <div class="rdn"><span>รับ <b class="amt in">${baht(t.inc)}</b></span><span>จ่าย <b class="amt out">${baht(t.exp)}</b></span><span>กำไร <b class="${p >= 0 ? "pos" : "neg"}">${signed(p)}</b></span></div></div>`;
+      }).join("")}</div>`;
+
+  const x = rs.find(z => z.id === roundSel);
+  if (!x) { $("#roundDetail").innerHTML = ""; return; }
+  const t = roundStats(x), p = t.inc - t.exp, st = roundStatus(x), area = num(x.area);
+  const perRai = area ? `<div class="kpis" style="margin-top:10px">${
+      kpiHtml("ต้นทุนต่อไร่", baht(t.exp / area), `บาท/ไร่ (${fmt(area, area % 1 ? 1 : 0)} ไร่)`)}${
+      kpiHtml("กำไรต่อไร่", signed(p / area), "บาท/ไร่", p >= 0 ? "pos" : "neg")}${
+      kpiHtml("ผลผลิตต่อไร่", t.ton ? fmt(t.ton * 1000 / area, 0) : "—", t.ton ? "กก./ไร่ (จากที่ขาย)" : "ยังไม่มีการขายเป็นตัน/กก.")}</div>` : "";
+  $("#roundDetail").innerHTML = `<div class="card">
+    <div class="hrow"><h2 style="margin:0">${esc(x.name)}</h2><button type="button" class="btn ghost sm" data-act="round-edit">แก้ไขรอบ</button></div>
+    <div class="small" style="margin:4px 0 6px">📅 ${roundRange(x)} · ${daysBetween(x.start, x.end) + 1} วัน · <span class="rst ${st.cls}">${st.text}</span>${x.note ? ` · ${esc(x.note)}` : ""}</div>
+    ${st.cls === "now" ? `<div class="cbar prog" style="height:6px;margin-bottom:10px"><i style="width:${Math.round(st.progress * 100)}%"></i></div>` : ""}
+    <div class="kpis" style="margin-bottom:0">${
+      kpiHtml("รายรับ", baht(t.inc), `${t.due ? `+ ค้างรับ ${baht(t.due)}` : "บาท"}${t.ton ? ` · ขาย ${fmt(t.ton, 2)} ตัน` : ""}`)}${
+      kpiHtml("รายจ่าย", baht(t.exp), t.asset ? `รวมซื้อเครื่องจักร ${baht(t.asset)}` : "บาท")}${
+      kpiHtml("กำไร (ขาดทุน)", signed(p), t.ton ? `ราคาเฉลี่ย ${baht(t.tonAmt / t.ton)} ฿/ตัน` : `${t.recs.length} รายการ`, p >= 0 ? "pos" : "neg")}</div>${perRai}
+    <h3>รายจ่ายแยกหมวด</h3>${catBarsHtml(t.cats, t.exp) || `<div class="small muted">ยังไม่มีรายจ่ายในรอบนี้</div>`}
+    <h3>รายการในรอบนี้ (${t.recs.length})</h3>${t.recs.length ? t.recs.map(itemHtml).join("") : `<div class="small muted">ยังไม่มีรายการทำนาในช่วงวันที่นี้ — กด + เพื่อบันทึก</div>`}
+  </div>`;
+}
+function openRound(x) {
+  roundEditing = x || null;
+  const yr = new Date().getFullYear(), start = x ? x.start : today();
+  $("#roundTitle").textContent = x ? "แก้ไขรอบการปลูก" : "เพิ่มรอบการปลูก";
+  $("#rdName").value = x ? x.name : `รอบที่ ${rounds().filter(z => z.start.startsWith(String(yr))).length + 1} ปี ${be(yr)}`;
+  $("#rdStart").value = thDate(start); $("#rdEnd").value = thDate(x ? x.end : addDays(start, 119));
+  $("#rdArea").value = x && x.area || ""; $("#rdVar").value = x && x.variety || ""; $("#rdNote").value = x && x.note || "";
+  $("#rdDel").hidden = !x; updateRoundDays();
+  showOverlay("roundOv");
+}
+function closeRound() { Picker.close(); hideOverlay("roundOv"); }
+function updateRoundDays() {
+  const a = parseDMY($("#rdStart").value), b = parseDMY($("#rdEnd").value);
+  $("#rdDays").textContent = !(a && b) ? "" : b < a ? "⚠️ วันสิ้นสุดต้องไม่ก่อนวันเริ่ม" : `รวม ${daysBetween(a, b) + 1} วัน (ประมาณ ${fmt((daysBetween(a, b) + 1) / 30, 1)} เดือน)`;
+}
+async function submitRound() {
+  const name = $("#rdName").value.trim(), a = parseDMY($("#rdStart").value), b = parseDMY($("#rdEnd").value);
+  if (!name) { toast("ใส่ชื่อรอบ"); $("#rdName").focus(); return; }
+  if (!a || !b) { toast("ใส่วันเริ่มและวันสิ้นสุดให้ถูกต้อง (วว/ดด/ปปปป)"); return; }
+  if (b < a) { toast("วันสิ้นสุดต้องไม่ก่อนวันเริ่ม"); return; }
+  const id = roundEditing ? roundEditing.id : newId("rd_");
+  const overlap = rounds().filter(z => z.id !== id && !(b < z.start || a > z.end));
+  if (overlap.length && !(await confirmBox("ช่วงวันที่ทับกัน", `ช่วงนี้ทับกับ ${overlap.map(z => z.name).join(", ")} — รายการที่วันที่ทับกันจะนับเข้ารอบที่เริ่มทีหลัง บันทึกต่อไหม?`, "บันทึกต่อ"))) return;
+  const x = { id, name, start:a, end:b };
+  const area = num($("#rdArea").value); if (area > 0) x.area = area;
+  const v = $("#rdVar").value.trim(); if (v) x.variety = v;
+  const n = $("#rdNote").value.trim(); if (n) x.note = n;
+  S.settings.rounds = rounds().filter(z => z.id !== id).concat([x]);
+  roundSel = id; saveSettings(); closeRound(); renderAll();
+  toast(roundEditing ? "แก้ไขรอบแล้ว ✓" : "เพิ่มรอบแล้ว ✓");
+}
+async function deleteRound() {
+  const x = roundEditing; if (!x) return;
+  if (!(await confirmBox("ลบรอบนี้?", `ลบ “${x.name}” — รายการบัญชีไม่ถูกลบ แค่ไม่นับเข้ารอบนี้แล้ว`, "ลบรอบ"))) return;
+  S.settings.rounds = rounds().filter(z => z.id !== x.id);
+  if (roundSel === x.id) roundSel = null;
+  saveSettings(); closeRound(); renderAll(); toast("ลบรอบแล้ว");
+}
+
+/* =====================================================================
+   10. SETTINGS: account info, drone-jobs sync, export / import
+   ===================================================================== */
+function renderSettings() {
+  $("#storeInfo").textContent = S.user ? `☁️ ข้อมูลเก็บในฐานข้อมูล Supabase (โปรเจกต์ drone-jobs) ของคุณ เปิดจากเครื่องไหนก็เห็นข้อมูลเดียวกัน · บัญชี ${S.user.email || ""} · ทั้งหมด ${S.records.size} รายการ` : "";
+  renderDroneJobs();
+}
+
+/* ---------- import finished jobs from the drone-jobs app (Supabase) ---------- */
+const DJ = { busy:false };
+function djCfg() {
+  const d = S.settings.droneJobs || (S.settings.droneJobs = {});
+  if (!Array.isArray(d.skip)) d.skip = [];
+  return d;
+}
+function djStatus(kind, html) { const el = $("#djStatus"); el.hidden = !html; el.className = "status " + (kind || ""); el.innerHTML = html || ""; }
+function renderDroneJobs() {
+  const d = S.settings.droneJobs || {};
+  const n = allRecords().filter(r => r.src === "drone-jobs").length;
+  $("#djInfo").textContent = d.lastSync ? `ดึงล่าสุด: ${fmtStamp(d.lastSync)} · มีงานโดรนในบัญชี ${n} รายการ` : "ยังไม่เคยดึงงาน";
+  $("#djBtn").disabled = DJ.busy;
+}
+const djRecordId = jobId => "r_dj_" + String(jobId).replace(/[^A-Za-z0-9_\-]/g, "_");
+function djJobToRecord(row, old) {
+  const j = row.data || {}, amount = r2(num(j.amount)), area = num(j.area);
+  const done = /^\d{4}-\d{2}-\d{2}$/.test(j.doneDate || "") ? j.doneDate : j.date;
+  const paid = !!j.paid || num(j.deposit) >= amount;
+  const r = old ? Object.assign({}, old) : { id:djRecordId(row.id), created:new Date().toISOString(), wht:0, exempt:false,
+    note:["งานโดรน", j.serviceName, j.plotName && "แปลง " + j.plotName, j.crop].filter(Boolean).join(" · ") };
+  Object.assign(r, {
+    biz:"drone", kind:"in", date:done, cat:/หว่าน/.test(j.serviceName || "") ? "ค่าจ้างหว่านปุ๋ย/เมล็ด" : "ค่าจ้างฉีดพ่น",
+    qty:area || null, unit:"ไร่", price:area ? r2(amount / area) : null, amount, party:j.name || "",
+    src:"drone-jobs", srcId:String(row.id), srcUpdated:j.updated || row.updated_at || null,
+  });
+  if (paid) {
+    const updatedDay = j.updated ? isoOf(new Date(j.updated)) : today();
+    r.status = "paid";
+    r.paidDate = /^\d{4}-\d{2}-\d{2}$/.test(j.paidDate || "") ? j.paidDate
+      : old && old.status === "paid" && old.paidDate ? old.paidDate
+      : old && old.status === "due" ? updatedDay : done;
+  } else {
+    r.status = "due"; delete r.paidDate;
+  }
+  return r;
+}
+const djSame = (a, b) => ["date","cat","qty","price","amount","party","status","paidDate"].every(k => (a[k] ?? null) === (b[k] ?? null));
+/** quiet=true: automatic run on start — only reports when something changed or failed */
+async function syncDroneJobs(quiet) {
+  if (DJ.busy || !S.loaded) return;
+  DJ.busy = true; renderDroneJobs(); if (!quiet) djStatus("work", "⏳ กำลังอ่านงานที่ปิดแล้วจากแอปรับงานโดรน…");
+  try {
+    const { data:rows, error } = await sb.from("jobs").select("id,data,updated_at").eq("data->>status", "done");
+    if (error) throw error;
+    const cfg = djCfg(), changed = []; let added = 0, updated = 0, same = 0, skipped = 0;
+    for (const row of rows) {
+      const j = row && row.data; if (!j || !row.id) continue;
+      if (num(j.amount) <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(j.doneDate || j.date || "") || cfg.skip.includes(String(row.id))) { skipped++; continue; }
+      const old = S.records.get(djRecordId(row.id)), r = djJobToRecord(row, old);
+      if (!old) { added++; changed.push(r); } else if (!djSame(old, r)) { updated++; changed.push(r); } else same++;
+    }
+    // manual drone income on the same day with the same amount may be a duplicate of an imported job
+    const imported = allRecords().filter(r => r.src === "drone-jobs").concat(changed.filter(r => !S.records.has(r.id)));
+    const maybeDup = allRecords().filter(r => r.biz === "drone" && r.kind === "in" && r.src !== "drone-jobs"
+      && imported.some(i => i.date === r.date && i.amount === r.amount)).length;
+    if (changed.length) {
+      if (!quiet) djStatus("work", `⏳ กำลังบันทึก ${changed.length} รายการ…`);
+      changed.forEach(r => S.records.set(r.id, r));
+      if (!(await saveRecords(changed))) throw new Error("save");
+    }
+    cfg.lastSync = new Date().toISOString(); saveSettings(); renderAll();
+    if (quiet && !changed.length) return;
+    djStatus("ok", `${quiet ? "🚁 อัปเดตจากแอปรับงานโดรนอัตโนมัติ · " : "✅ "}งานที่ปิดแล้ว ${rows.length} งาน · เพิ่มใหม่ <b>${added}</b> · อัปเดต <b>${updated}</b> · เหมือนเดิม ${same}${skipped ? ` · ข้าม ${skipped} (ยอด 0 บาท หรือเคยลบไว้)` : ""}`
+      + (maybeDup ? `<br>⚠️ พบรายรับโดรนที่บันทึกเอง ${maybeDup} รายการ ที่วันที่และยอดเงินตรงกับงานที่ดึงมา — อาจซ้ำกัน ลองตรวจในหน้ารายการ (กรองกิจการ “โดรน”)` : ""));
+  } catch (e) {
+    djStatus("err", "⚠️ ดึงงานไม่สำเร็จ — ตรวจอินเทอร์เน็ตแล้วกด “ดึงงานตอนนี้” อีกครั้ง");
+  } finally {
+    DJ.busy = false; renderDroneJobs();
+  }
+}
+
+/* ---------- export / import ---------- */
+function offerFile(filename, data, type) {
+  const url = URL.createObjectURL(new Blob([data], { type }));
+  const a = document.createElement("a"); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+function exportCsv() {
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const rows = [["วันที่","วันที่รับเงิน","กิจการ","ประเภท","หมวด","ปริมาณ","หน่วย","ราคาต่อหน่วย","จำนวนเงิน","สถานะ","ภาษีหัก ณ ที่จ่าย","ไม่คิดภาษี","ลูกค้า/ร้านค้า","รอบการปลูก","หมายเหตุ","จำนวนรูปใบเสร็จ","เลขที่หลักฐาน"]];
+  allRecords().filter(r => yearOf(r) === S.year || (isDue(r) && +r.date.slice(0, 4) === S.year))
+    .sort((a, b) => effDate(a).localeCompare(effDate(b)))
+    .forEach(r => rows.push([thDate(r.date), r.kind === "in" && r.status === "paid" ? thDate(r.paidDate || r.date) : "", BIZ[r.biz] ? BIZ[r.biz].name : "",
+      r.kind === "in" ? "รายรับ" : "รายจ่าย", r.cat, r.qty ?? "", r.unit || "", r.price ?? "", r.amount,
+      r.kind === "in" ? (isDue(r) ? "ค้างรับ" : "รับแล้ว") : "", r.wht || "", r.exempt ? "ใช่" : "", r.party || "", roundName(r), r.note || "",
+      (r.receipts || []).length || "", r.docNo || ""]));
+  offerFile(`farm-ledger-${be(S.year)}.csv`, "\uFEFF" + rows.map(r => r.map(q).join(",")).join("\r\n"), "text/csv;charset=utf-8");
+}
+function exportJson() {
+  offerFile(`farm-ledger-backup-${today()}.json`, JSON.stringify({ app:"farm-ledger", version:1, exported:new Date().toISOString(), records:allRecords(), settings:S.settings }, null, 1), "application/json");
+}
+async function importJson(file) {
+  let data; try { data = JSON.parse(await file.text()); } catch (e) { toast("ไฟล์ไม่ถูกต้อง"); return; }
+  const recs = (data && Array.isArray(data.records) ? data.records : [])
+    .filter(r => r && typeof r.id === "string" && r.id.startsWith("r_") && BIZ[r.biz] && (r.kind === "in" || r.kind === "out") && typeof r.date === "string");
+  if (!recs.length) { toast("ไม่พบรายการในไฟล์"); return; }
+  if (!(await confirmBox("กู้คืนข้อมูล?", `จะเพิ่ม/อัปเดต ${recs.length} รายการจากไฟล์ (รายการเดิมที่ไม่อยู่ในไฟล์จะยังอยู่)`, "กู้คืน"))) return;
+  const s = data.settings || {};
+  if (s.tax) S.settings.tax = Object.assign({}, s.tax, S.settings.tax);
+  if (Array.isArray(s.rounds)) { const have = new Set(rounds().map(x => x.id)); S.settings.rounds = rounds().concat(s.rounds.filter(x => x && x.id && !have.has(x.id))); }
+  saveSettings();
+  recs.forEach(r => S.records.set(r.id, r));
+  renderAll();
+  if (!(await saveRecords(recs))) return; toast(`กู้คืน ${recs.length} รายการแล้ว ✓`);
+}
+
+/* =====================================================================
+   11. NAVIGATION & EVENTS
+   ===================================================================== */
+function goView(v) {
+  S.view = v;
+  $$(".view").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
+  $$("nav.bottom button").forEach(b => b.classList.toggle("on", b.dataset.go === v));
+  $(".fab").hidden = !(v === "home" || v === "list" || v === "round");
+  window.scrollTo(0, 0);
+  if (v === "home") renderChart();
+  if (v === "tax") renderTax(true);
+  if (v === "round") renderRounds();
+}
+
+const ACTIONS = {
+  "record-new": () => openRecord(null),
+  "record-close": closeRecord,
+  "record-delete": deleteCurrentRecord,
+  "day-prev": () => { homeDay = addDays(homeDay || today(), -1); renderDay(); },
+  "day-next": () => { const n = addDays(homeDay || today(), 1); if (n <= today()) { homeDay = n; renderDay(); } },
+  "day-today": () => { homeDay = today(); renderDay(); },
+  "tax-copy": copyTaxSummary,
+  "round-new": () => openRound(null),
+  "round-edit": () => openRound(rounds().find(x => x.id === roundSel)),
+  "round-close": closeRound,
+  "round-delete": deleteRound,
+  "lb-prev": () => Lightbox.step(-1),
+  "lb-next": () => Lightbox.step(1),
+  "lb-close": () => hideOverlay("lbOv"),
+  "crop-rotate": () => Cropper.rotate(),
+  "crop-full": () => Cropper.reset(true),
+  "crop-cancel": () => Cropper.finish(false),
+  "crop-ok": () => Cropper.finish(true),
+  "export-csv": exportCsv,
+  "export-json": exportJson,
+  "dj-sync": () => syncDroneJobs(false),
+  "logout": logout,
+  "lg-forgot": () => showLogin("forgot"),
+  "lg-back": () => showLogin("in"),
+};
+document.addEventListener("click", e => {
+  const t = e.target;
+  const act = t.closest("[data-act]"); if (act && ACTIONS[act.dataset.act]) { if (act.tagName === "A") e.preventDefault(); ACTIONS[act.dataset.act](act); return; }
+  const go = t.closest("[data-go]"); if (go) { goView(go.dataset.go); return; }
+  const paid = t.closest("[data-paid]"); if (paid) { markPaid(paid.dataset.paid); return; }
+  const del = t.closest("[data-rcdel]"); if (del) { removeReceipt(+del.dataset.rcdel); return; }
+  const th = t.closest("[data-rc]"); if (th) { viewReceipt(+th.dataset.rc); return; }
+  const rec = t.closest("[data-rec]"); if (rec) { const r = S.records.get(rec.dataset.rec); if (r) openRecord(r); return; }
+  const rd = t.closest("[data-round]"); if (rd) { roundSel = rd.dataset.round; renderRounds(); window.scrollTo({ top:0, behavior:"smooth" }); return; }
+  const mb = t.closest(".method [data-method]"); if (mb) { taxInputs().method[mb.parentElement.dataset.biz] = mb.dataset.method; saveSettings(); renderTax(false); return; }
+  const bz = t.closest("#segBiz [data-b]"); if (bz) { F.biz = bz.dataset.b; drawRecordParts(); return; }
+  const kd = t.closest("#segKind [data-k]"); if (kd) { F.kind = kd.dataset.k; drawRecordParts(); return; }
+  const lm = t.closest("#listMode [data-mode]"); if (lm) { listMode = lm.dataset.mode; try { localStorage.setItem(LS_LISTMODE, listMode); } catch (err) {} renderList(); return; }
+  if (t.classList.contains("overlay")) {                  // tap on the dimmed backdrop
+    if (t.id === "recOv") closeRecord(); else if (t.id === "roundOv") closeRound(); else if (t.id === "lbOv") hideOverlay("lbOv");
+  }
+});
+document.addEventListener("input", e => {
+  const tin = e.target.closest(".tin[data-tax]");
+  if (tin) { taxInputs()[tin.dataset.tax] = tin.value === "" ? "" : num(tin.value); saveSettings(); renderTax(false); }
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (Cropper.active) Cropper.finish(false);
+  else if (Picker.open) Picker.close();
+  else if (confirmBox.cancel) confirmBox.cancel();
+  else if ($("#lbOv").classList.contains("on")) hideOverlay("lbOv");
+  else if ($("#roundOv").classList.contains("on")) closeRound();
+  else closeRecord();
+});
+
+$("#yearSel").addEventListener("change", e => { S.year = +e.target.value; renderAll(); if (S.view === "tax") renderTax(true); if (S.view === "home") renderChart(); });
+["#fBiz", "#fKind", "#fMonth"].forEach(s => $(s).addEventListener("change", renderList));
+$("#fText").addEventListener("input", renderList);
+$("#tFarmEx").addEventListener("change", e => { S.settings.farmExempt = e.target.checked; saveSettings(); renderTax(false); });
+$("#tMarried").addEventListener("change", e => { taxInputs().married = e.target.checked; saveSettings(); renderTax(false); });
+
+$("#recForm").addEventListener("submit", e => { e.preventDefault(); submitRecord(); });
+$("#rCat").addEventListener("change", () => fillUnits(null));
+$("#rQty").addEventListener("input", autoAmount);
+$("#rPrice").addEventListener("input", autoAmount);
+$("#rAmt").addEventListener("input", () => clearFieldError($("#rAmt")));
+$("#rRound").addEventListener("change", e => { F.round = e.target.value; });
+bindDateInput($("#rDate"), onRecordDateChanged);
+$$("[data-pick]").forEach(inp => {
+  inp.addEventListener("change", e => { const files = [...e.target.files]; e.target.value = ""; if (files.length) addReceiptFiles(files); });
+});
+
+$("#roundForm").addEventListener("submit", e => { e.preventDefault(); submitRound(); });
+bindDateInput($("#rdStart"), () => { const a = parseDMY($("#rdStart").value), b = parseDMY($("#rdEnd").value); if (a && (!b || b < a)) $("#rdEnd").value = thDate(addDays(a, 119)); updateRoundDays(); });
+bindDateInput($("#rdEnd"), updateRoundDays);
+
+$("#impJson").addEventListener("change", e => { const f = e.target.files[0]; e.target.value = ""; if (f) importJson(f); });
+
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (S.view === "home") renderChart();
+    if (Cropper.active && Cropper.src) {
+      const ow = Cropper.dw, oh = Cropper.dh, b = Cropper.box; Cropper.layout();
+      const fx = Cropper.dw / ow, fy = Cropper.dh / oh; Cropper.box = { x:b.x * fx, y:b.y * fy, w:b.w * fx, h:b.h * fy }; Cropper.draw();
+    }
+  }, 200);
+});
+
+/* =====================================================================
+   12. START
+   ===================================================================== */
+$("#lgForm").addEventListener("submit", e => { e.preventDefault(); submitLogin(); });
+document.addEventListener("visibilitychange", () => {      // pick up changes made on another device or in the drone-jobs app
+  if (document.visibilityState !== "visible" || !S.user || settingsSync.pending || $$(".overlay.on, .crop.on").length) return;
+  refresh(false).then(() => syncDroneJobs(true));
+});
+(async function start() {
+  if (!sb) { $("#booting").textContent = "โหลดระบบไม่สำเร็จ — ตรวจอินเทอร์เน็ตแล้วเปิดหน้านี้ใหม่"; return; }
+  let recovering = /type=recovery/.test(location.hash);
+  sb.auth.onAuthStateChange(ev => {
+    if (ev === "PASSWORD_RECOVERY") { recovering = true; showLogin("reset"); }
+    if (ev === "SIGNED_OUT" && S.user) { S.user = null; showLogin("in"); }
+  });
+  const { data:{ session } } = await sb.auth.getSession();
+  if (recovering) showLogin("reset");
+  else if (session && session.user) enterApp(session.user);
+  else showLogin("in");
+})();
+</script>
+</body>
+</html>
