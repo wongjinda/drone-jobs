@@ -44,7 +44,8 @@ body:not([data-view=home]) header.top{padding-bottom:8px}
 .hero{background:var(--card);border-radius:24px;padding:20px;box-shadow:0 0 0 1px var(--line);max-width:952px}
 @media(max-width:1008px){.hero{margin-left:14px;margin-right:14px}}
 .hero .hl{font-size:14px;color:var(--ink2)}
-.hero .hv{font-family:var(--fh);font-weight:700;color:var(--brand);font-size:clamp(34px,9vw,46px);line-height:1.15;font-variant-numeric:tabular-nums;margin:2px 0}
+.hero .hv{font-family:var(--fh);font-weight:700;font-size:clamp(34px,9vw,46px);line-height:1.15;font-variant-numeric:tabular-nums;margin:2px 0}
+.hero .hv.pos{color:var(--money)}.hero .hv.neg{color:var(--red)}
 .hero .hv small{font-size:16px;font-weight:500;color:var(--muted);margin-left:6px}
 .hero .hs{font-size:13px;color:var(--muted)}
 .hsplit{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
@@ -970,7 +971,7 @@ function renderHome() {
   const st = bizStats(S.year), t = sumStats(st), p = t.inc - t.exp;
   const margin = t.inc ? Math.round(p / t.inc * 100) : null;
   $("#hero").innerHTML = `<div class="hl">กำไร (ขาดทุน) สุทธิ ปี ${be(S.year)}${margin != null ? `<span class="chip ${p < 0 ? "neg" : ""}">${margin}% ของรายรับ</span>` : ""}</div>
-    <div class="hv">${signed(p)}<small>บาท</small></div>
+    <div class="hv ${p < 0 ? "neg" : "pos"}">${signed(p)}<small>บาท</small></div>
     ${t.asset ? `<div class="hs">ถ้าไม่นับซื้อเครื่องจักร ${signed(p + t.asset)} บาท</div>` : ""}
     <div class="hsplit">
       <div><span class="l"><i style="background:var(--money)"></i>รายรับ</span><b>${baht(t.inc)}</b><small>${t.due ? `+ ค้างรับ ${baht(t.due)} บาท` : "รับเงินแล้ว"}</small></div>
