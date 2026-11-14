@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f7f8fa">
+<meta name="theme-color" content="#e6ebf2">
 <title>บัญชี นา · รถเกี่ยว · โดรน + ภาษี</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,10 +11,10 @@
 <style>
 /* ---------- tokens ---------- */
 :root{
-  --bg:#f7f8fa; --card:#ffffff; --ink:#1a2233; --ink2:#4a5568; --muted:#7b8496;
-  --line:#e8ebf0; --brand:#1b3f7a; --brand2:#2563c9; --brand-soft:#e1ecfb;
-  --accent:#e2559a; --accent-soft:#fde6f1; --money:#3fbf7f; --money-soft:#e3f7ec; --red:#c0392b; --red-soft:#f8e3df; --soft:#f3f5f8;
-  --in:#2fb574; --out:#e0613a; --grid:#e3e6ec; --axis:#c2c8d2;
+  --bg:#e6ebf2; --card:#f4f6f9; --field:#fafbfc; --ink:#28344a; --ink2:#4d5a6f; --muted:#778296;
+  --line:#d6dde7; --brand:#1b3f7a; --brand2:#2563c9; --brand-soft:#dbe5f3;
+  --accent:#e2559a; --accent-soft:#fde6f1; --money:#3fbf7f; --money-soft:#e3f7ec; --red:#c0392b; --red-soft:#f8e3df; --soft:#e9eef4;
+  --in:#3aa772; --out:#d9704a; --grid:#e3e6ec; --axis:#c2c8d2;
   --r:20px; --r-sm:12px;
   --shadow:0 0 0 1px var(--line);
   --shadow-lg:0 18px 40px -12px rgba(16,36,80,.28);
@@ -78,7 +78,7 @@ main{margin-top:8px;position:relative;z-index:1}
 .biz .hd{display:flex;align-items:center;gap:10px;font-weight:600;margin-bottom:8px}
 .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:none}
 .ic.farm{background:#dff5e8;color:#17804c}.ic.harvest{background:#fff0d9;color:#a8650b}.ic.drone{background:#e1ecfb;color:#1b4fa3}
-.biz .ic{background:#fff;box-shadow:0 0 0 1px var(--line)}
+.biz .ic{background:var(--field);box-shadow:0 0 0 1px var(--line)}
 .row{display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:2px 0}
 .row b{font-variant-numeric:tabular-nums;font-weight:600}
 .row.tot{border-top:1px dashed color-mix(in oklab,var(--ink) 18%,transparent);margin-top:6px;padding-top:6px}
@@ -107,7 +107,7 @@ main{margin-top:8px;position:relative;z-index:1}
 .btns{display:flex;gap:8px;flex-wrap:wrap}
 .filebtn{position:relative;overflow:hidden;cursor:pointer}
 .filebtn input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:100px}
-.inp,label.f input,label.f select,.dwrap input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:#fff;min-height:44px}
+.inp,label.f input,label.f select,.dwrap input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--field);min-height:44px}
 .inp:focus,label.f input:focus,label.f select:focus,.dwrap input:focus,.filters input:focus,.filters select:focus,.tin:focus{outline:2px solid var(--brand2);outline-offset:0;border-color:transparent}
 .f{display:block;margin-bottom:10px}
 .f>span,.flbl{display:block;font-size:13px;color:var(--ink2);margin-bottom:3px;font-weight:500}
@@ -123,7 +123,7 @@ main{margin-top:8px;position:relative;z-index:1}
 .seg{display:flex;background:#e8eef6;border-radius:14px;padding:4px;gap:3px;margin-bottom:12px}
 .seg button{flex:1;border:0;background:none;padding:8px 4px;min-height:40px;border-radius:10px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background-color .15s var(--ease)}
 .seg button:disabled{opacity:.4;cursor:not-allowed}
-.seg button.on{background:#fff;box-shadow:0 2px 8px -2px rgba(16,36,80,.18);font-weight:600}
+.seg button.on{background:var(--field);box-shadow:0 2px 8px -2px rgba(16,36,80,.18);font-weight:600}
 .seg.kind button.on[data-k=in]{color:#1c9a5c}.seg.kind button.on[data-k=out]{color:#b5481c}
 .seg.small{margin:0;padding:3px;border-radius:10px}.seg.small button{padding:6px 14px;border-radius:10px;white-space:nowrap;min-height:36px}.seg.small button.on{color:var(--brand)}
 .navbtn{background:var(--brand-soft);border:0;border-radius:12px;width:44px;height:44px;font-size:20px;cursor:pointer;color:var(--brand);flex:none}
@@ -131,7 +131,7 @@ main{margin-top:8px;position:relative;z-index:1}
 
 /* ---------- lists ---------- */
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-.filters select,.filters input{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;min-width:0}
+.filters select,.filters input{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--field);min-width:0}
 .filters input{flex:1 1 160px}
 .item{display:flex;align-items:center;gap:12px;padding:10px 8px;margin:0 -8px;border-radius:14px;cursor:pointer;transition:background-color .15s var(--ease)}
 .item:hover{background:var(--soft)}
@@ -170,10 +170,10 @@ main{margin-top:8px;position:relative;z-index:1}
 .dwrap{position:relative}
 .dwrap input{padding-right:44px;cursor:pointer}
 .calbtn{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:0;font-size:20px;cursor:pointer;padding:4px 6px}
-.dp{position:absolute;left:0;top:calc(100% + 6px);z-index:50;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(20,30,60,.22);padding:10px;width:330px;max-width:calc(100vw - 32px)}
+.dp{position:absolute;left:0;top:calc(100% + 6px);z-index:50;background:var(--field);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(20,30,60,.22);padding:10px;width:330px;max-width:calc(100vw - 32px)}
 .dp.right{left:auto;right:0}
 .dph{display:flex;align-items:center;gap:6px;margin-bottom:8px}
-.dph select{flex:1;padding:6px 4px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:600;min-width:0}
+.dph select{flex:1;padding:6px 4px;border:1px solid var(--line);border-radius:8px;background:var(--field);font-weight:600;min-width:0}
 .dph .m{flex:1.7}
 .dow,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
 .dow span{font-size:12px;color:var(--muted);padding:2px 0;font-weight:600}
@@ -183,7 +183,7 @@ main{margin-top:8px;position:relative;z-index:1}
 .days button.td{outline:1.5px solid var(--brand);outline-offset:-2px}
 .days button.sel{background:var(--brand);color:#fff;font-weight:600}
 .dpf{display:flex;justify-content:space-between;margin-top:8px;gap:6px}
-.dpf button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:14px}
+.dpf button{border:1px solid var(--line);background:var(--field);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:14px}
 
 /* ---------- receipts ---------- */
 .rc-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
@@ -198,8 +198,8 @@ main{margin-top:8px;position:relative;z-index:1}
 .camb{flex:1 1 100%;padding:12px 14px;font-size:16px}
 .lb{align-items:center;background:rgba(10,12,8,.9)}
 .lbin{max-width:96vw;max-height:94vh;display:flex;flex-direction:column;align-items:center;gap:10px;margin:auto}
-.lbin img{max-width:96vw;max-height:80vh;border-radius:8px;background:#fff;object-fit:contain}
-.lbin .btn.ghost{background:#fff}
+.lbin img{max-width:96vw;max-height:80vh;border-radius:8px;background:var(--field);object-fit:contain}
+.lbin .btn.ghost{background:var(--field)}
 
 /* ---------- cropper ---------- */
 .crop{position:fixed;inset:0;background:#111;z-index:70;display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:10px 10px calc(12px + env(safe-area-inset-bottom));color:#fff}
@@ -229,7 +229,7 @@ main{margin-top:8px;position:relative;z-index:1}
 .trow{display:grid;grid-template-columns:1fr 150px;gap:10px;align-items:center;padding:5px 0}
 .trow .lbl{font-size:14.5px}
 .trow .lbl small{display:block;color:var(--muted);font-size:12px}
-.tin{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;text-align:right;font-variant-numeric:tabular-nums}
+.tin{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--field);text-align:right;font-variant-numeric:tabular-nums}
 .tin.cnt{text-align:center}
 table.sum{width:100%;border-collapse:collapse;font-size:14.5px}
 table.sum td{padding:6px 4px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
@@ -240,7 +240,7 @@ table.sum tr.sub td:first-child{padding-left:16px}
 .mbiz{border-radius:16px;padding:12px 14px;margin-bottom:10px;background:var(--soft)}
 .mbiz.ex{background:var(--money-soft)}
 .method{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
-.method button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 8px;font-size:12.5px;cursor:pointer}
+.method button{border:1px solid var(--line);background:var(--field);border-radius:999px;padding:4px 8px;font-size:12.5px;cursor:pointer}
 .method button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
 
 /* ---------- rounds ---------- */
@@ -266,7 +266,7 @@ table.sum tr.sub td:first-child{padding-left:16px}
 .fab{position:fixed;right:max(18px,calc(50% - 300px));bottom:calc(84px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:20px;box-shadow:0 10px 24px -10px rgba(27,63,122,.6);z-index:20;padding:0;background:var(--brand);color:#fff}
 .fab .i{width:28px;height:28px;stroke-width:2.4}
 .fab:hover{background:var(--brand2)}
-nav.bottom{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;z-index:15;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;z-index:15;background:rgba(244,246,249,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 nav.bottom .in{display:flex;max-width:600px;width:100%;padding:4px 6px}
 nav.bottom button{flex:1;background:none;border:0;padding:6px 2px;min-height:52px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;color:var(--muted);cursor:pointer;transition:background-color .18s var(--ease),color .18s var(--ease)}
 nav.bottom button .i{width:22px;height:22px}
