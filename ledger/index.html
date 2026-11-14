@@ -97,6 +97,7 @@ main{margin-top:-38px;position:relative;z-index:1}
 .ferr{color:var(--red);font-size:13px;font-weight:600;margin-top:3px}
 .seg{display:flex;background:#e6eaf1;border-radius:12px;padding:3px;gap:3px;margin-bottom:12px}
 .seg button{flex:1;border:0;background:none;padding:8px 4px;border-radius:9px;cursor:pointer;font-size:14px}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
 .seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
 .seg.kind button.on[data-k=in]{color:#1c9a5c}.seg.kind button.on[data-k=out]{color:#b5481c}
 .seg.small{margin:0;padding:3px;border-radius:10px}.seg.small button{padding:6px 12px;border-radius:8px}.seg.small button.on{color:var(--brand)}
@@ -412,6 +413,7 @@ nav.bottom button.on{color:var(--brand);font-weight:600;box-shadow:inset 0 3px 0
     <h2><span id="recTitle">บันทึกรายการ</span><button type="button" class="x" data-act="record-close" aria-label="ปิด">×</button></h2>
     <div class="seg" id="segBiz"></div>
     <div class="seg kind" id="segKind"><button type="button" data-k="in">💰 รายรับ</button><button type="button" data-k="out">💸 รายจ่าย</button></div>
+    <p class="small muted" id="noDroneIn" style="margin:-6px 0 10px" hidden>💡 รายรับโดรนบันทึกในแอปรับงานโดรน แล้วจะดึงมาลงที่นี่ให้อัตโนมัติ</p>
     <form id="recForm" autocomplete="off" novalidate>
       <div class="g2">
         <div class="f"><span class="flbl">วันที่ (วว/ดด/ปปปป)</span><div class="dwrap"><input type="text" id="rDate" inputmode="none" maxlength="10" placeholder="แตะเพื่อเลือกวันที่" aria-label="วันที่"><button type="button" class="calbtn" aria-label="เปิดปฏิทิน">📅</button><div class="dp" hidden></div></div></div>
@@ -1045,11 +1047,12 @@ function renderList() {
 /* =====================================================================
    7. RECORD FORM (+ receipts)
    ===================================================================== */
-const F = { id:null, biz:"farm", kind:"in", round:"", rc:[], removed:[], fresh:[], saving:false };
+const F = { id:null, biz:"farm", kind:"in", keepIn:false, round:"", rc:[], removed:[], fresh:[], saving:false };
 // rc item: {id?, t:"img"|"pdf", blob?, preview?, pending?, busy?}
 
 function openRecord(rec) {
   Object.assign(F, { id:rec ? rec.id : null, biz:rec ? rec.biz : (F.biz || "farm"), kind:rec ? rec.kind : "in",
+    keepIn:!!(rec && rec.biz === "drone" && rec.kind === "in"),   // an existing drone income record stays editable
     round:rec && rec.round || "", removed:[], fresh:[], saving:false,
     rc:rec && Array.isArray(rec.receipts) ? rec.receipts.map(x => Object.assign({}, x)) : [] });
   $("#recTitle").textContent = rec ? "แก้ไขรายการ" : "บันทึกรายการใหม่";
@@ -1079,6 +1082,12 @@ function closeRecord() {
   hideOverlay("recOv");
 }
 function drawRecordParts(cat, unit) {
+  // drone income comes from the drone-jobs app, so new drone records can only be expenses
+  const noIn = F.biz === "drone" && !F.keepIn;
+  if (noIn && F.kind === "in") F.kind = "out";
+  const inBtn = $("#segKind [data-k=in]");
+  inBtn.disabled = noIn; inBtn.title = noIn ? "รายรับโดรนดึงมาจากแอปรับงานโดรนอัตโนมัติ" : "";
+  $("#noDroneIn").hidden = !noIn;
   $("#segBiz").innerHTML = BIZ_KEYS.map(k => `<button type="button" data-b="${k}" class="${F.biz === k ? "on" : ""}">${BIZ[k].icon} ${BIZ[k].short}</button>`).join("");
   $$("#segKind button").forEach(b => b.classList.toggle("on", b.dataset.k === F.kind));
   const list = CATS[F.biz][F.kind], sel = $("#rCat");
@@ -1851,7 +1860,7 @@ document.addEventListener("click", e => {
   const rd = t.closest("[data-round]"); if (rd) { roundSel = rd.dataset.round; renderRounds(); window.scrollTo({ top:0, behavior:"smooth" }); return; }
   const mb = t.closest(".method [data-method]"); if (mb) { taxInputs().method[mb.parentElement.dataset.biz] = mb.dataset.method; saveSettings(); renderTax(false); return; }
   const bz = t.closest("#segBiz [data-b]"); if (bz) { F.biz = bz.dataset.b; drawRecordParts(); return; }
-  const kd = t.closest("#segKind [data-k]"); if (kd) { F.kind = kd.dataset.k; drawRecordParts(); return; }
+  const kd = t.closest("#segKind [data-k]"); if (kd && !kd.disabled) { F.kind = kd.dataset.k; drawRecordParts(); return; }
   const lm = t.closest("#listMode [data-mode]"); if (lm) { listMode = lm.dataset.mode; try { localStorage.setItem(LS_LISTMODE, listMode); } catch (err) {} renderList(); return; }
   if (t.classList.contains("overlay")) {                  // tap on the dimmed backdrop
     if (t.id === "recOv") closeRecord(); else if (t.id === "roundOv") closeRound(); else if (t.id === "lbOv") hideOverlay("lbOv");
