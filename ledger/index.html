@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#1f3a5f">
+<meta name="theme-color" content="#1b3f7a">
 <title>บัญชี นา · รถเกี่ยว · โดรน + ภาษี</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,10 +11,10 @@
 <style>
 /* ---------- tokens ---------- */
 :root{
-  --bg:#f2f4f8; --card:#ffffff; --ink:#1a2233; --ink2:#4a5568; --muted:#7b8496;
-  --line:#dde2ea; --brand:#1f3a5f; --brand2:#2c5282; --brand-soft:#e3eaf4;
-  --gold:#c9962b; --gold-soft:#f8eed6; --red:#c0392b; --red-soft:#f8e3df; --soft:#eef1f6;
-  --in:#1f9d63; --out:#e0613a; --grid:#e3e6ec; --axis:#c2c8d2;
+  --bg:#eef4fb; --card:#ffffff; --ink:#1a2233; --ink2:#4a5568; --muted:#7b8496;
+  --line:#d9e3ef; --brand:#1b3f7a; --brand2:#2563c9; --brand-soft:#e1ecfb;
+  --accent:#e2559a; --accent-soft:#fde6f1; --money:#3fbf7f; --money-soft:#e3f7ec; --red:#c0392b; --red-soft:#f8e3df; --soft:#edf3fa;
+  --in:#2fb574; --out:#e0613a; --grid:#e3e6ec; --axis:#c2c8d2;
   --r:14px; --shadow:0 1px 2px rgba(20,30,60,.06),0 4px 14px rgba(20,30,60,.06);
 }
 *{box-sizing:border-box}
@@ -25,12 +25,12 @@ h1,h2,h3{font-family:"Mitr","IBM Plex Sans Thai",sans-serif;font-weight:500;marg
 button,input,select,textarea{font:inherit;color:inherit}
 [hidden]{display:none!important}
 .wrap{max-width:980px;margin:0 auto;padding:0 14px}
-.muted{color:var(--muted)} .small{font-size:13px} .pos{color:#17744a} .neg{color:var(--red)}
+.muted{color:var(--muted)} .small{font-size:13px} .pos{color:#1c9a5c} .neg{color:var(--red)}
 .amt{font-family:"Mitr";font-variant-numeric:tabular-nums;white-space:nowrap}
-.amt.in{color:#17744a} .amt.out{color:#b5481c}
+.amt.in{color:#1c9a5c} .amt.out{color:#b5481c}
 
 /* ---------- header ---------- */
-header.top{background:linear-gradient(135deg,#132544 0%,#1f3a5f 55%,#2f5a8c 100%);color:#fff;padding:18px 0 54px;position:relative;overflow:hidden}
+header.top{background:linear-gradient(135deg,#142f63 0%,#1b4fa3 55%,#3b8fe0 100%);color:#fff;padding:18px 0 54px;position:relative;overflow:hidden}
 header.top::after{content:"";position:absolute;inset:auto -10% -40px -10%;height:80px;background:var(--bg);border-radius:50% 50% 0 0/100% 100% 0 0}
 .toprow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .brandname{display:flex;align-items:center;gap:10px}
@@ -39,7 +39,7 @@ header.top::after{content:"";position:absolute;inset:auto -10% -40px -10%;height
 .yearsel{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:999px;padding:6px 12px;font-weight:600}
 .yearsel option{color:#000}
 main{margin-top:-38px;position:relative;z-index:1}
-.banner{border-radius:10px;padding:8px 12px;font-size:14px;margin:0 0 12px;background:var(--gold-soft);color:#6b4f12}
+.banner{border-radius:10px;padding:8px 12px;font-size:14px;margin:0 0 12px;background:#fff1d6;color:#6b4f12}
 
 /* ---------- cards & stats ---------- */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
@@ -98,7 +98,7 @@ main{margin-top:-38px;position:relative;z-index:1}
 .seg{display:flex;background:#e6eaf1;border-radius:12px;padding:3px;gap:3px;margin-bottom:12px}
 .seg button{flex:1;border:0;background:none;padding:8px 4px;border-radius:9px;cursor:pointer;font-size:14px}
 .seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
-.seg.kind button.on[data-k=in]{color:#17744a}.seg.kind button.on[data-k=out]{color:#b5481c}
+.seg.kind button.on[data-k=in]{color:#1c9a5c}.seg.kind button.on[data-k=out]{color:#b5481c}
 .seg.small{margin:0;padding:3px;border-radius:10px}.seg.small button{padding:6px 12px;border-radius:8px}.seg.small button.on{color:var(--brand)}
 .navbtn{background:var(--brand-soft);border:0;border-radius:9px;width:38px;height:38px;font-size:20px;cursor:pointer;color:var(--brand);flex:none}
 .navbtn:disabled{opacity:.35;cursor:default}
@@ -114,8 +114,8 @@ main{margin-top:-38px;position:relative;z-index:1}
 .item .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item .d{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tag{display:inline-block;font-size:11px;border-radius:999px;padding:1px 8px;font-weight:600;vertical-align:1px}
-.tag.due{background:var(--gold-soft);color:#8a5d00}.tag.ex{background:#eee;color:#555}.tag.cap{background:#e9e4f7;color:#4b3a8f}
-.tag.rc{background:#e6eef8;color:#1c4f8a}.tag.doc{background:var(--brand-soft);color:#1f3a5f}
+.tag.due{background:#fff1d6;color:#8a5d00}.tag.ex{background:#eee;color:#555}.tag.cap{background:#e9e4f7;color:#4b3a8f}
+.tag.rc{background:#e6eef8;color:#1c4f8a}.tag.doc{background:var(--brand-soft);color:#1b3f7a}
 .grpm{font-family:"Mitr";font-size:16px;display:flex;justify-content:space-between;padding:16px 4px 4px;border-bottom:2px solid var(--line)}
 .grpm.plain{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);padding:10px 4px 2px;border:0}
 .daynav{display:flex;align-items:center;gap:8px;margin-bottom:6px}
@@ -167,7 +167,7 @@ main{margin-top:-38px;position:relative;z-index:1}
 .rc-th img{width:100%;height:100%;object-fit:cover;display:block}
 .rc-th .pdf{width:100%;height:100%;display:grid;place-items:center;font-weight:700;color:#b5481c;font-size:14px;text-align:center;line-height:1.2}
 .rc-th .busy{position:absolute;inset:0;background:rgba(255,255,255,.78);display:grid;place-items:center;font-size:12px;color:var(--ink2)}
-.rc-no{position:absolute;left:4px;top:4px;background:rgba(31,58,95,.92);color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:0 6px}
+.rc-no{position:absolute;left:4px;top:4px;background:rgba(27,63,122,.92);color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:0 6px}
 .rc-new{position:absolute;left:4px;bottom:4px;background:#c99a2e;color:#fff;font-size:10.5px;font-weight:700;border-radius:6px;padding:0 5px}
 .rc-x{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:15px;line-height:1;cursor:pointer;padding:0}
 .camb{flex:1 1 100%;padding:12px 14px;font-size:16px}
@@ -187,7 +187,7 @@ main{margin-top:-38px;position:relative;z-index:1}
 .cbox::before{left:33.33%;right:33.33%;top:0;bottom:0;border-left-width:1px;border-right-width:1px}
 .cbox::after{top:33.33%;bottom:33.33%;left:0;right:0;border-top-width:1px;border-bottom-width:1px}
 .ch{position:absolute;width:30px;height:30px;touch-action:none}
-.ch::after{content:"";position:absolute;width:18px;height:18px;border:4px solid #f0c14b}
+.ch::after{content:"";position:absolute;width:18px;height:18px;border:4px solid #b6f0cf}
 .ch.nw{left:-15px;top:-15px;cursor:nwse-resize}.ch.nw::after{left:11px;top:11px;border-right:0;border-bottom:0}
 .ch.ne{right:-15px;top:-15px;cursor:nesw-resize}.ch.ne::after{right:11px;top:11px;border-left:0;border-bottom:0}
 .ch.sw{left:-15px;bottom:-15px;cursor:nesw-resize}.ch.sw::after{left:11px;bottom:11px;border-right:0;border-top:0}
@@ -223,11 +223,11 @@ table.sum tr.sub td:first-child{padding-left:16px}
 .rdc.on{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-soft)}
 .rdn{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;margin-top:4px}
 .rst{font-size:12px;font-weight:600;border-radius:999px;padding:1px 9px;white-space:nowrap}
-.rst.now{background:var(--brand-soft);color:#1f3a5f}.rst.done{background:#eee;color:#555}.rst.wait{background:var(--gold-soft);color:#8a5d00}
+.rst.now{background:var(--money-soft);color:#17804c}.rst.done{background:#eee;color:#555}.rst.wait{background:#fff1d6;color:#8a5d00}
 
 /* ---------- settings ---------- */
 .status{font-size:14px;margin-top:10px;padding:8px 12px;border-radius:10px}
-.status.ok{background:#e2f3ea;color:#17603d}.status.err{background:var(--red-soft);color:#8a2a1f}.status.work{background:#eef3fa;color:#1c4f8a}
+.status.ok{background:var(--money-soft);color:#17804c}.status.err{background:var(--red-soft);color:#8a2a1f}.status.work{background:#eef3fa;color:#1c4f8a}
 
 /* ---------- login & header actions ---------- */
 .topact{display:flex;align-items:center;gap:8px}
@@ -238,12 +238,12 @@ table.sum tr.sub td:first-child{padding-left:16px}
 .loading{text-align:center;color:var(--muted);padding:40px 0;margin-top:-38px;position:relative}
 /* ---------- nav ---------- */
 .view{display:none}.view.on{display:block}
-.fab{position:fixed;right:18px;bottom:92px;width:58px;height:58px;border-radius:50%;font-size:30px;box-shadow:0 6px 18px rgba(201,150,43,.45);z-index:20;padding:0;background:var(--gold);color:#1a2233}
+.fab{position:fixed;right:18px;bottom:92px;width:58px;height:58px;border-radius:50%;font-size:30px;box-shadow:0 6px 18px rgba(226,85,154,.45);z-index:20;padding:0;background:var(--accent);color:#fff}
 nav.bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;z-index:15;padding-bottom:env(safe-area-inset-bottom)}
 nav.bottom .in{display:flex;max-width:640px;width:100%}
 nav.bottom button{flex:1;background:none;border:0;padding:8px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);cursor:pointer}
 nav.bottom button .e{font-size:21px;line-height:1}
-nav.bottom button.on{color:var(--brand);font-weight:600;box-shadow:inset 0 3px 0 var(--gold)}
+nav.bottom button.on{color:var(--brand);font-weight:600;box-shadow:inset 0 3px 0 var(--accent)}
 
 @media(max-width:720px){
   .kpis{grid-template-columns:1fr 1fr}
@@ -257,7 +257,7 @@ nav.bottom button.on{color:var(--brand);font-weight:600;box-shadow:inset 0 3px 0
 <header class="top">
   <div class="wrap toprow">
     <div class="brandname">
-      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="20" fill="rgba(255,255,255,.18)"/><path d="M20 32V14M20 18c-3-1-5-4-5-7 3 1 5 3 5 7zm0 0c3-1 5-4 5-7-3 1-5 3-5 7zm0 6c-3-1-6-3-6-7 3 1 6 3 6 7zm0 0c3-1 6-3 6-7-3 1-6 3-6 7z" stroke="#f0c14b" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="20" fill="rgba(255,255,255,.18)"/><path d="M20 32V14M20 18c-3-1-5-4-5-7 3 1 5 3 5 7zm0 0c3-1 5-4 5-7-3 1-5 3-5 7zm0 6c-3-1-6-3-6-7 3 1 6 3 6 7zm0 0c3-1 6-3 6-7-3 1-6 3-6 7z" stroke="#b6f0cf" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
       <div><h1>สมุดบัญชีชาวนา</h1><small>ทำนา · รับจ้างเกี่ยวข้าว · รับจ้างโดรน · ภาษี</small></div>
     </div>
     <div class="topact">
@@ -1305,7 +1305,7 @@ async function watermark(blob, info) {
     for (let xx = -base - tw; xx <= base + tw; xx += tw) x.fillText(txt, xx + (row % 2) * tw / 2, yy);
   x.restore();
   // information band below the photo (never covers the receipt)
-  x.fillStyle = "#1f3a5f"; x.fillRect(0, H, W, band);
+  x.fillStyle = "#1b3f7a"; x.fillRect(0, H, W, band);
   x.fillStyle = "#fff"; x.textAlign = "left"; x.textBaseline = "alphabetic";
   x.font = `700 ${Math.round(fs2 * 1.1)}px "IBM Plex Sans Thai", sans-serif`;
   x.fillText(`เลขที่หลักฐาน ${info.docNo}${info.total > 1 ? `  (รูป ${info.page}/${info.total})` : ""}`, fs2 * 0.7, H + fs2 * 1.45, W - fs2 * 1.4);
