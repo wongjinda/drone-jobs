@@ -264,7 +264,8 @@ table.sum tr.sub td:first-child{padding-left:16px}
 .loading{text-align:center;color:var(--muted);padding:40px 0;margin-top:-38px;position:relative}
 /* ---------- nav ---------- */
 .view{display:none}.view.on{display:block}
-.fab{position:fixed;right:max(18px,calc(50% - 300px));bottom:calc(84px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:20px;box-shadow:0 10px 24px -10px rgba(0,0,0,.7);z-index:20;padding:0;background:var(--brand);color:#fff}
+.fab{position:fixed;right:18px;bottom:calc(84px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:20px;box-shadow:0 10px 24px -10px rgba(0,0,0,.7);z-index:20;padding:0;background:var(--brand);color:#fff}
+@media(min-width:720px){.fab{right:32px;bottom:calc(96px + env(safe-area-inset-bottom))}}
 .fab .i{width:28px;height:28px;stroke-width:2.4}
 .fab:hover{background:var(--brand2)}
 nav.bottom{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;z-index:15;background:rgba(23,34,53,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
