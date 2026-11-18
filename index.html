@@ -171,8 +171,15 @@ tr.confirm-row td{padding:0 0 8px!important;border:0!important}
 .edit-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:12px 16px;border-radius:12px;background:var(--blue-l);color:var(--blue)}
 .edit-banner .btn{margin-left:auto}
 .ac-wrap{position:relative}
-.ac-list{position:absolute;left:0;right:0;top:100%;z-index:12;margin-top:4px;max-height:280px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(30,40,20,.14)}
-.ac-item{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line)}
+.ac-box{position:relative}
+.ac-box input{padding-right:46px}
+.ac-btn{position:absolute;right:3px;top:50%;transform:translateY(-50%);width:40px;height:36px;border:0;border-radius:8px;background:var(--green-l);color:var(--green-d);font-size:16px;font-weight:700}
+.ac-btn.on{background:var(--green);color:#fff}
+.ac-head{position:sticky;top:0;z-index:1;padding:6px 12px;font-size:12px;color:var(--muted);background:#F7FAF3;border-bottom:1px solid var(--line)}
+.ac-list{position:absolute;left:0;right:0;top:100%;z-index:12;margin-top:4px;max-height:min(340px,55vh);overscroll-behavior:contain;-webkit-overflow-scrolling:touch;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(30,40,20,.14)}
+.ac-item{display:flex;align-items:baseline;gap:8px;padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--line)}
+.ac-item b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.ac-sub{flex:none;font-size:12px;color:var(--muted);white-space:nowrap}
 .ac-item:last-child{border:0}
 .ac-item.on,.ac-item:hover{background:var(--green-l)}
 .ac-item .meta{margin:0;font-size:12px}
@@ -419,7 +426,7 @@ details.rm-sec[open]>summary{margin-bottom:4px}
     <form id="jobForm" class="card jobform" novalidate>
       <div class="jf-head"><h2>รับงานใหม่</h2><button class="btn sm ghost" type="button" id="resetBtn">ล้างฟอร์ม</button></div>
       <div class="fgrid">
-        <div class="ac-wrap w"><label for="fName">ชื่อลูกค้า * <span class="opt">พิมพ์เพื่อค้นหาลูกค้าเก่า</span></label><input id="fName" name="name" autocomplete="off"><div class="ac-list hidden" id="acList"></div><div class="ac-hint hidden" id="acHint"></div></div>
+        <div class="ac-wrap w"><label for="fName">ชื่อลูกค้า * <span class="opt">พิมพ์ค้นหา หรือกด ▾ เลือกจากรายชื่อ</span></label><div class="ac-box"><input id="fName" name="name" autocomplete="off"><button type="button" class="ac-btn" id="acBtn" aria-label="เปิดรายชื่อลูกค้า" aria-expanded="false">▾</button></div><div class="ac-list hidden" id="acList" role="listbox"></div><div class="ac-hint hidden" id="acHint"></div></div>
         <div><label for="fPhone">เบอร์โทร</label><input id="fPhone" name="phone" inputmode="tel"></div>
         <div><label for="fArea">พื้นที่ (ไร่) *</label><input id="fArea" name="area" type="number" min="0" step="0.5" inputmode="decimal"></div>
         <div class="all hidden" id="plotPick"></div>
@@ -503,7 +510,7 @@ details.rm-sec[open]>summary{margin-bottom:4px}
 
 <script>
 "use strict";
-const APP_VERSION="2.8 · 11/11/2569";
+const APP_VERSION="2.9 · 18/11/2569";
 const SB_URL="https://nvuzbwullioricaonpck.supabase.co";
 // คีย์สาธารณะ (anon) — ข้อมูลป้องกันด้วย Row Level Security: แต่ละบัญชีเห็นเฉพาะข้อมูลของตัวเอง
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52dXpid3VsbGlvcmljYW9ucGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzI1NTIsImV4cCI6MjEwOTU0ODU1Mn0.a_2-yqi0ovmj1DjjY8_4ujONYiP0OfxZZdUs1Cs7kZE";
@@ -909,11 +916,18 @@ let acItems=[],acIdx=-1,plotChoices=[];
 function acRender(){
   const all=customers();if(!all.length){acClose();return}
   const q=norm($("#fName").value),qd=$("#fName").value.replace(/\D/g,"");
-  acItems=all.filter(c=>!q||norm(c.name).includes(q)||(qd.length>=3&&c.phone.replace(/\D/g,"").includes(qd))).slice(0,8);
-  $("#acList").innerHTML=acItems.length?acItems.map((c,i)=>`<div class="ac-item${i===acIdx?" on":""}" data-ac="${i}"><b>${esc(c.name)}</b>${c.phone?` · ${esc(c.phone)}`:""}<div class="meta">${c.plots.length} แปลง · ใช้บริการ ${c.count} ครั้ง${c.last?` · ล่าสุด ${thDate(c.last)}`:""}</div></div>`).join(""):`<div class="ac-item" style="cursor:default;color:var(--muted)">ไม่พบลูกค้าเก่า — จะบันทึกเป็นลูกค้าใหม่</div>`;
-  $("#acList").classList.remove("hidden");
+  acItems=q?all.filter(c=>norm(c.name).includes(q)||(qd.length>=3&&c.phone.replace(/\D/g,"").includes(qd))):all.slice().sort((a,b)=>a.name.localeCompare(b.name,"th"));
+  $("#acList").innerHTML=(acItems.length?`<div class="ac-head">${q?`พบ ${acItems.length} ราย`:`ลูกค้าทั้งหมด ${acItems.length} ราย · ก–ฮ`} · เลื่อนเพื่อเลือก</div>`:"")+(acItems.length?acItems.map((c,i)=>`<div class="ac-item${i===acIdx?" on":""}" data-ac="${i}" role="option"><b>${esc(c.name)}</b><span class="ac-sub">${[c.phone?esc(c.phone):"",c.plots.length?c.plots.length+" แปลง":""].filter(Boolean).join(" · ")}</span></div>`).join(""):`<div class="ac-item" style="cursor:default;color:var(--muted)">ไม่พบลูกค้าเก่า — จะบันทึกเป็นลูกค้าใหม่</div>`);
+  $("#acList").classList.remove("hidden");$("#acBtn").setAttribute("aria-expanded","true");$("#acBtn").classList.add("on");
+  const on=$("#acList .ac-item.on");if(on)on.scrollIntoView({block:"nearest"});
+  acFit();
 }
-function acClose(){$("#acList").classList.add("hidden");acIdx=-1}
+// keep the list above the phone's bottom menu bar
+function acFit(){
+  const l=$("#acList"),top=l.getBoundingClientRect().top,nav=$("nav.tabs"),navTop=getComputedStyle(nav).position==="fixed"?nav.getBoundingClientRect().top:innerHeight;
+  l.style.maxHeight=Math.max(160,Math.min(380,navTop-top-10))+"px";
+}
+function acClose(){$("#acList").classList.add("hidden");acIdx=-1;$("#acBtn").setAttribute("aria-expanded","false");$("#acBtn").classList.remove("on")}
 function acPick(c){
   $("#fName").value=c.name;$("#fPhone").value=c.phone||"";
   renderPlotPicker(null);renderPlotPicker(c);
@@ -974,8 +988,14 @@ $("#fName").addEventListener("keydown",e=>{
   else if(e.key==="Enter"&&acIdx>=0){e.preventDefault();acPick(acItems[acIdx])}
   else if(e.key==="Escape")acClose();
 });
-$("#acList").addEventListener("mousedown",e=>{const it=e.target.closest("[data-ac]");if(it){e.preventDefault();acPick(acItems[+it.dataset.ac])}});
-$("#fName").addEventListener("blur",()=>setTimeout(acClose,150));
+$("#acList").addEventListener("mousedown",e=>e.preventDefault());
+$("#acList").addEventListener("click",e=>{const it=e.target.closest("[data-ac]");if(it){acTouch=false;acPick(acItems[+it.dataset.ac])}});
+$("#fName").addEventListener("blur",()=>setTimeout(()=>{if(document.activeElement!==$("#acBtn")&&!acTouch)acClose()},150));
+// ▾ opens the full customer list without bringing up the phone keyboard
+let acTouch=false;
+$("#acBtn").addEventListener("mousedown",e=>e.preventDefault());
+$("#acBtn").addEventListener("click",()=>{if($("#acList").classList.contains("hidden")){acTouch=true;acIdx=-1;const hd=$("header").offsetHeight,y=$("#fName").getBoundingClientRect().top;if(y>hd+60||y<hd)window.scrollBy(0,y-hd-40);acRender();$("#acList").scrollTop=0}else{acTouch=false;acClose()}});
+document.addEventListener("pointerdown",e=>{if(!$("#acList").classList.contains("hidden")&&!e.target.closest(".ac-wrap")){acTouch=false;acClose()}});
 
 /* ================= job list ================= */
 let filter="all";
