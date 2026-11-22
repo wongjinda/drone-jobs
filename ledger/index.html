@@ -707,6 +707,39 @@ async function refresh(showErrors) {
   catch (e) { setBanner("⚠️ โหลดข้อมูลไม่สำเร็จ — ตรวจอินเทอร์เน็ตแล้วเปิดหน้านี้ใหม่"); if (showErrors) writeErr(e); }
 }
 
+/* ---------- live updates: changes from another device (or the drone-jobs app) appear at once ---------- */
+const LIVE = { ch:null, joined:false, renderT:null, djT:null };
+const sameJson = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+function liveRender() { clearTimeout(LIVE.renderT); LIVE.renderT = setTimeout(renderAll, 120); }
+function liveRecord(id, data) {
+  const had = S.records.get(id);
+  if (data ? sameJson(had, data) : !had) return;          // our own write echoing back
+  if (data) S.records.set(id, data); else S.records.delete(id);
+  if (F.id === id && $("#recOv").classList.contains("on")) toast(data ? "รายการนี้เพิ่งถูกแก้จากอีกเครื่อง" : "รายการนี้เพิ่งถูกลบจากอีกเครื่อง");
+  liveRender();
+}
+function startLive() {
+  stopLive();
+  const uid = S.user.id, mine = `user_id=eq.${uid}`;
+  LIVE.ch = sb.channel(`ledger-${uid}`)
+    .on("postgres_changes", { event:"INSERT", schema:"public", table:T_RECORDS, filter:mine }, p => liveRecord(p.new.id, p.new.data))
+    .on("postgres_changes", { event:"UPDATE", schema:"public", table:T_RECORDS, filter:mine }, p => liveRecord(p.new.id, p.new.data))
+    .on("postgres_changes", { event:"DELETE", schema:"public", table:T_RECORDS }, p => { if (p.old && p.old.user_id === uid) liveRecord(p.old.id, null); })
+    .on("postgres_changes", { event:"*", schema:"public", table:T_SETTINGS, filter:mine }, p => {
+      if (!p.new || p.new.id !== "main" || settingsSync.pending || sameJson(S.settings, normalizeSettings(p.new.data))) return;
+      S.settings = normalizeSettings(p.new.data); liveRender();
+    })
+    .on("postgres_changes", { event:"*", schema:"public", table:"jobs", filter:mine }, () => {
+      clearTimeout(LIVE.djT); LIVE.djT = setTimeout(() => syncDroneJobs(true), 1500);
+    })
+    .subscribe(status => {
+      if (status !== "SUBSCRIBED") return;
+      if (LIVE.joined) refresh(false).then(() => syncDroneJobs(true));   // reconnected: catch up on anything missed
+      LIVE.joined = true;
+    });
+}
+function stopLive() { if (LIVE.ch) sb.removeChannel(LIVE.ch); LIVE.ch = null; LIVE.joined = false; }
+
 /* ---------- sign-in (same accounts as the drone-jobs app) ---------- */
 let loginMode = "in";                                     // in | forgot | reset
 function showLogin(mode) {
@@ -755,9 +788,11 @@ async function enterApp(user) {
   goView(S.view);
   renderAll();
   syncDroneJobs(true);
+  startLive();
 }
 async function logout() {
   if (!(await confirmBox("ออกจากระบบ?", "จะออกจากระบบทั้งแอปบัญชีและแอปรับงานโดรนบนเครื่องนี้", "ออกจากระบบ"))) return;
+  stopLive();
   await sb.auth.signOut();
   S.records = new Map(); S.settings = normalizeSettings(null); S.user = null; S.loaded = false;
   showLogin("in");
