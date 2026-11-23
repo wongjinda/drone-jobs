@@ -80,6 +80,10 @@ main{margin-top:8px;position:relative;z-index:1}
 .biz .hd{display:flex;align-items:center;gap:10px;font-weight:600;margin-bottom:8px}
 .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:none}
 .ic.farm{background:#1d4434;color:#6ee7a8}.ic.harvest{background:#4a3818;color:#fbbf5a}.ic.drone{background:#2c4370;color:#93c5fd}
+.otherlink{display:flex;align-items:center;gap:10px;width:100%;margin-top:12px;padding:10px 12px;border:1px dashed var(--line);border-radius:14px;background:none;color:var(--ink2);font:inherit;cursor:pointer;text-align:left}
+.otherlink:hover{background:var(--soft)}
+.otherlink b{margin-left:auto;color:var(--ink)}
+.ic.other{background:#3b2f4d;color:#d8b4fe}
 .biz .ic{background:var(--field);box-shadow:0 0 0 1px var(--line)}
 .row{display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:2px 0}
 .row b{font-variant-numeric:tabular-nums;font-weight:600}
@@ -321,7 +325,8 @@ nav.bottom button.on .i{stroke-width:2.3}
 
   <!-- ===== HOME ===== -->
   <section class="view on" id="v-home">
-    <div class="card"><h2>แยกตามกิจการ</h2><div class="bizgrid" id="homeBiz"></div></div>
+    <div class="card"><h2>แยกตามกิจการ</h2><div class="bizgrid" id="homeBiz"></div>
+      <button type="button" class="otherlink" data-go="other" id="homeOther"></button></div>
     <div class="card">
       <h2>รายรับ–รายจ่ายรายเดือน</h2>
       <div class="legend"><span><i style="background:var(--in)"></i>รายรับ (รับเงินแล้ว)</span><span><i style="background:var(--out)"></i>รายจ่าย</span></div>
@@ -383,6 +388,21 @@ nav.bottom button.on .i{stroke-width:2.3}
     </ul></div></div>
   </section>
 
+  <!-- ===== OTHER SPENDING ===== -->
+  <section class="view" id="v-other">
+    <div class="card">
+      <div class="hrow" style="margin-bottom:6px"><h2 style="margin:0">รายจ่ายอื่น</h2><button class="btn sm" data-act="other-new">＋ บันทึกรายจ่าย</button></div>
+      <p class="small muted" style="margin:0">ค่าใช้จ่ายในบ้านและเรื่องส่วนตัวที่ไม่เกี่ยวกับนา รถเกี่ยว หรือโดรน เก็บไว้ดูเอง <b>ไม่นำไปคิดกำไรของกิจการและไม่คิดภาษี</b></p>
+    </div>
+    <div class="kpis" id="otherKpis"></div>
+    <div class="card" id="otherCatCard"><h2>แยกตามหมวด</h2><div id="otherCats"></div></div>
+    <div class="card">
+      <div class="hrow" style="margin-bottom:10px"><h2 style="margin:0">รายการ</h2><select id="oMonth" class="inp" style="width:auto;min-height:38px;padding:4px 10px" aria-label="เดือน"></select></div>
+      <div class="strip" id="otherSum" hidden></div>
+      <div id="otherList"></div>
+    </div>
+  </section>
+
   <!-- ===== ROUNDS ===== -->
   <section class="view" id="v-round">
     <div class="card">
@@ -436,6 +456,7 @@ nav.bottom button.on .i{stroke-width:2.3}
   <button data-go="list"><span class="e" data-i="list"></span>รายการ</button>
   <button data-go="tax"><span class="e" data-i="tax"></span>ภาษี</button>
   <button data-go="round"><span class="e" data-i="round"></span>รอบปลูก</button>
+  <button data-go="other"><span class="e" data-i="wallet"></span>จ่ายอื่น</button>
   <button data-go="set"><span class="e" data-i="set"></span>ข้อมูล</button>
 </div></nav>
 
@@ -445,6 +466,7 @@ nav.bottom button.on .i{stroke-width:2.3}
     <h2><span id="recTitle">บันทึกรายการ</span><button type="button" class="x" data-act="record-close" aria-label="ปิด">×</button></h2>
     <div class="seg" id="segBiz"></div>
     <div class="seg kind" id="segKind"><button type="button" data-k="in">💰 รายรับ</button><button type="button" data-k="out">💸 รายจ่าย</button></div>
+    <p class="small muted" id="otherNote" style="margin:-6px 0 10px" hidden>💡 รายจ่ายอื่นเก็บไว้ดูเอง ไม่นำไปคิดกำไรของกิจการและไม่นำไปคิดภาษี</p>
     <p class="small muted" id="noDroneIn" style="margin:-6px 0 10px" hidden>💡 รายรับโดรนบันทึกในแอปรับงานโดรน แล้วจะดึงมาลงที่นี่ให้อัตโนมัติ</p>
     <form id="recForm" autocomplete="off" novalidate>
       <div class="g2">
@@ -562,6 +584,7 @@ const ICONS = {
   round:'<path d="M12 21v-9"/><path d="M12 12C12 7.5 9 5 4 5c0 4.5 3 7 8 7zM12 14c0-4 3-6.5 8-6.5 0 4-3 6.5-8 6.5z"/>',
   set:'<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
+  wallet:'<path d="M4 7a2 2 0 0 1 2-2h11v4"/><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M16 13.5h2"/>',
 };
 const svg = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
 document.querySelectorAll("[data-i]").forEach(el => { el.outerHTML = svg(el.dataset.i); });
@@ -569,8 +592,11 @@ const BIZ = {
   farm:   { name:"ทำนา",            short:"นา",       icon:svg("farm") },
   harvest:{ name:"รับจ้างเกี่ยวข้าว", short:"รถเกี่ยว", icon:svg("harvest") },
   drone:  { name:"รับจ้างโดรนฉีดยา", short:"โดรน",     icon:svg("drone") },
+  other:  { name:"รายจ่ายอื่น",       short:"จ่ายอื่น", icon:svg("wallet") },
 };
-const BIZ_KEYS = Object.keys(BIZ);
+/** the three businesses; "other" = household/personal spending, kept apart from profit and tax */
+const BIZ_KEYS = ["farm", "harvest", "drone"];
+const isBizRec = r => BIZ_KEYS.includes(r.biz);
 const CAT_ASSET = "ซื้อเครื่องจักร/อุปกรณ์ (ทรัพย์สิน)";
 const CAT_DEPR  = "ค่าเสื่อมราคาเครื่องจักร";
 const CATS = {
@@ -581,6 +607,10 @@ const CATS = {
   harvest:{
     in:[["ค่าจ้างเกี่ยวข้าว","ไร่"],["ค่าจ้างขนข้าว","เที่ยว"],["รายรับอื่น ๆ",""]],
     out:[["ค่าน้ำมันดีเซล","ลิตร"],["ค่าซ่อม/อะไหล่",""],["ค่าน้ำมันเครื่อง/จารบี",""],["ค่าจ้างคนขับ/ลูกมือ","วัน"],["ค่าขนย้ายรถ (หัวลาก)","เที่ยว"],["ค่านายหน้าหางาน","ไร่"],["ค่าอาหาร/ที่พักระหว่างทาง",""],["ค่างวดดอกเบี้ยรถ",""],["ค่าประกัน/ภาษีรถ",""],[CAT_DEPR,""],[CAT_ASSET,""],["รายจ่ายอื่น ๆ",""]],
+  },
+  other:{
+    in:[],
+    out:[["ค่าอาหาร/ของใช้ในบ้าน",""],["ค่าน้ำ-ค่าไฟบ้าน",""],["ค่าโทรศัพท์/อินเทอร์เน็ต",""],["ค่าน้ำมันรถส่วนตัว","ลิตร"],["ผ่อนบ้าน/ผ่อนรถส่วนตัว",""],["ค่าเล่าเรียน/ค่าใช้จ่ายลูก",""],["ค่ารักษาพยาบาล",""],["เบี้ยประกันชีวิต/สุขภาพ",""],["ทำบุญ/บริจาค",""],["งานบุญ/งานสังคม",""],["ให้พ่อแม่/ครอบครัว",""],["ภาษี/ค่าธรรมเนียมต่าง ๆ",""],["รายจ่ายอื่น ๆ",""]],
   },
   drone:{
     in:[["ค่าจ้างฉีดพ่น","ไร่"],["ค่าจ้างหว่านปุ๋ย/เมล็ด","ไร่"],["ขายยา/ปุ๋ยให้ลูกค้า",""],["รายรับอื่น ๆ",""]],
@@ -867,8 +897,8 @@ function roundStats(x) {
 }
 
 /* ---- evidence numbers: <พ.ศ.>/<running 4 digits> ---- */
-function nextDocNo(beYear, exceptId) {
-  const pre = beYear + "/"; let max = 0;
+function nextDocNo(beYear, exceptId, other) {
+  const pre = (other ? "อ" : "") + beYear + "/"; let max = 0;
   for (const r of S.records.values()) {
     if (r.id !== exceptId && typeof r.docNo === "string" && r.docNo.startsWith(pre)) max = Math.max(max, parseInt(r.docNo.slice(pre.length), 10) || 0);
   }
@@ -956,6 +986,7 @@ function renderAll() {
   renderYearSelect();
   renderHome();
   renderList();
+  renderOther();
   renderSettings();
   if (S.view === "tax") renderTax(false);
   if (S.view === "round") renderRounds();
@@ -1000,6 +1031,31 @@ function catBarsHtml(cats, total) {
   return rows.map(([c, v]) => `<div class="catrow"><div class="cl"><span>${esc(c)}</span><b>${baht(v)} <span class="muted small">(${Math.round(v / total * 100)}%)</span></b></div><div class="cbar"><i style="width:${Math.max(2, v / max * 100)}%"></i></div></div>`).join("");
 }
 
+/* ---------- other (household) spending ---------- */
+const otherRecs = year => allRecords().filter(r => r.biz === "other" && yearOf(r) === year);
+function renderOther() {
+  const fm = $("#oMonth");
+  if (!fm.options.length) fm.innerHTML = `<option value="">ทั้งปี</option>` + MONTHS.map((m, i) => `<option value="${i + 1}">${m}</option>`).join("");
+  const all = otherRecs(S.year), month = +fm.value;
+  const total = all.reduce((t, r) => t + num(r.amount), 0);
+  const now = new Date(), thisM = S.year === now.getFullYear() ? now.getMonth() + 1 : 12;
+  const mTot = all.filter(r => monthOf(r) === thisM).reduce((t, r) => t + num(r.amount), 0);
+  const months = new Set(all.map(monthOf)).size;
+  $("#otherKpis").innerHTML =
+    kpiHtml(`รวมทั้งปี ${be(S.year)}`, baht(total), `${all.length} รายการ`) +
+    kpiHtml(`เดือน${MONTHS_FULL[thisM - 1]}`, baht(mTot), "บาท") +
+    kpiHtml("เฉลี่ยต่อเดือน", baht(months ? total / months : 0), months ? `จาก ${months} เดือนที่มีรายการ` : "บาท");
+  const list = all.filter(r => !month || monthOf(r) === month).sort(byNewest);
+  const cats = {}; list.forEach(r => { cats[r.cat] = (cats[r.cat] || 0) + num(r.amount); });
+  const sum = list.reduce((t, r) => t + num(r.amount), 0);
+  $("#otherCatCard").hidden = !list.length;
+  $("#otherCats").innerHTML = catBarsHtml(cats, sum);
+  $("#otherSum").hidden = !list.length;
+  $("#otherSum").innerHTML = `<span>${list.length} รายการ</span><span>รวม <b class="amt out">${baht(sum)}</b> บาท</span>`;
+  $("#otherList").innerHTML = list.length ? list.map(itemHtml).join("")
+    : `<div class="empty">ยังไม่มีรายจ่ายอื่น${month ? "ในเดือนนี้" : `ในปี ${be(S.year)}`}<br>กด <b>＋ บันทึกรายจ่าย</b> เพื่อเริ่มบันทึก</div>`;
+}
+
 /* ---------- home ---------- */
 let homeDay = null;
 function renderHome() {
@@ -1017,6 +1073,8 @@ function renderHome() {
     const extra = b.rai ? `<div class="row small muted"><span>ทำไป ${fmt(b.rai, b.rai % 1 ? 1 : 0)} ไร่</span><span>เฉลี่ยรับ ${baht(b.inc / b.rai)} ฿/ไร่</span></div>` : "";
     return bizCardHtml(k, b, extra);
   }).join("");
+  const ot = otherRecs(S.year).reduce((t, r) => t + num(r.amount), 0);
+  $("#homeOther").innerHTML = `<span class="ic other">${svg("wallet")}</span><span>รายจ่ายอื่น (ไม่นับในกำไร)</span><b>${baht(ot)} บาท ›</b>`;
   if (S.view === "home") renderChart();
   const dues = allRecords().filter(isDue).sort((a, b) => a.date.localeCompare(b.date));
   $("#dueCard").hidden = !dues.length;
@@ -1030,7 +1088,7 @@ function renderDay() {
   const d = homeDay, rel = d === td ? "วันนี้" : d === addDays(td, -1) ? "เมื่อวาน" : "";
   $("#dayLbl").innerHTML = `${rel ? `<b>${rel}</b> · ` : ""}${weekday(d)} ${thDate(d)}${d !== td ? ` <button type="button" class="btn ghost sm" data-act="day-today" style="margin-left:6px;padding:2px 10px">วันนี้</button>` : ""}`;
   $("#dayNext").disabled = d >= td;
-  const recs = allRecords().filter(r => effDate(r) === d || (isDue(r) && r.date === d)).sort(byNewest);
+  const recs = allRecords().filter(r => isBizRec(r) && (effDate(r) === d || (isDue(r) && r.date === d))).sort(byNewest);
   let i = 0, o = 0;
   recs.forEach(r => { if (isDue(r)) return; if (r.kind === "in") i += num(r.amount); else o += num(r.amount); });
   $("#daySum").hidden = !recs.length;
@@ -1044,7 +1102,7 @@ function renderChart() {
   const box = $("#chart");
   const inc = Array(12).fill(0), exp = Array(12).fill(0);
   for (const r of S.records.values()) {
-    if (isDue(r) || yearOf(r) !== S.year) continue;
+    if (!isBizRec(r) || isDue(r) || yearOf(r) !== S.year) continue;
     (r.kind === "in" ? inc : exp)[monthOf(r) - 1] += num(r.amount);
   }
   const max = Math.max(1, ...inc, ...exp);
@@ -1093,6 +1151,7 @@ function renderList() {
   $$("#listMode button").forEach(b => b.classList.toggle("on", b.dataset.mode === listMode));
   const biz = fb.value, kind = $("#fKind").value, month = +fm.value, q = $("#fText").value.trim().toLowerCase();
   const list = allRecords().filter(r => {
+    if (!isBizRec(r)) return false;                          // "other" spending has its own tab
     if (biz && r.biz !== biz) return false;
     if (kind === "due") return isDue(r);
     if (yearOf(r) !== S.year || (month && monthOf(r) !== month)) return false;
@@ -1135,8 +1194,8 @@ function renderList() {
 const F = { id:null, biz:"farm", kind:"in", keepIn:false, round:"", rc:[], removed:[], fresh:[], saving:false };
 // rc item: {id?, t:"img"|"pdf", blob?, preview?, pending?, busy?}
 
-function openRecord(rec) {
-  Object.assign(F, { id:rec ? rec.id : null, biz:rec ? rec.biz : (F.biz || "farm"), kind:rec ? rec.kind : "in",
+function openRecord(rec, biz) {
+  Object.assign(F, { id:rec ? rec.id : null, biz:rec ? rec.biz : (biz || (F.biz && F.biz !== "other" ? F.biz : "farm")), kind:rec ? rec.kind : "in",
     keepIn:!!(rec && rec.biz === "drone" && rec.kind === "in"),   // an existing drone income record stays editable
     round:rec && rec.round || "", removed:[], fresh:[], saving:false,
     rc:rec && Array.isArray(rec.receipts) ? rec.receipts.map(x => Object.assign({}, x)) : [] });
@@ -1168,12 +1227,14 @@ function closeRecord() {
 }
 function drawRecordParts(cat, unit) {
   // drone income comes from the drone-jobs app, so new drone records can only be expenses
-  const noIn = F.biz === "drone" && !F.keepIn;
+  const other = F.biz === "other";                          // household spending: expenses only
+  const noIn = other || (F.biz === "drone" && !F.keepIn);
   if (noIn && F.kind === "in") F.kind = "out";
   const inBtn = $("#segKind [data-k=in]");
-  inBtn.disabled = noIn; inBtn.title = noIn ? "รายรับโดรนดึงมาจากแอปรับงานโดรนอัตโนมัติ" : "";
-  $("#noDroneIn").hidden = !noIn;
-  $("#segBiz").innerHTML = BIZ_KEYS.map(k => `<button type="button" data-b="${k}" class="${F.biz === k ? "on" : ""}">${BIZ[k].icon} ${BIZ[k].short}</button>`).join("");
+  inBtn.disabled = noIn; inBtn.title = noIn ? (other ? "รายจ่ายอื่นมีแต่รายจ่าย" : "รายรับโดรนดึงมาจากแอปรับงานโดรนอัตโนมัติ") : "";
+  $("#noDroneIn").hidden = !noIn || other;
+  $("#otherNote").hidden = !other;
+  $("#segBiz").innerHTML = BIZ_KEYS.concat("other").map(k => `<button type="button" data-b="${k}" class="${F.biz === k ? "on" : ""}">${BIZ[k].icon} ${BIZ[k].short}</button>`).join("");
   $$("#segKind button").forEach(b => b.classList.toggle("on", b.dataset.k === F.kind));
   const list = CATS[F.biz][F.kind], sel = $("#rCat");
   sel.innerHTML = list.map(([c]) => `<option>${esc(c)}</option>`).join("");
@@ -1243,7 +1304,7 @@ async function submitRecord() {
   if (old && old.src) Object.assign(r, { src:old.src, srcId:old.srcId, srcUpdated:old.srcUpdated || null });
 
   if (F.rc.length) {
-    if (!r.docNo) r.docNo = nextDocNo(be(+iso.slice(0, 4)), r.id);
+    if (!r.docNo) r.docNo = nextDocNo(be(+iso.slice(0, 4)), r.id, r.biz === "other");
     const ok = await uploadPendingReceipts(r);
     if (!ok) return;
     r.receipts = F.rc.map(x => x.path ? { path:x.path, t:x.t } : { id:x.id, t:x.t });
@@ -1900,7 +1961,7 @@ function goView(v) {
   S.view = v; document.body.dataset.view = v;
   $$(".view").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
   $$("nav.bottom button").forEach(b => b.classList.toggle("on", b.dataset.go === v));
-  $(".fab").hidden = !(v === "home" || v === "list" || v === "round");
+  $(".fab").hidden = !(v === "home" || v === "list" || v === "round" || v === "other");
   window.scrollTo(0, 0);
   if (v === "home") renderChart();
   if (v === "tax") renderTax(true);
@@ -1908,7 +1969,8 @@ function goView(v) {
 }
 
 const ACTIONS = {
-  "record-new": () => openRecord(null),
+  "record-new": () => openRecord(null, S.view === "other" ? "other" : null),
+  "other-new": () => openRecord(null, "other"),
   "record-close": closeRecord,
   "record-delete": deleteCurrentRecord,
   "day-prev": () => { homeDay = addDays(homeDay || today(), -1); renderDay(); },
@@ -1968,6 +2030,7 @@ document.addEventListener("keydown", e => {
 $("#yearSel").addEventListener("change", e => { S.year = +e.target.value; renderAll(); if (S.view === "tax") renderTax(true); if (S.view === "home") renderChart(); });
 ["#fBiz", "#fKind", "#fMonth"].forEach(s => $(s).addEventListener("change", renderList));
 $("#fText").addEventListener("input", renderList);
+$("#oMonth").addEventListener("change", renderOther);
 $("#tFarmEx").addEventListener("change", e => { S.settings.farmExempt = e.target.checked; saveSettings(); renderTax(false); });
 $("#tMarried").addEventListener("change", e => { taxInputs().married = e.target.checked; saveSettings(); renderTax(false); });
 
