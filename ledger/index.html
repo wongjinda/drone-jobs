@@ -129,6 +129,7 @@ main{margin-top:8px;position:relative;z-index:1}
 .seg{display:flex;background:#1e293e;border-radius:14px;padding:4px;gap:3px;margin-bottom:12px}
 .seg button{flex:1;border:0;background:none;padding:8px 4px;min-height:40px;border-radius:10px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background-color .15s var(--ease)}
 .seg button:disabled{opacity:.4;cursor:not-allowed}
+#segBiz button{flex:1 1 auto;white-space:nowrap;padding:8px 6px;gap:4px;font-size:13.5px}
 .seg button.on{background:var(--field);box-shadow:0 2px 8px -2px rgba(0,0,0,.5);font-weight:600;background:var(--brand-soft)}
 .seg.kind button.on[data-k=in]{color:#4ade80}.seg.kind button.on[data-k=out]{color:#fb9a6f}
 .seg.small{margin:0;padding:3px;border-radius:10px}.seg.small button{padding:6px 14px;border-radius:10px;white-space:nowrap;min-height:36px}.seg.small button.on{color:var(--brand)}
@@ -275,7 +276,7 @@ table.sum tr.sub td:first-child{padding-left:16px}
 .fab:hover{background:var(--brand2)}
 nav.bottom{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;z-index:15;background:rgba(36,49,74,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 nav.bottom .in{display:flex;max-width:600px;width:100%;padding:4px 6px}
-nav.bottom button{flex:1;background:none;border:0;padding:6px 2px;min-height:52px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;color:var(--muted);cursor:pointer;transition:background-color .18s var(--ease),color .18s var(--ease)}
+nav.bottom button{flex:1;min-width:0;white-space:nowrap;background:none;border:0;padding:6px 2px;min-height:52px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;color:var(--muted);cursor:pointer;transition:background-color .18s var(--ease),color .18s var(--ease)}
 nav.bottom button .i{width:22px;height:22px}
 nav.bottom button.on{color:var(--brand);font-weight:700}
 nav.bottom button.on .i{stroke-width:2.3}
@@ -391,7 +392,7 @@ nav.bottom button.on .i{stroke-width:2.3}
   <!-- ===== OTHER SPENDING ===== -->
   <section class="view" id="v-other">
     <div class="card">
-      <div class="hrow" style="margin-bottom:6px"><h2 style="margin:0">รายจ่ายอื่น</h2><button class="btn sm" data-act="other-new">＋ บันทึกรายจ่าย</button></div>
+      <div class="hrow" style="margin-bottom:6px"><h2 style="margin:0">รายจ่ายอื่นๆ</h2><button class="btn sm" data-act="other-new">＋ บันทึกรายจ่าย</button></div>
       <p class="small muted" style="margin:0">ค่าใช้จ่ายในบ้านและเรื่องส่วนตัวที่ไม่เกี่ยวกับนา รถเกี่ยว หรือโดรน เก็บไว้ดูเอง <b>ไม่นำไปคิดกำไรของกิจการและไม่คิดภาษี</b></p>
     </div>
     <div class="kpis" id="otherKpis"></div>
@@ -456,7 +457,7 @@ nav.bottom button.on .i{stroke-width:2.3}
   <button data-go="list"><span class="e" data-i="list"></span>รายการ</button>
   <button data-go="tax"><span class="e" data-i="tax"></span>ภาษี</button>
   <button data-go="round"><span class="e" data-i="round"></span>รอบปลูก</button>
-  <button data-go="other"><span class="e" data-i="wallet"></span>จ่ายอื่น</button>
+  <button data-go="other"><span class="e" data-i="wallet"></span>รายจ่ายอื่นๆ</button>
   <button data-go="set"><span class="e" data-i="set"></span>ข้อมูล</button>
 </div></nav>
 
@@ -466,7 +467,7 @@ nav.bottom button.on .i{stroke-width:2.3}
     <h2><span id="recTitle">บันทึกรายการ</span><button type="button" class="x" data-act="record-close" aria-label="ปิด">×</button></h2>
     <div class="seg" id="segBiz"></div>
     <div class="seg kind" id="segKind"><button type="button" data-k="in">💰 รายรับ</button><button type="button" data-k="out">💸 รายจ่าย</button></div>
-    <p class="small muted" id="otherNote" style="margin:-6px 0 10px" hidden>💡 รายจ่ายอื่นเก็บไว้ดูเอง ไม่นำไปคิดกำไรของกิจการและไม่นำไปคิดภาษี</p>
+    <p class="small muted" id="otherNote" style="margin:-6px 0 10px" hidden>💡 รายจ่ายอื่นๆเก็บไว้ดูเอง ไม่นำไปคิดกำไรของกิจการและไม่นำไปคิดภาษี</p>
     <p class="small muted" id="noDroneIn" style="margin:-6px 0 10px" hidden>💡 รายรับโดรนบันทึกในแอปรับงานโดรน แล้วจะดึงมาลงที่นี่ให้อัตโนมัติ</p>
     <form id="recForm" autocomplete="off" novalidate>
       <div class="g2">
@@ -592,7 +593,7 @@ const BIZ = {
   farm:   { name:"ทำนา",            short:"นา",       icon:svg("farm") },
   harvest:{ name:"รับจ้างเกี่ยวข้าว", short:"รถเกี่ยว", icon:svg("harvest") },
   drone:  { name:"รับจ้างโดรนฉีดยา", short:"โดรน",     icon:svg("drone") },
-  other:  { name:"รายจ่ายอื่น",       short:"จ่ายอื่น", icon:svg("wallet") },
+  other:  { name:"รายจ่ายอื่นๆ",      short:"รายจ่ายอื่นๆ", icon:svg("wallet") },
 };
 /** the three businesses; "other" = household/personal spending, kept apart from profit and tax */
 const BIZ_KEYS = ["farm", "harvest", "drone"];
@@ -1053,7 +1054,7 @@ function renderOther() {
   $("#otherSum").hidden = !list.length;
   $("#otherSum").innerHTML = `<span>${list.length} รายการ</span><span>รวม <b class="amt out">${baht(sum)}</b> บาท</span>`;
   $("#otherList").innerHTML = list.length ? list.map(itemHtml).join("")
-    : `<div class="empty">ยังไม่มีรายจ่ายอื่น${month ? "ในเดือนนี้" : `ในปี ${be(S.year)}`}<br>กด <b>＋ บันทึกรายจ่าย</b> เพื่อเริ่มบันทึก</div>`;
+    : `<div class="empty">ยังไม่มีรายจ่ายอื่นๆ${month ? "ในเดือนนี้" : `ในปี ${be(S.year)}`}<br>กด <b>＋ บันทึกรายจ่าย</b> เพื่อเริ่มบันทึก</div>`;
 }
 
 /* ---------- home ---------- */
@@ -1074,7 +1075,7 @@ function renderHome() {
     return bizCardHtml(k, b, extra);
   }).join("");
   const ot = otherRecs(S.year).reduce((t, r) => t + num(r.amount), 0);
-  $("#homeOther").innerHTML = `<span class="ic other">${svg("wallet")}</span><span>รายจ่ายอื่น (ไม่นับในกำไร)</span><b>${baht(ot)} บาท ›</b>`;
+  $("#homeOther").innerHTML = `<span class="ic other">${svg("wallet")}</span><span>รายจ่ายอื่นๆ (ไม่นับในกำไร)</span><b>${baht(ot)} บาท ›</b>`;
   if (S.view === "home") renderChart();
   const dues = allRecords().filter(isDue).sort((a, b) => a.date.localeCompare(b.date));
   $("#dueCard").hidden = !dues.length;
@@ -1231,7 +1232,7 @@ function drawRecordParts(cat, unit) {
   const noIn = other || (F.biz === "drone" && !F.keepIn);
   if (noIn && F.kind === "in") F.kind = "out";
   const inBtn = $("#segKind [data-k=in]");
-  inBtn.disabled = noIn; inBtn.title = noIn ? (other ? "รายจ่ายอื่นมีแต่รายจ่าย" : "รายรับโดรนดึงมาจากแอปรับงานโดรนอัตโนมัติ") : "";
+  inBtn.disabled = noIn; inBtn.title = noIn ? (other ? "รายจ่ายอื่นๆมีแต่รายจ่าย" : "รายรับโดรนดึงมาจากแอปรับงานโดรนอัตโนมัติ") : "";
   $("#noDroneIn").hidden = !noIn || other;
   $("#otherNote").hidden = !other;
   $("#segBiz").innerHTML = BIZ_KEYS.concat("other").map(k => `<button type="button" data-b="${k}" class="${F.biz === k ? "on" : ""}">${BIZ[k].icon} ${BIZ[k].short}</button>`).join("");
