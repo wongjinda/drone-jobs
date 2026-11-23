@@ -91,6 +91,10 @@ main{margin-top:8px;position:relative;z-index:1}
 .strip{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13.5px;background:var(--soft);border-radius:12px;padding:8px 12px;margin:8px 0 4px}
 .strip .amt{font-size:13.5px;font-weight:600}
 .catrow{padding:5px 0}
+button.catrow{display:block;width:100%;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer;border-radius:10px;padding:6px 8px;margin:0 -8px;width:calc(100% + 16px)}
+button.catrow:hover{background:var(--soft)}
+button.catrow.on{background:var(--brand-soft)}
+.fchip{display:inline-flex;align-items:center;gap:8px;background:var(--brand-soft);color:var(--ink);border:0;border-radius:999px;padding:6px 12px;margin-bottom:10px;font:inherit;font-size:14px;cursor:pointer}
 .catrow .cl{display:flex;justify-content:space-between;gap:8px;font-size:14px}
 .catrow .cl b{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
 .cbar{height:8px;background:#34425e;border-radius:99px;margin-top:3px;overflow:hidden}
@@ -396,9 +400,15 @@ nav.bottom button.on .i{stroke-width:2.3}
       <p class="small muted" style="margin:0">ค่าใช้จ่ายในบ้านและเรื่องส่วนตัวที่ไม่เกี่ยวกับนา รถเกี่ยว หรือโดรน เก็บไว้ดูเอง <b>ไม่นำไปคิดกำไรของกิจการและไม่คิดภาษี</b></p>
     </div>
     <div class="kpis" id="otherKpis"></div>
-    <div class="card" id="otherCatCard"><h2>แยกตามหมวด</h2><div id="otherCats"></div></div>
+    <div class="card" id="otherCatCard">
+      <div class="hrow" style="margin-bottom:8px"><h2 style="margin:0">สรุปรายจ่าย</h2>
+        <div class="seg small" id="oGroup" role="group" aria-label="แยกตาม"><button type="button" data-g="cat">ตามหมวด</button><button type="button" data-g="party">ตามร้านค้า</button></div></div>
+      <p class="small muted" style="margin:0 0 6px">แตะแถวเพื่อดูเฉพาะรายการของหมวด/ร้านนั้น</p>
+      <div id="otherCats"></div>
+    </div>
     <div class="card">
       <div class="hrow" style="margin-bottom:10px"><h2 style="margin:0">รายการ</h2><select id="oMonth" class="inp" style="width:auto;min-height:38px;padding:4px 10px" aria-label="เดือน"></select></div>
+      <div id="otherFilter"></div>
       <div class="strip" id="otherSum" hidden></div>
       <div id="otherList"></div>
     </div>
@@ -1033,6 +1043,9 @@ function catBarsHtml(cats, total) {
 }
 
 /* ---------- other (household) spending ---------- */
+const NO_PARTY = "(ไม่ระบุร้านค้า)";
+const OTHER = { group:"cat", pick:null };
+try { if (localStorage.getItem("farm-ledger-other-group") === "party") OTHER.group = "party"; } catch (e) {}
 const otherRecs = year => allRecords().filter(r => r.biz === "other" && yearOf(r) === year);
 function renderOther() {
   const fm = $("#oMonth");
@@ -1046,11 +1059,21 @@ function renderOther() {
     kpiHtml(`รวมทั้งปี ${be(S.year)}`, baht(total), `${all.length} รายการ`) +
     kpiHtml(`เดือน${MONTHS_FULL[thisM - 1]}`, baht(mTot), "บาท") +
     kpiHtml("เฉลี่ยต่อเดือน", baht(months ? total / months : 0), months ? `จาก ${months} เดือนที่มีรายการ` : "บาท");
-  const list = all.filter(r => !month || monthOf(r) === month).sort(byNewest);
-  const cats = {}; list.forEach(r => { cats[r.cat] = (cats[r.cat] || 0) + num(r.amount); });
+  const inMonth = all.filter(r => !month || monthOf(r) === month);
+  // summary grouped by category or by shop; tapping a row filters the list below
+  $$("#oGroup button").forEach(b => b.classList.toggle("on", b.dataset.g === OTHER.group));
+  const keyOf = r => OTHER.group === "party" ? (String(r.party || "").trim() || NO_PARTY) : r.cat;
+  const groups = {}; inMonth.forEach(r => { const k = keyOf(r); groups[k] = (groups[k] || 0) + num(r.amount); });
+  const monthSum = inMonth.reduce((t, r) => t + num(r.amount), 0);
+  if (OTHER.pick && !(OTHER.pick.g === OTHER.group && groups[OTHER.pick.v] != null)) OTHER.pick = null;
+  const rows = Object.entries(groups).sort((a, b) => b[1] - a[1]), max = rows.length ? rows[0][1] : 1;
+  $("#otherCatCard").hidden = !inMonth.length;
+  $("#otherCats").innerHTML = rows.map(([k, v]) => `<button type="button" class="catrow ${OTHER.pick && OTHER.pick.v === k ? "on" : ""}" data-opick="${esc(k)}">
+      <div class="cl"><span>${esc(k)}</span><b>${baht(v)} <span class="muted small">(${Math.round(v / monthSum * 100)}%)</span></b></div>
+      <div class="cbar"><i style="width:${Math.max(2, v / max * 100)}%"></i></div></button>`).join("");
+  const list = inMonth.filter(r => !OTHER.pick || keyOf(r) === OTHER.pick.v).sort(byNewest);
   const sum = list.reduce((t, r) => t + num(r.amount), 0);
-  $("#otherCatCard").hidden = !list.length;
-  $("#otherCats").innerHTML = catBarsHtml(cats, sum);
+  $("#otherFilter").innerHTML = OTHER.pick ? `<button type="button" class="fchip" data-act="other-unpick">${OTHER.group === "party" ? "ร้าน" : "หมวด"}: <b>${esc(OTHER.pick.v)}</b> ✕</button>` : "";
   $("#otherSum").hidden = !list.length;
   $("#otherSum").innerHTML = `<span>${list.length} รายการ</span><span>รวม <b class="amt out">${baht(sum)}</b> บาท</span>`;
   $("#otherList").innerHTML = list.length ? list.map(itemHtml).join("")
@@ -1972,6 +1995,7 @@ function goView(v) {
 const ACTIONS = {
   "record-new": () => openRecord(null, S.view === "other" ? "other" : null),
   "other-new": () => openRecord(null, "other"),
+  "other-unpick": () => { OTHER.pick = null; renderOther(); },
   "record-close": closeRecord,
   "record-delete": deleteCurrentRecord,
   "day-prev": () => { homeDay = addDays(homeDay || today(), -1); renderDay(); },
@@ -2001,6 +2025,8 @@ document.addEventListener("click", e => {
   const t = e.target;
   const act = t.closest("[data-act]"); if (act && ACTIONS[act.dataset.act]) { if (act.tagName === "A") e.preventDefault(); ACTIONS[act.dataset.act](act); return; }
   const go = t.closest("[data-go]"); if (go) { goView(go.dataset.go); return; }
+  const og = t.closest("#oGroup [data-g]"); if (og) { OTHER.group = og.dataset.g; OTHER.pick = null; try { localStorage.setItem("farm-ledger-other-group", OTHER.group); } catch (e) {} renderOther(); return; }
+  const op = t.closest("[data-opick]"); if (op) { const v = op.dataset.opick; OTHER.pick = OTHER.pick && OTHER.pick.v === v ? null : { g:OTHER.group, v }; renderOther(); return; }
   const paid = t.closest("[data-paid]"); if (paid) { markPaid(paid.dataset.paid); return; }
   const del = t.closest("[data-rcdel]"); if (del) { removeReceipt(+del.dataset.rcdel); return; }
   const th = t.closest("[data-rc]"); if (th) { viewReceipt(+th.dataset.rc); return; }
