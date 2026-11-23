@@ -94,6 +94,14 @@ main{margin-top:8px;position:relative;z-index:1}
 button.catrow{display:block;width:100%;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer;border-radius:10px;padding:6px 8px;margin:0 -8px;width:calc(100% + 16px)}
 button.catrow:hover{background:var(--soft)}
 button.catrow.on{background:var(--brand-soft)}
+.verbox{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.vname{font-family:var(--fh);font-weight:600;font-size:16px}
+.vtag{display:inline-block;font-family:var(--fh);font-weight:600;font-size:13px;background:var(--brand-soft);color:#bfdbfe;border-radius:999px;padding:1px 10px;margin-right:6px}
+.vrel{padding:12px 0;border-bottom:1px solid var(--line)}.vrel:last-child{border-bottom:0}
+.vrel .vh{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.vrel .vh b{font-weight:600}
+.vrel ul{margin:0;padding-left:20px;color:var(--ink2);font-size:14px}
+.vrel.cur .vtag{background:var(--brand);color:#fff}
 .olbl{font-size:12.5px;color:var(--muted);margin:0 0 4px}
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
@@ -488,6 +496,11 @@ nav.bottom button.on .i{stroke-width:2.3}
         <li>ซื้อรถเกี่ยว/โดรน ให้บันทึกหมวด "ซื้อเครื่องจักร" (ไม่นับเป็นค่าใช้จ่ายภาษี) แล้วบันทึก "ค่าเสื่อมราคา" ปีละครั้ง (เครื่องจักรหักได้ไม่เกิน 20% ของราคาทุนต่อปี)</li>
       </ul></div>
     </div>
+    <div class="card">
+      <h2>เกี่ยวกับแอป</h2>
+      <div class="verbox"><div><div class="vname">สมุดบัญชีชาวนา</div><div class="small muted" id="verLine"></div></div>
+        <button type="button" class="btn ghost sm" data-act="changelog">ประวัติการพัฒนา</button></div>
+    </div>
   </section>
 </main>
 
@@ -574,6 +587,12 @@ nav.bottom button.on .i{stroke-width:2.3}
 </div>
 
 <!-- ===== confirm / lightbox / cropper / toast ===== -->
+<div class="overlay" id="logOv">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="logTitle">
+    <h2><span id="logTitle">ประวัติการพัฒนา</span><button type="button" class="x" data-act="changelog-close" aria-label="ปิด">×</button></h2>
+    <div id="logList"></div>
+  </div>
+</div>
 <div class="overlay" id="cfOv">
   <div class="sheet narrow" role="alertdialog" aria-modal="true" aria-labelledby="cfTitle">
     <h2 id="cfTitle">ยืนยัน</h2>
@@ -860,6 +879,7 @@ async function enterApp(user) {
   renderAll();
   syncDroneJobs(true);
   startLive();
+  announceVersion();
 }
 async function logout() {
   if (!(await confirmBox("ออกจากระบบ?", "จะออกจากระบบทั้งแอปบัญชีและแอปรับงานโดรนบนเครื่องนี้", "ออกจากระบบ"))) return;
@@ -1029,6 +1049,7 @@ function renderAll() {
   renderList();
   renderOther();
   renderSettings();
+  renderVersion();
   if (S.view === "tax") renderTax(false);
   if (S.view === "round") renderRounds();
 }
@@ -1070,6 +1091,41 @@ function catBarsHtml(cats, total) {
   const rows = Object.entries(cats).sort((a, b) => b[1] - a[1]); if (!rows.length) return "";
   const max = rows[0][1];
   return rows.map(([c, v]) => `<div class="catrow"><div class="cl"><span>${esc(c)}</span><b>${baht(v)} <span class="muted small">(${Math.round(v / total * 100)}%)</span></b></div><div class="cbar"><i style="width:${Math.max(2, v / max * 100)}%"></i></div></div>`).join("");
+}
+
+/* ---------- version & changelog (newest first; bump APP_VERSION with every release) ---------- */
+const CHANGELOG = [
+  { v:"2.5.0", d:"2026-11-23", t:"แสดงเวอร์ชันของแอป", items:["มีเลขเวอร์ชันและประวัติการพัฒนาในแท็บข้อมูล","แจ้ง “มีอะไรใหม่” ครั้งแรกที่เปิดแอปหลังอัปเดต"] },
+  { v:"2.4.0", d:"2026-11-23", t:"สรุปรายจ่ายอื่นๆ ได้หลายแบบ", items:["แยกตามหมวด ร้านค้า เดือน สัปดาห์ วันในสัปดาห์ ใบเสร็จ หรือหมวด × เดือน","แสดงเป็นแถบ วงกลม หรือตาราง และเลือกการเรียงได้","แตะแถวเพื่อกรองซ้อนกันหลายชั้น"] },
+  { v:"2.3.0", d:"2026-11-23", t:"แท็บรายจ่ายอื่นๆ", items:["บันทึกค่าใช้จ่ายในบ้าน/ส่วนตัวที่ไม่เกี่ยวกับ 3 กิจการ","ไม่นำไปคิดกำไรกิจการและภาษี","เลขที่หลักฐานแยกชุด ขึ้นต้นด้วย “อ”"] },
+  { v:"2.2.0", d:"2026-11-22", t:"อัปเดตทันทีข้ามเครื่อง", items:["เปิดหลายเครื่องพร้อมกัน เครื่องหนึ่งแก้ อีกเครื่องเปลี่ยนตามทันที","ปิดงานในแอปรับงานโดรนแล้วรายรับเข้าบัญชีเอง"] },
+  { v:"2.1.0", d:"2026-11-14", t:"สีกำไรสุทธิ", items:["กำไรเป็นสีเขียว ขาดทุนเป็นสีแดง"] },
+  { v:"2.0.2", d:"2026-11-14", t:"ปรับธีมกลางคืนให้สว่างขึ้นเล็กน้อย", items:[] },
+  { v:"2.0.1", d:"2026-11-14", t:"ย้ายปุ่ม + ไปมุมขวาล่างบนจอกว้าง", items:[] },
+  { v:"2.0.0", d:"2026-11-14", t:"หน้าตาใหม่ ธีมกลางคืน", items:["กำไรสุทธิตัวใหญ่ด้านบน แบบแอปธนาคาร","ไอคอนลายเส้น แถบเมนูใหม่ ฟอนต์ Anuphan","พื้นเข้มสบายตา"] },
+  { v:"1.5.0", d:"2026-11-14", t:"รายรับโดรนมาจากแอปรับงานโดรนเท่านั้น", items:["ปิดปุ่มรายรับเมื่อบันทึกรายการโดรนใหม่"] },
+  { v:"1.4.0", d:"2026-11-14", t:"ธีมสีมงคลคนเกิดวันศุกร์", items:[] },
+  { v:"1.3.0", d:"2026-11-13", t:"สำรองข้อมูลพร้อมรูปหลักฐาน", items:["ไฟล์ JSON รวมรูปใบเสร็จ กู้คืนแล้วรูปไม่ซ้ำ"] },
+  { v:"1.2.0", d:"2026-11-13", t:"ธีมกรมท่า + ทอง แยกจากแอปรับงานโดรน", items:[] },
+  { v:"1.1.0", d:"2026-11-13", t:"ย้ายรูปหลักฐานจากแอปเดิม", items:["นำเข้าไฟล์ย้ายข้อมูลแล้วอัปโหลดรูปใบเสร็จให้อัตโนมัติ"] },
+  { v:"1.0.1", d:"2026-11-13", t:"แก้การกู้คืนข้อมูล", items:["กู้คืนแล้วได้ค่าภาษี การยกเว้นรายได้ทำนา และงานโดรนที่ข้ามไว้ครบ"] },
+  { v:"1.0.0", d:"2026-11-13", t:"เปิดใช้บนเว็บ + Supabase", items:["ย้ายจากแอปใน Claude มาเป็นเว็บ ใช้บัญชีเดียวกับแอปรับงานโดรน","รูปใบเสร็จเก็บใน Supabase Storage"] },
+];
+const APP_VERSION = CHANGELOG[0].v;
+function renderVersion() { $("#verLine").textContent = `เวอร์ชัน ${APP_VERSION} · ${thDate(CHANGELOG[0].d)}`; }
+function openChangelog(onlyNewerThan) {
+  const list = onlyNewerThan ? CHANGELOG.filter(c => cmpVer(c.v, onlyNewerThan) > 0) : CHANGELOG;
+  $("#logTitle").textContent = onlyNewerThan ? `มีอะไรใหม่ในเวอร์ชัน ${APP_VERSION}` : "ประวัติการพัฒนา";
+  $("#logList").innerHTML = list.map(c => `<div class="vrel ${c.v === APP_VERSION ? "cur" : ""}">
+      <div class="vh"><span class="vtag">v${c.v}</span><b>${esc(c.t)}</b><span class="small muted">${thDate(c.d)}</span></div>
+      ${c.items.length ? `<ul>${c.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>` : ""}</div>`).join("");
+  showOverlay("logOv");
+}
+const cmpVer = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0); return 0; };
+// first launch after an update: offer the list of what changed
+function announceVersion() {
+  let seen = null; try { seen = localStorage.getItem("farm-ledger-version"); localStorage.setItem("farm-ledger-version", APP_VERSION); } catch (e) { return; }
+  if (seen && cmpVer(APP_VERSION, seen) > 0) openChangelog(seen);
 }
 
 /* ---------- other (household) spending ---------- */
@@ -2090,6 +2146,8 @@ function goView(v) {
 const ACTIONS = {
   "record-new": () => openRecord(null, S.view === "other" ? "other" : null),
   "other-new": () => openRecord(null, "other"),
+  "changelog": () => openChangelog(),
+  "changelog-close": () => hideOverlay("logOv"),
   "other-unpick": () => { OTHER.picks = []; renderOther(); },
   "record-close": closeRecord,
   "record-delete": deleteCurrentRecord,
@@ -2152,6 +2210,7 @@ document.addEventListener("keydown", e => {
   else if (confirmBox.cancel) confirmBox.cancel();
   else if ($("#lbOv").classList.contains("on")) hideOverlay("lbOv");
   else if ($("#roundOv").classList.contains("on")) closeRound();
+  else if ($("#logOv").classList.contains("on")) hideOverlay("logOv");
   else closeRecord();
 });
 
