@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://nvuzbwullioricaonpck.supabase.co; connect-src https://nvuzbwullioricaonpck.supabase.co wss://nvuzbwullioricaonpck.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#1b2538">
 <title>บัญชี นา · รถเกี่ยว · โดรน + ภาษี</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -623,7 +625,7 @@ nav.bottom button.on .i{stroke-width:2.3}
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="vendor/supabase-js-2.45.4.js" integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o"></script>
 <script>
 "use strict";
 /* =====================================================================
@@ -1095,6 +1097,7 @@ function catBarsHtml(cats, total) {
 
 /* ---------- version & changelog (newest first; bump APP_VERSION with every release) ---------- */
 const CHANGELOG = [
+  { v:"2.5.1", d:"2026-11-24", t:"เพิ่มความปลอดภัย", items:["เก็บไลบรารี Supabase ไว้กับแอปเอง พร้อมตรวจลายนิ้วมือไฟล์ ไม่โหลดจาก CDN ภายนอก","จำกัดให้หน้าแอปติดต่อได้เฉพาะ Supabase ของเรา (Content Security Policy) กันโค้ดแปลกปลอมส่งข้อมูลออกไปที่อื่น","ไม่ส่งที่อยู่หน้าเว็บ (referrer) ไปให้เว็บอื่น"] },
   { v:"2.5.0", d:"2026-11-23", t:"แสดงเวอร์ชันของแอป", items:["มีเลขเวอร์ชันและประวัติการพัฒนาในแท็บข้อมูล","แจ้ง “มีอะไรใหม่” ครั้งแรกที่เปิดแอปหลังอัปเดต"] },
   { v:"2.4.0", d:"2026-11-23", t:"สรุปรายจ่ายอื่นๆ ได้หลายแบบ", items:["แยกตามหมวด ร้านค้า เดือน สัปดาห์ วันในสัปดาห์ ใบเสร็จ หรือหมวด × เดือน","แสดงเป็นแถบ วงกลม หรือตาราง และเลือกการเรียงได้","แตะแถวเพื่อกรองซ้อนกันหลายชั้น"] },
   { v:"2.3.0", d:"2026-11-23", t:"แท็บรายจ่ายอื่นๆ", items:["บันทึกค่าใช้จ่ายในบ้าน/ส่วนตัวที่ไม่เกี่ยวกับ 3 กิจการ","ไม่นำไปคิดกำไรกิจการและภาษี","เลขที่หลักฐานแยกชุด ขึ้นต้นด้วย “อ”"] },
