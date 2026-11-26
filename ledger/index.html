@@ -104,6 +104,12 @@ button.catrow.on{background:var(--brand-soft)}
 .vrel .vh b{font-weight:600}
 .vrel ul{margin:0;padding-left:20px;color:var(--ink2);font-size:14px}
 .vrel.cur .vtag{background:var(--brand);color:#fff}
+.catact{display:flex;flex-wrap:wrap;gap:2px 14px;margin-top:4px}
+.catact .lnk{white-space:nowrap}
+.lnk{background:none;border:0;padding:4px 0;color:var(--brand2);font:inherit;font-size:13.5px;cursor:pointer}
+.lnk.red{color:var(--red)}
+.catnew{background:var(--soft);border-radius:14px;padding:12px;margin:0 0 12px}
+.catnew .row{display:flex;gap:8px;margin-top:8px}
 .olbl{font-size:12.5px;color:var(--muted);margin:0 0 4px}
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
@@ -152,7 +158,7 @@ button.catrow.on{background:var(--brand-soft)}
 .filebtn{position:relative;overflow:hidden;cursor:pointer}
 .filebtn input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:100px}
 .inp,label.f input,label.f select,.dwrap input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--field);min-height:44px}
-.inp:focus,label.f input:focus,label.f select:focus,.dwrap input:focus,.filters input:focus,.filters select:focus,.tin:focus{outline:2px solid var(--brand2);outline-offset:0;border-color:transparent}
+.inp:focus,select.inp:focus,label.f input:focus,label.f select:focus,.dwrap input:focus,.filters input:focus,.filters select:focus,.tin:focus{outline:2px solid var(--brand2);outline-offset:0;border-color:transparent}
 .f{display:block;margin-bottom:10px}
 .f>span,.flbl{display:block;font-size:13px;color:var(--ink2);margin-bottom:3px;font-weight:500}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -527,7 +533,13 @@ nav.bottom button.on .i{stroke-width:2.3}
     <form id="recForm" autocomplete="off" novalidate>
       <div class="g2">
         <div class="f"><span class="flbl">วันที่ (วว/ดด/ปปปป)</span><div class="dwrap"><input type="text" id="rDate" inputmode="none" maxlength="10" placeholder="แตะเพื่อเลือกวันที่" aria-label="วันที่"><button type="button" class="calbtn" aria-label="เปิดปฏิทิน">📅</button><div class="dp" hidden></div></div></div>
-        <label class="f"><span>หมวด</span><select id="rCat"></select></label>
+        <div class="f"><label for="rCat" class="flbl">หมวด</label><select id="rCat" class="inp"></select>
+          <div class="catact" id="catAct" hidden><button type="button" class="lnk" data-act="cat-add">＋ เพิ่มหมวดใหม่</button><button type="button" class="lnk red" data-act="cat-del" id="catDel" hidden>ลบหมวดนี้</button></div>
+        </div>
+      </div>
+      <div class="catnew" id="catNew" hidden>
+        <label class="f" style="margin:0"><span>ชื่อหมวดใหม่</span><input type="text" id="catName" maxlength="40" placeholder="เช่น ค่าเลี้ยงสัตว์ ค่าซ่อมบ้าน"></label>
+        <div class="row"><button type="button" class="btn sm" data-act="cat-save">เพิ่มหมวด</button><button type="button" class="btn ghost sm" data-act="cat-cancel">ยกเลิก</button></div>
       </div>
       <div class="g3">
         <label class="f"><span>ปริมาณ</span><input type="number" step="any" min="0" id="rQty" inputmode="decimal" placeholder="เช่น 25"></label>
@@ -1097,6 +1109,7 @@ function catBarsHtml(cats, total) {
 
 /* ---------- version & changelog (newest first; bump APP_VERSION with every release) ---------- */
 const CHANGELOG = [
+  { v:"2.6.0", d:"2026-11-26", t:"เพิ่มหมวดเองได้ในรายจ่ายอื่นๆ", items:["ตอนบันทึกรายจ่ายอื่นๆ กด “＋ เพิ่มหมวดใหม่” ใต้ช่องหมวด","หมวดที่เพิ่มเองใช้ได้ทุกเครื่อง และลบออกจากรายการได้ (รายการเดิมไม่หาย)"] },
   { v:"2.5.1", d:"2026-11-24", t:"เพิ่มความปลอดภัย", items:["เก็บไลบรารี Supabase ไว้กับแอปเอง พร้อมตรวจลายนิ้วมือไฟล์ ไม่โหลดจาก CDN ภายนอก","จำกัดให้หน้าแอปติดต่อได้เฉพาะ Supabase ของเรา (Content Security Policy) กันโค้ดแปลกปลอมส่งข้อมูลออกไปที่อื่น","ไม่ส่งที่อยู่หน้าเว็บ (referrer) ไปให้เว็บอื่น"] },
   { v:"2.5.0", d:"2026-11-23", t:"แสดงเวอร์ชันของแอป", items:["มีเลขเวอร์ชันและประวัติการพัฒนาในแท็บข้อมูล","แจ้ง “มีอะไรใหม่” ครั้งแรกที่เปิดแอปหลังอัปเดต"] },
   { v:"2.4.0", d:"2026-11-23", t:"สรุปรายจ่ายอื่นๆ ได้หลายแบบ", items:["แยกตามหมวด ร้านค้า เดือน สัปดาห์ วันในสัปดาห์ ใบเสร็จ หรือหมวด × เดือน","แสดงเป็นแถบ วงกลม หรือตาราง และเลือกการเรียงได้","แตะแถวเพื่อกรองซ้อนกันหลายชั้น"] },
@@ -1414,10 +1427,11 @@ function drawRecordParts(cat, unit) {
   $("#otherNote").hidden = !other;
   $("#segBiz").innerHTML = BIZ_KEYS.concat("other").map(k => `<button type="button" data-b="${k}" class="${F.biz === k ? "on" : ""}">${BIZ[k].icon} ${BIZ[k].short}</button>`).join("");
   $$("#segKind button").forEach(b => b.classList.toggle("on", b.dataset.k === F.kind));
-  const list = CATS[F.biz][F.kind], sel = $("#rCat");
+  const list = catList(F.biz, F.kind), sel = $("#rCat");
   sel.innerHTML = list.map(([c]) => `<option>${esc(c)}</option>`).join("");
   if (cat && !list.some(([c]) => c === cat)) sel.add(new Option(cat, cat));
   if (cat) sel.value = cat;
+  $("#catAct").hidden = F.biz !== "other"; $("#catNew").hidden = true;
   fillUnits(unit);
   $("#inOnly").hidden = F.kind !== "in";
   $("#farmOnly").hidden = F.biz !== "farm";
@@ -1426,8 +1440,43 @@ function drawRecordParts(cat, unit) {
   fillRoundSelect();
   renderReceipts();
 }
+// categories the user added for "other" spending live in settings.customCats.other (synced to every device)
+const customCats = () => (S.settings.customCats && Array.isArray(S.settings.customCats.other)) ? S.settings.customCats.other : [];
+function catList(biz, kind) {
+  const base = CATS[biz][kind];
+  if (biz !== "other" || kind !== "out") return base;
+  const last = base[base.length - 1];                      // keep "รายจ่ายอื่น ๆ" at the end
+  return base.slice(0, -1).concat(customCats().filter(c => !base.some(([b]) => b === c)).map(c => [c, ""]), [last]);
+}
+function syncCatDel() { $("#catDel").hidden = !(F.biz === "other" && customCats().includes($("#rCat").value)); }
+function addCategory() {
+  const name = $("#catName").value.trim().replace(/\s+/g, " ");
+  if (!name) { $("#catName").focus(); return; }
+  if (!catList("other", "out").some(([c]) => c === name)) {
+    S.settings.customCats = Object.assign({}, S.settings.customCats, { other:customCats().concat(name) });
+    saveSettings();
+    toast(`เพิ่มหมวด “${name}” แล้ว`);
+  }
+  const unit = $("#rUnit").value;
+  $("#rCat").innerHTML = catList("other", "out").map(([c]) => `<option>${esc(c)}</option>`).join("");
+  $("#rCat").value = name; fillUnits(unit);
+  $("#catNew").hidden = true; syncCatDel();
+}
+async function deleteCategory() {
+  const name = $("#rCat").value;
+  if (!customCats().includes(name)) return;
+  const used = allRecords().filter(r => r.biz === "other" && r.cat === name).length;
+  if (!(await confirmBox("ลบหมวดนี้?", `ลบ “${name}” ออกจากรายการหมวด${used ? ` — รายการเดิม ${used} รายการยังอยู่และยังใช้ชื่อหมวดนี้` : ""}`, "ลบหมวด"))) return;
+  S.settings.customCats = Object.assign({}, S.settings.customCats, { other:customCats().filter(c => c !== name) });
+  saveSettings();
+  const keep = F.id && S.records.get(F.id) && S.records.get(F.id).cat === name;
+  $("#rCat").innerHTML = catList("other", "out").map(([c]) => `<option>${esc(c)}</option>`).join("");
+  if (keep) { $("#rCat").add(new Option(name, name)); $("#rCat").value = name; }
+  fillUnits(null); syncCatDel();
+}
 function fillUnits(unit) {
-  const def = (CATS[F.biz][F.kind].find(([c]) => c === $("#rCat").value) || [])[1] || "";
+  syncCatDel();
+  const def = (catList(F.biz, F.kind).find(([c]) => c === $("#rCat").value) || [])[1] || "";
   const u = unit != null ? unit : def;
   $("#rUnit").innerHTML = UNITS.map(x => `<option value="${x}">${x || "—"}</option>`).join("");
   $("#rUnit").value = UNITS.includes(u) ? u : "";
@@ -2119,6 +2168,7 @@ async function importJson(file) {
   if (s.tax && typeof s.tax === "object") Object.keys(s.tax).forEach(y => { if (blankTax(S.settings.tax[y])) S.settings.tax[y] = s.tax[y]; });
   if (Array.isArray(s.rounds)) { const have = new Set(rounds().map(x => x.id)); S.settings.rounds = rounds().concat(s.rounds.filter(x => x && x.id && !have.has(x.id))); }
   if (typeof s.farmExempt === "boolean") S.settings.farmExempt = s.farmExempt;
+  if (s.customCats && Array.isArray(s.customCats.other)) S.settings.customCats = Object.assign({}, S.settings.customCats, { other:[...new Set(customCats().concat(s.customCats.other.filter(c => typeof c === "string" && c.trim())))] });
   const skip = s.droneJobs && Array.isArray(s.droneJobs.skip) ? s.droneJobs.skip : [];
   if (skip.length) { const dj = djCfg(); skip.forEach(id => { if (!dj.skip.includes(id)) dj.skip.push(id); }); }
   saveSettings();
@@ -2149,6 +2199,10 @@ function goView(v) {
 const ACTIONS = {
   "record-new": () => openRecord(null, S.view === "other" ? "other" : null),
   "other-new": () => openRecord(null, "other"),
+  "cat-add": () => { $("#catNew").hidden = false; $("#catName").value = ""; $("#catName").focus(); },
+  "cat-cancel": () => { $("#catNew").hidden = true; },
+  "cat-save": addCategory,
+  "cat-del": deleteCategory,
   "changelog": () => openChangelog(),
   "changelog-close": () => hideOverlay("logOv"),
   "other-unpick": () => { OTHER.picks = []; renderOther(); },
@@ -2227,6 +2281,7 @@ $("#tMarried").addEventListener("change", e => { taxInputs().married = e.target.
 
 $("#recForm").addEventListener("submit", e => { e.preventDefault(); submitRecord(); });
 $("#rCat").addEventListener("change", () => fillUnits(null));
+$("#catName").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addCategory(); } if (e.key === "Escape") { e.stopPropagation(); $("#catNew").hidden = true; } });
 $("#rQty").addEventListener("input", autoAmount);
 $("#rPrice").addEventListener("input", autoAmount);
 $("#rAmt").addEventListener("input", () => clearFieldError($("#rAmt")));
